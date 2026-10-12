@@ -1,0 +1,92 @@
+PLAY STORE LISTING — copy/paste into Play Console
+==================================================
+
+App name (max 30):
+My Laptop Market
+
+Short description (max 80):
+India’s B2B IT marketplace for laptops, desktops, servers and vendors.
+
+Full description:
+My Laptop Market is India’s B2B network for IT vendors, dealers, distributors and buyers.
+
+Browse live listings of laptops, desktops, monitors, servers, storage, graphics cards and accessories from verified businesses across India. Search by product, connect with shops, and send requirements when you need stock.
+
+Vendors can register, complete a short verification subscription, add products with photos and videos, chat with buyers, and manage listings from the phone.
+
+Features
+• Browse and search verified vendor listings
+• Categories: Laptops, Desktop, Screens, Server, Storage, Accessories, Graphics Cards
+• Vendor registration, profile and shop logo
+• Add, edit and remove product listings
+• In-app messaging and buyer requirements
+• Optional voice assistant for product questions
+• Separate admin login for marketplace staff
+
+This app is for business users in the IT trade, not a consumer retail store. Physical hardware is transacted between businesses. Vendor verification payments are completed on our website.
+
+Website: https://mylaptopmarket.com/
+Support: faiz@mylaptopmarket.com
+Phone: +91 85958 64379 / +91 93108 93144
+
+
+Hindi short description (optional, max 80):
+भारत का B2B IT मार्केटप्लेस — लैपटॉप, डेस्कटॉप, सर्वर और वेन्डर्स।
+
+Hindi full description (optional):
+My Laptop Market भारत का B2B नेटवर्क है IT vendors, dealers, distributors और buyers के लिए।
+
+Verified businesses की live listings देखें — laptops, desktops, monitors, servers, storage, graphics cards और accessories. Product search करें, shops से जुड़ें, और stock चाहिए हो तो requirement भेजें।
+
+Vendors रजिस्टर करके verification पूरा कर सकते हैं, photos/videos के साथ products जोड़ सकते हैं, buyers से chat कर सकते हैं, और फोन से listings मैनेज कर सकते हैं।
+
+यह ऐप IT trade के business users के लिए है, consumer retail store नहीं है।
+
+
+Category:
+Shopping
+
+Tags:
+Marketplace, B2B, Computers, Wholesale
+
+Email:
+faiz@mylaptopmarket.com
+
+Phone:
++91 8595864379
+
+Address:
+Plot no 19, Office no 5, Veer Savarkar Block, Shakarpur, Delhi 110091, India
+
+Website:
+https://mylaptopmarket.com/
+
+Privacy policy URL (host the HTML file first):
+https://mylaptopmarket.com/privacy-policy.html
+
+App access / demo for reviewers:
+Provide a test vendor login in Play Console → App content → App access
+(Create one test shop on the website and paste username + password there.)
+
+Content rating questionnaire:
+- Category: Shopping / Business
+- No user-generated public social feed that is unmoderated? Listings are vendor products — say the app includes user-generated listings that you moderate.
+- No violence, no dating, no alcohol, no gambling
+- Target age: 18+ business users
+
+Ads:
+No
+
+News app:
+No
+
+Data safety (summary):
+Collected: Name, email, phone, user IDs, photos, approximate location (typed city/area, not GPS), audio (optional chatbot), messages, purchase history (vendor subscription on website)
+Shared: with your own backend; chatbot text/audio transcript with Google Gemini
+Sold: No
+Encrypted in transit: Yes
+Users can request deletion: Yes (email support)
+Purpose: App functionality, account management
+Microphone: optional, in-app voice assistant
+Photos: user-selected product/profile images
+Not collected: precise location, contacts, SMS, calendar, advertising ID

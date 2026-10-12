@@ -1,0 +1,77 @@
+My Laptop Market — Play Console steps (jo Google account se aapko karna hai)
+===========================================================================
+
+Yeh machine par jo kaam ho sakta tha, wo ho chuka hai:
+- targetSdk 36 (Play ki 31 Aug 2026 requirement)
+- signed Android App Bundle (.aab)
+- privacy policy HTML
+- listing text + 512 icon + feature graphic
+
+Aapke Google account / ₹25 fee ke bina Play Console mein app live NAHI ho sakti.
+Neeche wale steps aap khud complete karein.
+
+1) Developer account
+   - https://play.google.com/console
+   - Google account se login (faiz@mylaptopmarket.com ya jo business account hai)
+   - One-time registration fee ~USD 25
+   - Identity verification (PAN/Aadhaar/GST jaisa Google maange)
+   - Payments profile: India, business details, address
+
+2) Privacy policy ko website par daalein (REQUIRED)
+   File: playstore/privacy-policy.html
+   Isko apni hosting par upload karein taaki ye URL khule:
+     https://mylaptopmarket.com/privacy-policy.html
+   Browser mein open karke confirm karein page load ho.
+
+3) Naya app banao
+   Play Console → Create app
+   - App name: My Laptop Market
+   - Default language: English (United States) or English (India)
+   - App or game: App
+   - Free
+   - Declarations accept karein
+
+4) Store listing
+   - playstore/listing.txt se copy-paste
+   - App icon: playstore/assets/icon-512.png
+   - Feature graphic: playstore/assets/feature-graphic.png
+   - Phone screenshots: KAM SE KAM 2 (recommended 4–8)
+     Real device ya emulator se lo: Home, product detail, search, vendor add product
+     Size: JPEG/PNG, 16:9 or 9:16, 320px se 3840px
+   - Privacy policy URL paste karein
+
+5) App bundle upload
+   File:
+     app/build/outputs/bundle/release/app-release.aab
+   Play Console → Test and release → Production (ya pehle Internal testing)
+   Google Play App Signing: "Let Google manage" select karein (recommended)
+   Upload key yeh wala keystore hai: keystore/mylaptopmarket-upload.jks
+   KEYSTORE KO KABHI MAT KHO DENA — bina iske update nahi ja sakta.
+
+6) App content forms
+   - Privacy policy
+   - Ads: No
+   - Target audience: 18+
+   - News: No
+   - COVID: No
+   - Data safety: listing.txt ke hisaab se
+   - Government / political: No
+   - Financial features: No (vendor subscription website par hai, in-app Play Billing nahi)
+   - Health: No
+   - App access: test vendor username/password do, warna reviewer login nahi kar payega
+   - Content rating: IARC questionnaire complete karo
+   - Store settings: category Shopping, email, phone, address
+
+7) Countries
+   India select karo (aur jo markets chahiye)
+
+8) Submit
+   Internal testing pehle bhejo, install karke check karo, phir Production → Send for review
+   Review 1–7 din lag sakta hai.
+
+KEYSTORE BACKUP
+  Files (git mein nahi jaate):
+    keystore/mylaptopmarket-upload.jks
+    keystore.properties
+    playstore/KEYSTORE_BACKUP.txt
+  Inko Google Drive / password manager / USB par copy karke rakho.

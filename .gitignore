@@ -1,0 +1,32 @@
+*.iml
+.gradle
+.kotlin/
+dist/
+.env
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+build/
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Play Store signing — never commit these
+keystore.properties
+keystore/
+*.jks
+*.keystore
+playstore/KEYSTORE_BACKUP.txt
+*.aab
+playstore/*.aab
+playstore/mapping.txt
+
+# AI Configuration - Don't commit API keys!
+composeApp/src/commonMain/kotlin/com/mylaptopmarket/config/AIConfig.kt
