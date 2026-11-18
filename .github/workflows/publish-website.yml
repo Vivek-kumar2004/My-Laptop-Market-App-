@@ -6,6 +6,7 @@ on:
     paths:
       - "website/**"
       - "scripts/deploy_website.sh"
+      - "scripts/generate_sitemap.py"
       - ".github/workflows/publish-website.yml"
 
 permissions:
