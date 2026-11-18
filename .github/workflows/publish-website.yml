@@ -1,0 +1,33 @@
+name: Publish website
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "website/**"
+      - "scripts/deploy_website.sh"
+      - ".github/workflows/publish-website.yml"
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: publish-website
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/260494254228/locations/global/workloadIdentityPools/github/providers/github
+          service_account: github-website-deploy@mylaptopmarket-app.iam.gserviceaccount.com
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Publish to the live site
+        run: bash scripts/deploy_website.sh

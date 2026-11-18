@@ -1,0 +1,777 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDH9FK3LQ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-FPDH9FK3LQ');
+    </script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Why Us | My Laptop Market</title>
+    <meta name="description" content="Why IT vendors and dealers choose My Laptop Market for B2B networking, leads, and nationwide partnerships." />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="https://mylaptopmarket.com/why-us.html" />
+    <link rel="icon" href="https://mylaptopmarket.com/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" sizes="192x192" href="https://mylaptopmarket.com/images/favicon-192.png" />
+    <link rel="apple-touch-icon" href="https://mylaptopmarket.com/apple-touch-icon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="My Laptop Market" />
+    <meta property="og:url" content="https://mylaptopmarket.com/why-us.html" />
+    <meta property="og:title" content="Why Us | My Laptop Market" />
+    <meta property="og:description" content="Why IT vendors and dealers choose My Laptop Market for B2B networking, leads, and nationwide partnerships." />
+    <meta property="og:image" content="https://mylaptopmarket.com/images/og-macbook.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://mylaptopmarket.com/images/og-macbook.jpg" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="home-modern.css" />
+    <link rel="stylesheet" href="site-modern.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+
+    <style>
+      .wu-hero {
+        min-height: 42vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 120px 20px 30px;
+        background:
+          radial-gradient(ellipse 70% 55% at 50% 0%, rgba(37,99,235,.28) 0%, transparent 65%),
+          linear-gradient(180deg, #070c1a 0%, #0a0f1e 100%);
+      }
+      .wu-hero h1 {
+        font-size: clamp(2.2rem, 5vw, 3.6rem);
+        font-weight: 900;
+        line-height: 1.15;
+        margin: 12px 0 16px;
+        background: linear-gradient(135deg, #fff 0%, #93c5fd 55%, #3376cd 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .wu-hero p {
+        color: rgba(255,255,255,.65);
+        font-size: 1.05rem;
+        max-width: 620px;
+        margin: 0 auto 24px;
+        line-height: 1.7;
+      }
+      .wu-hero .small-title,
+      .wu-stage-head .small-title {
+        text-align: center !important;
+        display: block;
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      /* ── 3D COVERFLOW ── */
+      .wu-stage {
+        padding: 20px 0 100px;
+        background:
+          radial-gradient(ellipse 50% 40% at 50% 35%, rgba(37,99,235,.18) 0%, transparent 70%),
+          linear-gradient(180deg, #0a0f1e 0%, #060b18 100%);
+        overflow: hidden;
+      }
+      .wu-stage-head {
+        text-align: center;
+        margin-bottom: 28px;
+        padding: 0 20px;
+        max-width: 720px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .wu-stage-head .small-title { margin-bottom: 8px; }
+      .wu-stage-head h2 {
+        color: #fff;
+        font-size: clamp(1.4rem, 3vw, 2rem);
+        font-weight: 800;
+        margin-bottom: 8px;
+        text-align: center;
+      }
+      .wu-stage-head p {
+        color: rgba(255,255,255,.5);
+        font-size: .95rem;
+        text-align: center;
+      }
+
+      .cf-wrap {
+        position: relative;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px 0 10px;
+        overflow: hidden;
+      }
+      .cf-scene {
+        height: clamp(320px, 48vw, 460px);
+        perspective: 1200px;
+        perspective-origin: 50% 45%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: grab;
+        user-select: none;
+        touch-action: pan-y;
+        overflow: hidden;
+      }
+      .cf-scene.is-dragging { cursor: grabbing; }
+      .cf-track {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transform-style: preserve-3d;
+      }
+      .cf-slide {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: min(560px, 78vw);
+        height: min(340px, 42vw);
+        min-height: 220px;
+        margin: 0;
+        transform-style: preserve-3d;
+        transition: transform .55s cubic-bezier(.22,.7,.25,1), opacity .45s ease, filter .45s ease;
+        border-radius: 20px;
+        overflow: hidden;
+        background: #0f172a;
+        border: 1px solid rgba(255,255,255,.12);
+        box-shadow: 0 25px 60px rgba(0,0,0,.5);
+        will-change: transform, opacity, filter;
+      }
+      .cf-slide.active {
+        border-color: rgba(96,165,250,.55);
+        box-shadow:
+          0 35px 90px rgba(0,0,0,.55),
+          0 0 40px rgba(37,99,235,.35),
+          0 0 0 1px rgba(147,197,253,.2) inset;
+      }
+      .cf-slide .cf-chrome {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 12px;
+        background: linear-gradient(135deg, #1e2d48, #152033);
+        border-bottom: 1px solid rgba(255,255,255,.06);
+      }
+      .cf-dot { width: 9px; height: 9px; border-radius: 50%; }
+      .cf-dot.r { background: #ff5f57; }
+      .cf-dot.y { background: #febc2e; }
+      .cf-dot.g { background: #28c840; }
+      .cf-url {
+        flex: 1;
+        margin-left: 6px;
+        font-size: .68rem;
+        color: rgba(255,255,255,.4);
+        background: rgba(255,255,255,.05);
+        border-radius: 5px;
+        padding: 3px 8px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .cf-slide img {
+        display: block;
+        width: 100%;
+        height: calc(100% - 34px);
+        object-fit: cover;
+        object-position: top center;
+        pointer-events: none;
+      }
+      .cf-floor {
+        position: absolute;
+        left: 10%;
+        right: 10%;
+        bottom: 8%;
+        height: 40px;
+        background: radial-gradient(ellipse at center, rgba(37,99,235,.35) 0%, transparent 70%);
+        filter: blur(12px);
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .cf-nav {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        margin-top: 8px;
+      }
+      .cf-btn {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        border: 1px solid rgba(255,255,255,.18);
+        background: rgba(255,255,255,.06);
+        color: #fff;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background .2s, border-color .2s, transform .2s;
+      }
+      .cf-btn:hover {
+        background: rgba(37,99,235,.35);
+        border-color: rgba(96,165,250,.5);
+        transform: scale(1.06);
+      }
+      .cf-dots {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .cf-dots button {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(255,255,255,.25);
+        cursor: pointer;
+        padding: 0;
+        transition: width .25s, background .25s, border-radius .25s;
+      }
+      .cf-dots button.on {
+        width: 28px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #3376cd, #60a5fa);
+      }
+
+      .cf-caption {
+        max-width: 720px;
+        margin: 36px auto 0;
+        text-align: center;
+        padding: 0 24px;
+        min-height: 160px;
+      }
+      .cf-caption .wu-num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, rgba(37,99,235,.4), rgba(99,102,241,.25));
+        border: 1px solid rgba(37,99,235,.45);
+        color: #93c5fd;
+        font-weight: 800;
+        margin-bottom: 14px;
+      }
+      .cf-caption h3 {
+        color: #fff;
+        font-size: clamp(1.35rem, 2.5vw, 1.85rem);
+        font-weight: 800;
+        margin-bottom: 10px;
+      }
+      .cf-caption p {
+        color: rgba(255,255,255,.62);
+        line-height: 1.7;
+        margin-bottom: 16px;
+      }
+      .wu-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+      }
+      .wu-tag {
+        font-size: .72rem;
+        font-weight: 600;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        color: #93c5fd;
+        background: rgba(37,99,235,.15);
+        border: 1px solid rgba(37,99,235,.3);
+        border-radius: 999px;
+        padding: 6px 12px;
+      }
+      .cf-caption.is-swap {
+        animation: cfCapIn .35s ease;
+      }
+      @keyframes cfCapIn {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .wu-cta-wrap { padding: 50px 20px 20px; }
+      .wu-cta {
+        max-width: 900px;
+        margin: 0 auto;
+        text-align: center;
+        padding: 56px 36px;
+        border-radius: 28px;
+        background: linear-gradient(135deg, #1e3a6e 0%, #1e1e3f 100%);
+        position: relative;
+        overflow: hidden;
+      }
+      .wu-cta::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse 70% 70% at 50% -10%, rgba(37,99,235,.4), transparent);
+      }
+      .wu-cta h2, .wu-cta p, .wu-cta .btn-group { position: relative; }
+      .wu-cta h2 {
+        font-size: clamp(1.7rem, 3vw, 2.4rem);
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 12px;
+      }
+      .wu-cta p { color: rgba(255,255,255,.7); margin-bottom: 28px; }
+      .wu-cta .btn-group {
+        display: flex;
+        gap: 14px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .wu-cta .outline-btn {
+        padding: 14px 28px;
+        border-radius: 50px;
+        border: 1px solid rgba(255,255,255,.3);
+        color: #fff;
+        font-weight: 600;
+        text-decoration: none;
+      }
+      .wu-cta .outline-btn:hover {
+        background: rgba(255,255,255,.1);
+        border-color: rgba(255,255,255,.6);
+      }
+
+      footer .footer-logo { display: inline-block; line-height: 0; }
+      footer .footer-logo img {
+        height: 96px;
+        width: auto;
+        max-width: 160px;
+        border-radius: 18px;
+        object-fit: cover;
+        background: #fff;
+        padding: 8px;
+        box-shadow: 0 12px 36px rgba(0,0,0,.4);
+        border: 1px solid rgba(255,255,255,.08);
+      }
+      footer .footer-summary {
+        color: rgba(255,255,255,.6);
+        margin-top: 16px;
+        max-width: 280px;
+        line-height: 1.6;
+      }
+      footer .footer-links h4,
+      footer .footer-contact h4 {
+        color: #93c5fd;
+        margin-bottom: 16px;
+      }
+      footer .footer-bottom {
+        border-top: 1px solid rgba(255,255,255,.08);
+        margin-top: 40px;
+        padding: 18px 20px;
+        color: rgba(255,255,255,.4);
+        font-size: .85rem;
+      }
+
+      @media (max-width: 640px) {
+        .cf-scene { height: 280px; }
+        .cf-slide {
+          width: 86vw;
+          height: 210px;
+        }
+      }
+    </style>
+  <style>.touch-cards{display:flex;flex-direction:column;gap:10px}.touch-card{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:16px;text-decoration:none;color:inherit;background:linear-gradient(180deg,rgba(24,36,62,.95),rgba(10,16,30,.88));border:1px solid rgba(125,168,255,.22)}.touch-icon{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;border-radius:11px;background:rgba(37,99,235,.18);color:#7db2ff;font-size:14px}.touch-copy{min-width:0}.touch-copy small{display:block;margin-bottom:2px;font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:#93c5fd}.touch-copy strong{display:block;color:#f8fafc;font-size:14px;font-weight:600;line-height:1.35}.touch-copy em{display:inline-block;margin-top:6px;font-style:normal;font-size:13px;font-weight:600;color:#e2e8f0}</style>
+<style>
+      .touch-cards { display: flex; flex-direction: column; gap: 10px; }
+      .touch-card { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: 16px; text-decoration: none; color: inherit; background: linear-gradient(180deg, rgba(24, 36, 62, 0.95), rgba(10, 16, 30, 0.88)); border: 1px solid rgba(125, 168, 255, 0.22); box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18); transition: transform 0.2s ease, border-color 0.2s ease; }
+      .touch-card:hover { transform: translateY(-2px); border-color: rgba(96, 165, 250, 0.7); }
+      .touch-icon { width: 34px; height: 34px; flex: 0 0 34px; display: grid; place-items: center; border-radius: 11px; background: rgba(37, 99, 235, 0.18); color: #7db2ff; font-size: 14px; }
+      .touch-copy { min-width: 0; }
+      .touch-copy small { display: block; margin-bottom: 2px; font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase; color: #93c5fd; }
+      .touch-copy strong { display: block; color: #f8fafc; font-size: 14px; font-weight: 600; line-height: 1.35; }
+      .touch-copy em { display: inline-block; margin-top: 6px; font-style: normal; font-size: 13px; font-weight: 600; color: #e2e8f0; background: rgba(37, 99, 235, 0.16); border-radius: 999px; padding: 3px 8px; }
+      .footer-logo { margin-bottom: 22px; }
+      .store-badges { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 0 0 18px; }
+      .store-badges a { display: inline-flex; line-height: 0; }
+      .store-badges img { height: 44px; width: auto; display: block; }
+      .store-badges img.play-badge { height: 66px; margin: 0; }
+    </style>
+    <link rel="stylesheet" href="aqua-theme.css?v=20261027i" />
+</head>
+
+  <body class="theme-dark">
+    <header class="navbar">
+      <div class="container nav-container padding-XY">
+        <div class="logo">
+          <a href="index.html"><img src="images/mylaptoplogo.png" alt="My Laptop Market Logo" /></a>
+        </div>
+        <ul class="nav-links" id="navLinks">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="services.html">Services</a></li>
+          <li><a href="products.html">Products</a></li>
+          <li><a href="why-us.html" class="active">Why Us</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
+          <li><a href="https://mylaptopmarket.com/api/vendor/login" class="mobile-vendor-login" id="mobileVendorNavLink">Vendor Login</a></li>
+        </ul>
+        <a href="https://mylaptopmarket.com/api/vendor/login" class="contact-btn glow-btn" id="vendorNavBtn">Vendor Login</a>
+        <div class="hamburger" id="hamburger"><i class="fa-solid fa-bars"></i></div>
+      </div>
+    </header>
+
+    <main>
+      <section class="wu-hero">
+        <div>
+          <p class="small-title">WHY MY LAPTOP MARKET</p>
+          <h1>See the platform from the inside</h1>
+          <p>Swipe through a 3D look at the vendor panel — dashboard, products, search, messaging, branding & invoices.</p>
+          <a href="https://mylaptopmarket.com/api/vendor/register" class="primary-btn glow-btn">Register Your Business</a>
+        </div>
+      </section>
+
+      <section class="wu-stage">
+        <div class="wu-stage-head">
+          <p class="small-title">PLATFORM TOUR</p>
+          <h2>3D feature gallery</h2>
+          <p>Drag, use arrows, or click dots — side cards sit in depth, center card stays in focus</p>
+        </div>
+
+        <div class="cf-wrap">
+          <div class="cf-floor"></div>
+          <div class="cf-scene" id="cfScene">
+            <div class="cf-track" id="cfTrack">
+              <figure class="cf-slide" data-i="0">
+                <div class="cf-chrome"><span class="cf-dot r"></span><span class="cf-dot y"></span><span class="cf-dot g"></span><span class="cf-url">vendor / dashboard</span></div>
+                <img src="images/why-us/01-dashboard.png" alt="Dashboard" />
+              </figure>
+              <figure class="cf-slide" data-i="1">
+                <div class="cf-chrome"><span class="cf-dot r"></span><span class="cf-dot y"></span><span class="cf-dot g"></span><span class="cf-url">vendor / profile</span></div>
+                <img src="images/why-us/02-profile.png" alt="Profile" />
+              </figure>
+              <figure class="cf-slide" data-i="2">
+                <div class="cf-chrome"><span class="cf-dot r"></span><span class="cf-dot y"></span><span class="cf-dot g"></span><span class="cf-url">vendor / search_products</span></div>
+                <img src="images/why-us/03-search.png" alt="Search" />
+              </figure>
+              <figure class="cf-slide" data-i="3">
+                <div class="cf-chrome"><span class="cf-dot r"></span><span class="cf-dot y"></span><span class="cf-dot g"></span><span class="cf-url">vendor / add_product</span></div>
+                <img src="images/why-us/04-add-product.png" alt="Add product" />
+              </figure>
+              <figure class="cf-slide" data-i="4">
+                <div class="cf-chrome"><span class="cf-dot r"></span><span class="cf-dot y"></span><span class="cf-dot g"></span><span class="cf-url">vendor / product_list</span></div>
+                <img src="images/why-us/05-product-list.png" alt="Product list" />
+              </figure>
+              <figure class="cf-slide" data-i="5">
+                <div class="cf-chrome"><span class="cf-dot r"></span><span class="cf-dot y"></span><span class="cf-dot g"></span><span class="cf-url">vendor / messages</span></div>
+                <img src="images/why-us/06-messages.png" alt="Messages" />
+              </figure>
+              <figure class="cf-slide" data-i="6">
+                <div class="cf-chrome"><span class="cf-dot r"></span><span class="cf-dot y"></span><span class="cf-dot g"></span><span class="cf-url">vendor / invoice</span></div>
+                <img src="images/why-us/07-invoice.png" alt="Invoice" />
+              </figure>
+            </div>
+          </div>
+
+          <div class="cf-nav">
+            <button type="button" class="cf-btn" id="cfPrev" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+            <div class="cf-dots" id="cfDots"></div>
+            <button type="button" class="cf-btn" id="cfNext" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+          </div>
+
+          <div class="cf-caption" id="cfCaption"></div>
+        </div>
+
+        <div class="wu-cta-wrap">
+          <div class="wu-cta">
+            <h2>Ready to run your IT business from one panel?</h2>
+            <p>Register free, list products, connect with dealers nationwide, and grow with a platform built only for the IT trade.</p>
+            <div class="btn-group">
+              <a href="https://mylaptopmarket.com/api/vendor/register" class="primary-btn glow-btn">Register Free Now</a>
+              <a href="contact.html" class="outline-btn">Talk to Our Team</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+        <footer>
+      <section class="footer">
+        <div class="container footer-grid padding-XY">
+          <div>
+            <div class="footer-logo">
+              <img src="images/mylaptoplogo.png" alt="My Laptop Market Logo" loading="lazy" />
+            </div>
+            <div class="store-badges">
+              <a href="https://play.google.com/store/apps/details?id=com.mylaptopmarket" target="_blank" rel="noopener noreferrer">
+                <img class="play-badge" src="images/google-play-badge.png" alt="Get it on Google Play" />
+              </a>
+              <a href="https://apps.apple.com/in/app/my-laptop-market/id6811815946" target="_blank" rel="noopener noreferrer">
+                <img src="images/app-store-badge.svg" alt="Download on the App Store" />
+              </a>
+            </div>
+            <div class="social-icons">
+              <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+              <a href="#" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
+              <a href="https://www.instagram.com/mylaptopmarket/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+              <a href="https://www.linkedin.com/company/my-laptop-market/?viewAsMember=true" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+          </div>
+          <div>
+            <h3>Quick Links</h3>
+            <ul>
+              <li><a href="index.html">Home</a></li>
+              <li><a href="about.html">About</a></li>
+              <li><a href="services.html">Services</a></li>
+              <li><a href="products.html">Products</a></li>
+              <li><a href="contact.html">Contact Us</a></li>
+            </ul>
+          </div>
+          <div>
+            <h3>Our Services</h3>
+            <ul>
+              <li>Vendor Registration</li>
+              <li>Supplier & Dealer Discovery</li>
+              <li>B2B Lead Generation</li>
+              <li>Business Matchmaking</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Get In Touch</h3>
+            <div class="touch-cards">
+              <a class="touch-card" href="tel:+919718199976">
+                <span class="touch-icon"><i class="fa-solid fa-phone"></i></span>
+                <span class="touch-copy">
+                  <small>Sales Assistant</small>
+                  <strong>Mr Shaizan Siddqui</strong>
+                  <em>9718199976</em>
+                </span>
+              </a>
+              <a class="touch-card" href="tel:+917295834965">
+                <span class="touch-icon"><i class="fa-solid fa-phone"></i></span>
+                <span class="touch-copy">
+                  <small>Technical Assistant</small>
+                  <strong>Mr Vivek Kumar</strong>
+                  <em>7295834965</em>
+                </span>
+              </a>
+              <a class="touch-card" href="mailto:support@mylaptopmarket.com">
+                <span class="touch-icon"><i class="fa-solid fa-envelope"></i></span>
+                <span class="touch-copy">
+                  <small>Email</small>
+                  <strong>support@mylaptopmarket.com</strong>
+                </span>
+              </a>
+              <a class="touch-card" href="https://www.google.com/maps/search/?api=1&query=Plot+no+19+Office+no+5,+Veer+Savarkar+Block,+Shakarpur+110091,+Delhi" target="_blank" rel="noopener noreferrer">
+                <span class="touch-icon"><i class="fa-solid fa-location-dot"></i></span>
+                <span class="touch-copy">
+                  <small>Office</small>
+                  <strong>Plot no 19, Office no 5, Veer Savarkar Block, Shakarpur-110091</strong>
+                </span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="marquee">
+        <div class="marquee-track">
+          <span>IT Vendors Network ✦ Technology Suppliers ✦ IT Product Distributors ✦ Refurbished Hardware Suppliers ✦&nbsp;</span>
+          <span>IT Equipment Marketplace ✦ Enterprise Hardware Dealers ✦ IT Asset Management ✦ Corporate IT Equipment ✦</span>
+        </div>
+      </section>
+
+      <div class="copyright">
+        © 2026 My Laptop Market. All Rights Reserved | <a href="privacy-policy.html" style="color:inherit">Privacy Policy</a> | www.mylaptopmarket.com
+        <div class="footer-duns">
+          <script language="JavaScript" src="https://dunsregistered.dnb.com" type="text/javascript"></script>
+        </div>
+      </div>
+    </footer>
+
+    <script src="page-animations.js"></script>
+    <script src="vendor-auth-nav.js?v=20261016c"></script>
+    <script>
+      (function () {
+        var slidesMeta = [
+          {
+            title: 'Central business control center',
+            text: 'One dashboard for subscription, profile, B2B & retail products, enquiries, messages, low-stock alerts and invoices.',
+            tags: ['Live stats', 'Quick actions', 'Alerts']
+          },
+          {
+            title: 'Shop branding with your own logo',
+            text: 'Upload a shop logo and update details. Branding appears in the sidebar and wherever your vendor name shows.',
+            tags: ['Logo upload', 'Shop identity']
+          },
+          {
+            title: 'Discover products across the network',
+            text: 'Search other vendors’ listings with images and specs. Call or message a seller instantly.',
+            tags: ['Product search', 'Call & message']
+          },
+          {
+            title: 'Simple product listing tools',
+            text: 'Add B2B products with category, stock, price, description, YouTube link and multiple images.',
+            tags: ['Category', 'Multi images', 'Stock & price']
+          },
+          {
+            title: 'Manage inventory in one clean list',
+            text: 'See every listing with category, stock, price, status and thumbnails. Edit or delete in a click.',
+            tags: ['Inventory', 'Edit / delete', 'Status']
+          },
+          {
+            title: 'Built-in B2B messaging',
+            text: 'Chat with other vendors inside the panel — conversations, unread badges and a full chat window.',
+            tags: ['Inbox', 'Unread alerts', 'Vendor chat']
+          },
+          {
+            title: 'Professional tax invoices',
+            text: 'Subscription payments generate GST-ready tax invoices with tax breakup and print/PDF.',
+            tags: ['GST invoice', 'Print / PDF', 'Records']
+          }
+        ];
+
+        var slides = Array.prototype.slice.call(document.querySelectorAll('.cf-slide'));
+        var scene = document.getElementById('cfScene');
+        var dotsEl = document.getElementById('cfDots');
+        var caption = document.getElementById('cfCaption');
+        var index = 0;
+        var N = slides.length;
+        var dragging = false;
+        var startX = 0;
+        var deltaX = 0;
+
+        function pad(n) { return (n < 10 ? '0' : '') + n; }
+
+        function renderCaption() {
+          var m = slidesMeta[index];
+          var tags = m.tags.map(function (t) {
+            return '<span class="wu-tag">' + t + '</span>';
+          }).join('');
+          caption.classList.remove('is-swap');
+          void caption.offsetWidth;
+          caption.innerHTML =
+            '<span class="wu-num">' + pad(index + 1) + '</span>' +
+            '<h3>' + m.title + '</h3>' +
+            '<p>' + m.text + '</p>' +
+            '<div class="wu-tags">' + tags + '</div>';
+          caption.classList.add('is-swap');
+        }
+
+        function renderDots() {
+          dotsEl.innerHTML = slidesMeta.map(function (_, i) {
+            return '<button type="button" data-dot="' + i + '" class="' + (i === index ? 'on' : '') + '" aria-label="Slide ' + (i + 1) + '"></button>';
+          }).join('');
+        }
+
+        function layout() {
+          var spacing = window.innerWidth < 640 ? 70 : 95;
+          var depth = window.innerWidth < 640 ? 140 : 220;
+          var angle = window.innerWidth < 640 ? 38 : 48;
+
+          slides.forEach(function (slide, i) {
+            var offset = i - index;
+            var abs = Math.abs(offset);
+            var x = offset * spacing;
+            var z = -abs * depth;
+            var ry = offset * -angle;
+            var scale = abs === 0 ? 1 : Math.max(0.55, 1 - abs * 0.12);
+            var opacity = abs > 2 ? 0 : Math.max(0.2, 1 - abs * 0.28);
+            var blur = abs === 0 ? 0 : Math.min(3, abs * 1.1);
+            var zIndex = 100 - abs;
+            var visibility = abs > 2 ? 'hidden' : 'visible';
+
+            slide.style.zIndex = String(zIndex);
+            slide.style.opacity = String(opacity);
+            slide.style.visibility = visibility;
+            slide.style.filter = blur ? 'blur(' + blur + 'px) brightness(' + (1 - abs * 0.08) + ')' : 'none';
+            slide.style.transform =
+              'translate(-50%, -50%) translateX(' + x + '%) translateZ(' + z + 'px) rotateY(' + ry + 'deg) scale(' + scale + ')';
+            slide.classList.toggle('active', offset === 0);
+            slide.style.pointerEvents = abs === 0 || abs === 1 ? 'auto' : 'none';
+          });
+
+          renderDots();
+          renderCaption();
+        }
+
+        function go(i) {
+          index = (i + N) % N;
+          layout();
+        }
+
+        document.getElementById('cfPrev').addEventListener('click', function () { go(index - 1); });
+        document.getElementById('cfNext').addEventListener('click', function () { go(index + 1); });
+
+        dotsEl.addEventListener('click', function (e) {
+          var btn = e.target.closest('[data-dot]');
+          if (!btn) return;
+          go(parseInt(btn.getAttribute('data-dot'), 10));
+        });
+
+        slides.forEach(function (slide) {
+          slide.addEventListener('click', function () {
+            var i = parseInt(slide.getAttribute('data-i'), 10);
+            if (i !== index) go(i);
+          });
+        });
+
+        function onDown(x) {
+          dragging = true;
+          startX = x;
+          deltaX = 0;
+          scene.classList.add('is-dragging');
+        }
+        function onMove(x) {
+          if (!dragging) return;
+          deltaX = x - startX;
+        }
+        function onUp() {
+          if (!dragging) return;
+          dragging = false;
+          scene.classList.remove('is-dragging');
+          if (Math.abs(deltaX) > 50) {
+            go(index + (deltaX < 0 ? 1 : -1));
+          }
+          deltaX = 0;
+        }
+
+        scene.addEventListener('mousedown', function (e) { onDown(e.clientX); });
+        window.addEventListener('mousemove', function (e) { onMove(e.clientX); });
+        window.addEventListener('mouseup', onUp);
+
+        scene.addEventListener('touchstart', function (e) {
+          if (e.touches[0]) onDown(e.touches[0].clientX);
+        }, { passive: true });
+        scene.addEventListener('touchmove', function (e) {
+          if (e.touches[0]) onMove(e.touches[0].clientX);
+        }, { passive: true });
+        scene.addEventListener('touchend', onUp);
+
+        scene.addEventListener('wheel', function (e) {
+          if (Math.abs(e.deltaX) > Math.abs(e.deltaY) || e.shiftKey) {
+            e.preventDefault();
+            if (e.deltaX > 20 || e.deltaY > 20) go(index + 1);
+            else if (e.deltaX < -20 || e.deltaY < -20) go(index - 1);
+          }
+        }, { passive: false });
+
+        var auto = setInterval(function () {
+          if (!dragging && !document.hidden) go(index + 1);
+        }, 4500);
+        scene.addEventListener('mouseenter', function () { clearInterval(auto); auto = null; });
+        scene.addEventListener('mouseleave', function () {
+          if (!auto) {
+            auto = setInterval(function () {
+              if (!dragging && !document.hidden) go(index + 1);
+            }, 4500);
+          }
+        });
+
+        window.addEventListener('resize', layout);
+        layout();
+      })();
+    </script>
+      <script src="pop.js?v=20261029a"></script>
+</body>
+</html>
