@@ -1,4 +1,9 @@
 User-agent: *
 Allow: /
 
+# Keep vendor/admin app surfaces out of the index; public catalog stays allowed.
+Disallow: /api/vendor/
+Disallow: /api/admin/
+
 Sitemap: https://mylaptopmarket.com/sitemap.xml
+

@@ -12,6 +12,9 @@ if [[ ! -d "$SITE" ]]; then
   exit 1
 fi
 
+# Refresh Google sitemap with current public product URLs before upload.
+python3 "$ROOT/scripts/generate_sitemap.py"
+
 gcloud storage rsync "$SITE" "$BUCKET" \
   --recursive \
   --cache-control="public, max-age=300"
