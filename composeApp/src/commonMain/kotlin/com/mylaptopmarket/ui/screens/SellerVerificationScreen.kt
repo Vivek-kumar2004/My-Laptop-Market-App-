@@ -25,7 +25,9 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.mylaptopmarket.network.SessionManager
 import com.mylaptopmarket.ui.theme.*
+import com.mylaptopmarket.ui.tour.tourTarget
 import com.mylaptopmarket.util.ImagePicker
+import com.mylaptopmarket.util.SHOW_VENDOR_PAYMENT
 import com.mylaptopmarket.viewmodel.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,7 +71,12 @@ fun SellerVerificationScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text("Seller Verification", fontWeight = FontWeight.Bold, color = TextPrimary)
+                    Text(
+                        "Seller Verification",
+                        modifier = Modifier.tourTarget("page-verify"),
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
@@ -194,38 +201,42 @@ fun SellerVerificationScreen(
             }
 
             if (resolvedId != null) {
-                Spacer(Modifier.height(28.dp))
-                Text(
-                    "Subscription",
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    if (seller?.isVerified == true) {
-                        "Subscription active${seller.subscriptionEnd?.let { " till $it" } ?: ""}${if (seller.daysLeft > 0) " · ${seller.daysLeft} days left" else ""}."
-                    } else {
-                        "Products live karne ke liye ₹499 / 30 din ki subscription alag se chahiye."
-                    },
-                    color = TextSecondary,
-                    style = MaterialTheme.typography.bodySmall
-                )
-                Spacer(Modifier.height(12.dp))
-                Button(
-                    onClick = { uriHandler.openUri(viewModel.subscriptionUrl(resolvedId)) },
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (seller?.isVerified == true) PrimaryBlue else WarningOrange
-                    )
-                ) {
+                if (SHOW_VENDOR_PAYMENT) {
+                    Spacer(Modifier.height(28.dp))
                     Text(
-                        if (seller?.isVerified == true) "Renew Subscription" else "Pay / Activate Subscription",
-                        fontWeight = FontWeight.Bold
+                        "Subscription",
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary,
+                        modifier = Modifier.fillMaxWidth()
                     )
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        if (seller?.isVerified == true) {
+                            "Subscription active${seller.subscriptionEnd?.let { " till $it" } ?: ""}${if (seller.daysLeft > 0) " · ${seller.daysLeft} days left" else ""}."
+                        } else {
+                            "Products live karne ke liye ₹1 / 30 din ki subscription alag se chahiye."
+                        },
+                        color = TextSecondary,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    Button(
+                        onClick = { uriHandler.openUri(viewModel.subscriptionUrl(resolvedId)) },
+                        modifier = Modifier.fillMaxWidth().height(50.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (seller?.isVerified == true) PrimaryBlue else WarningOrange
+                        )
+                    ) {
+                        Text(
+                            if (seller?.isVerified == true) "Renew Subscription" else "Pay / Activate Subscription",
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Spacer(Modifier.height(12.dp))
+                } else {
+                    Spacer(Modifier.height(28.dp))
                 }
-                Spacer(Modifier.height(12.dp))
                 OutlinedButton(
                     onClick = { viewModel.loadSellerStatus(resolvedId) },
                     enabled = !isLoading,

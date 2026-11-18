@@ -26,10 +26,22 @@ private data class AddProductResponse(
     val data: CreatedProduct? = null
 )
 
+@kotlinx.serialization.Serializable
+private data class MarketListResponse(
+    val status: Boolean = false,
+    val data: List<com.mylaptopmarket.model.MarketListing> = emptyList()
+)
+
+@kotlinx.serialization.Serializable
+private data class MarketOneResponse(
+    val status: Boolean = false,
+    val data: com.mylaptopmarket.model.MarketListing? = null
+)
+
 class ApiProductRepository : ProductRepository {
 
-    private val baseImageUrl = "${KtorClient.getBaseUrl()}assets/uploads/products/"
-    private val baseVendorLogoUrl = "${KtorClient.getBaseUrl()}assets/uploads/vendors/"
+    private val baseImageUrl = "${KtorClient.getMediaBaseUrl()}assets/uploads/products/"
+    private val baseVendorLogoUrl = "${KtorClient.getMediaBaseUrl()}assets/uploads/vendors/"
     private val json = Json { ignoreUnknownKeys = true }
     private val vendorLogoCache = mutableMapOf<String, String?>()
 
@@ -61,6 +73,34 @@ class ApiProductRepository : ProductRepository {
 
     override fun getTopProducts(): Flow<List<Product>> = flow {
         emit(getAllProducts())
+    }
+
+    override fun getMarketListings(): Flow<List<com.mylaptopmarket.model.MarketListing>> = flow {
+        emit(fetchMarketListings())
+    }
+
+    override suspend fun getMarketListing(id: String): com.mylaptopmarket.model.MarketListing? {
+        return try {
+            val response = KtorClient.httpClient.get("${KtorClient.getBaseUrl()}api/market-listings/$id")
+            val payload = AppJson.decodeFromString(MarketOneResponse.serializer(), response.bodyAsText())
+            if (!payload.status) null else payload.data
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    private suspend fun fetchMarketListings(): List<com.mylaptopmarket.model.MarketListing> {
+        return try {
+            val response = KtorClient.httpClient.get("${KtorClient.getBaseUrl()}api/market-listings")
+            val payload = AppJson.decodeFromString(MarketListResponse.serializer(), response.bodyAsText())
+            if (!payload.status) emptyList() else payload.data
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            emptyList()
+        }
     }
 
     override fun getFeaturedProducts(): Flow<List<Product>> = flow {

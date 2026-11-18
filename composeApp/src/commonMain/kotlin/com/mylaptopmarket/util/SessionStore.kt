@@ -16,6 +16,14 @@ internal expect fun readSeenAnnouncement(): String?
 
 internal expect fun writeSeenAnnouncement(message: String?)
 
+internal expect fun readVendorTutorialSeen(): Boolean
+
+internal expect fun writeVendorTutorialSeen(seen: Boolean)
+
 fun seenAnnouncement(): String = readSeenAnnouncement().orEmpty()
 
 fun markAnnouncementSeen(message: String) = writeSeenAnnouncement(message)
+
+fun vendorTutorialSeen(): Boolean = readVendorTutorialSeen()
+
+fun markVendorTutorialSeen() = writeVendorTutorialSeen(true)

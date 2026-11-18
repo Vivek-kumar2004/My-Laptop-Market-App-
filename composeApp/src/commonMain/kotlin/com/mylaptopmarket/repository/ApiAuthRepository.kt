@@ -2,6 +2,7 @@ package com.mylaptopmarket.repository
 
 import com.mylaptopmarket.network.GstProfile
 import com.mylaptopmarket.network.KtorClient
+import com.mylaptopmarket.util.SHOW_VENDOR_PAYMENT
 import com.mylaptopmarket.network.SessionManager
 import com.mylaptopmarket.network.VendorSession
 import io.ktor.client.call.body
@@ -21,6 +22,9 @@ import kotlinx.serialization.Serializable
 data class LoginRequest(val username: String, val password: String)
 
 @Serializable
+data class FirebaseCodeRequest(val code: String)
+
+@Serializable
 data class RegisterRequest(
     val shop_name: String,
     val username: String,
@@ -29,8 +33,19 @@ data class RegisterRequest(
     val state: String = "",
     val mobile: String,
     val email: String,
-    val password: String
+    val password: String,
+    val email_otp: String = "",
+    val mobile_otp: String = ""
 )
+
+@Serializable
+data class EmailOtpRequest(val email: String)
+
+@Serializable
+data class VerifyEmailOtpRequest(val email: String, val email_otp: String)
+
+@Serializable
+data class VerifyMobileTokenRequest(val mobile: String, val firebase_token: String)
 
 @Serializable
 data class ForgotPasswordRequest(val email: String)
@@ -138,25 +153,7 @@ class ApiAuthRepository {
                 contentType(ContentType.Application.Json)
                 setBody(request)
             }.body()
-
-            when {
-                response.success && response.vendor != null -> {
-                    Result.success(response.vendor.toSession(daysLeft = 0))
-                }
-                response.code == "pending_verification" || response.code == "expired" -> {
-                    Result.failure(
-                        AuthPendingException(
-                            message = response.message ?: "Seller verification pending",
-                            pending = AuthPending(
-                                vendorId = response.vendor_id ?: response.vendor?.id ?: 0,
-                                code = response.code ?: "pending_verification",
-                                message = response.message ?: "Activate subscription to get verified."
-                            )
-                        )
-                    )
-                }
-                else -> Result.failure(Exception(response.message ?: "Invalid username or password"))
-            }
+            response.asSessionResult("Invalid username or password")
         } catch (e: AuthPendingException) {
             Result.failure(e)
         } catch (e: Exception) {
@@ -166,6 +163,41 @@ class ApiAuthRepository {
                 e.message ?: "Login failed"
             }
             Result.failure(Exception(errorMsg))
+        }
+    }
+
+    suspend fun loginWithFirebaseCode(code: String): Result<VendorSession> {
+        return try {
+            val response: LoginResponse = client.post("$baseUrl/vendor/firebase-code") {
+                contentType(ContentType.Application.Json)
+                setBody(FirebaseCodeRequest(code))
+            }.body()
+            response.asSessionResult("Google sign-in could not be finished")
+        } catch (e: AuthPendingException) {
+            Result.failure(e)
+        } catch (e: Exception) {
+            Result.failure(Exception(e.message ?: "Google sign-in could not be finished"))
+        }
+    }
+
+    private fun LoginResponse.asSessionResult(fallback: String): Result<VendorSession> {
+        return when {
+            success && vendor != null -> Result.success(vendor.toSession(daysLeft = 0))
+            code == "pending_verification" || code == "expired" -> Result.failure(
+                AuthPendingException(
+                    message = message ?: "Seller verification pending",
+                    pending = AuthPending(
+                        vendorId = vendor_id ?: vendor?.id ?: 0,
+                        code = code ?: "pending_verification",
+                        message = message ?: if (SHOW_VENDOR_PAYMENT) {
+                            "Activate subscription to get verified."
+                        } else {
+                            "Seller verification pending"
+                        }
+                    )
+                )
+            )
+            else -> Result.failure(Exception(message ?: fallback))
         }
     }
 
@@ -181,7 +213,11 @@ class ApiAuthRepository {
                     AuthPending(
                         vendorId = response.vendor_id ?: response.vendor!!.id,
                         code = "pending_verification",
-                        message = response.message ?: "Account created. Activate subscription to get verified."
+                        message = response.message ?: if (SHOW_VENDOR_PAYMENT) {
+                            "Account created. Activate subscription to get verified."
+                        } else {
+                            "Account created."
+                        }
                     )
                 )
             } else {
@@ -314,6 +350,24 @@ class ApiAuthRepository {
         }
     }
 
+    suspend fun sendRegisterOtp(email: String): Result<String> {
+        return postAuthMessage("$baseUrl/vendor/email_otp", EmailOtpRequest(email.trim()))
+    }
+
+    suspend fun verifyRegisterOtp(email: String, otp: String): Result<String> {
+        return postAuthMessage(
+            "$baseUrl/vendor/email_verify",
+            VerifyEmailOtpRequest(email = email.trim(), email_otp = otp.trim())
+        )
+    }
+
+    suspend fun verifyRegisterMobileToken(mobile: String, firebaseToken: String): Result<String> {
+        return postAuthMessage(
+            "$baseUrl/vendor/mobile_verify",
+            VerifyMobileTokenRequest(mobile = mobile.trim(), firebase_token = firebaseToken)
+        )
+    }
+
     suspend fun sendPasswordOtp(email: String): Result<String> {
         return postAuthMessage("$baseUrl/vendor/forgot_password", ForgotPasswordRequest(email.trim()))
     }
@@ -396,7 +450,7 @@ class ApiAuthRepository {
             !logo_url.isNullOrBlank() -> logo_url
             !logo.isNullOrBlank() -> {
                 val file = logo.substringAfterLast('/')
-                "${KtorClient.getBaseUrl()}assets/uploads/vendors/$file"
+                "${KtorClient.getMediaBaseUrl()}assets/uploads/vendors/$file"
             }
             else -> null
         }

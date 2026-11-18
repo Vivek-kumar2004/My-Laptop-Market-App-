@@ -20,10 +20,24 @@ android {
         applicationId = "com.mylaptopmarket"
         minSdk = 24
         targetSdk = 36
-        versionCode = 7
-        versionName = "1.0.6"
+        versionCode = 13
+        versionName = "1.1.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    flavorDimensions += "app"
+    productFlavors {
+        create("store") {
+            dimension = "app"
+            isDefault = true
+        }
+        create("admin") {
+            dimension = "app"
+            applicationId = "com.mylaptopmarket.admin"
+            versionCode = 1
+            versionName = "1.0.0"
+        }
     }
 
     signingConfigs {
@@ -75,6 +89,7 @@ dependencies {
     implementation(libs.google.material)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
+    implementation(libs.play.app.update)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

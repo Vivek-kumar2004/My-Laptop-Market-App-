@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import AVFoundation
 import Speech
 import UserNotifications
@@ -89,8 +90,10 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 @main
 struct iOSApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @State private var storeUpdateURL: URL?
 
     init() {
+        PhoneAuthSetup.install()
         FloorDeskSpeech.shared.install()
     }
 
@@ -100,7 +103,67 @@ struct iOSApp: App {
                 .onOpenURL { url in
                     IosDeepLinkBus.shared.publish(uri: url.absoluteString)
                 }
+                .task {
+                    storeUpdateURL = await StoreUpdate.newerVersionURL()
+                }
+                .alert("Update available", isPresented: storeUpdatePresented) {
+                    Button("Update") {
+                        if let storeUpdateURL {
+                            UIApplication.shared.open(storeUpdateURL)
+                        }
+                    }
+                    Button("Not now", role: .cancel) {}
+                } message: {
+                    Text("A new version is on the App Store.")
+                }
         }
+    }
+
+    private var storeUpdatePresented: Binding<Bool> {
+        Binding(
+            get: { storeUpdateURL != nil },
+            set: { if !$0 { storeUpdateURL = nil } }
+        )
+    }
+}
+
+private enum StoreUpdate {
+    static func newerVersionURL() async -> URL? {
+        let bundleId = Bundle.main.bundleIdentifier ?? ""
+        guard !bundleId.contains("admin") else { return nil }
+        guard let current = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String else { return nil }
+        guard let lookup = URL(string: "https://itunes.apple.com/lookup?bundleId=\(bundleId)&country=in") else { return nil }
+        guard let (data, _) = try? await URLSession.shared.data(from: lookup),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let results = json["results"] as? [[String: Any]],
+              let latest = results.first?["version"] as? String,
+              isNewer(latest, than: current) else { return nil }
+        let offeredKey = "mlm-offered-store-version"
+        if UserDefaults.standard.string(forKey: offeredKey) == latest { return nil }
+        UserDefaults.standard.set(latest, forKey: offeredKey)
+        let trackId: String? = {
+            switch results.first?["trackId"] {
+            case let number as NSNumber:
+                return number.stringValue
+            case let text as String:
+                return text
+            default:
+                return nil
+            }
+        }()
+        guard let trackId else { return nil }
+        return URL(string: "itms-apps://apps.apple.com/app/id\(trackId)")
+    }
+
+    private static func isNewer(_ store: String, than current: String) -> Bool {
+        let left = store.split(separator: ".").map { Int($0) ?? 0 }
+        let right = current.split(separator: ".").map { Int($0) ?? 0 }
+        for index in 0..<max(left.count, right.count) {
+            let storePart = index < left.count ? left[index] : 0
+            let currentPart = index < right.count ? right[index] : 0
+            if storePart != currentPart { return storePart > currentPart }
+        }
+        return false
     }
 }
 

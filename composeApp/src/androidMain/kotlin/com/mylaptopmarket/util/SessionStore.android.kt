@@ -7,6 +7,7 @@ private const val KEY_SESSION = "vendor_session"
 private const val KEY_ADMIN_SESSION = "admin_session"
 private const val KEY_WISHLIST = "wishlist"
 private const val KEY_SEEN_ANNOUNCEMENT = "seen_announcement"
+private const val KEY_VENDOR_TUTORIAL = "vendor_flow_tour_seen"
 
 internal actual fun readSessionJson(): String? {
     val context = applicationContextOrNull() ?: return null
@@ -60,6 +61,20 @@ internal actual fun readSeenAnnouncement(): String? {
     val context = applicationContextOrNull() ?: return null
     return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         .getString(KEY_SEEN_ANNOUNCEMENT, null)
+}
+
+internal actual fun readVendorTutorialSeen(): Boolean {
+    val context = applicationContextOrNull() ?: return false
+    return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        .getBoolean(KEY_VENDOR_TUTORIAL, false)
+}
+
+internal actual fun writeVendorTutorialSeen(seen: Boolean) {
+    val context = applicationContextOrNull() ?: return
+    context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        .edit()
+        .putBoolean(KEY_VENDOR_TUTORIAL, seen)
+        .apply()
 }
 
 internal actual fun writeSeenAnnouncement(message: String?) {

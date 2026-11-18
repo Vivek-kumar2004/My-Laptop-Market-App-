@@ -1,5 +1,6 @@
 package com.mylaptopmarket.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -57,6 +58,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mylaptopmarket.repository.AdminVendorData
 import com.mylaptopmarket.ui.theme.ErrorRed
+import com.mylaptopmarket.ui.theme.PrimaryBlue
 import com.mylaptopmarket.ui.theme.SuccessGreen
 import com.mylaptopmarket.ui.theme.SuccessGreenLight
 import com.mylaptopmarket.ui.theme.SurfaceWhite
@@ -69,6 +71,7 @@ import com.mylaptopmarket.viewmodel.AdminVendorsViewModel
 fun AdminVendorsScreen(
     viewModel: AdminVendorsViewModel,
     onAddClick: () -> Unit,
+    onVendorClick: (Int) -> Unit,
     onEditClick: (Int) -> Unit,
     onBackClick: () -> Unit,
     bottomBar: @Composable () -> Unit
@@ -255,6 +258,7 @@ fun AdminVendorsScreen(
                         AdminVendorCard(
                             vendor = vendor,
                             showPassword = showPasswordId == vendor.id,
+                            onOpen = { onVendorClick(vendor.id) },
                             onTogglePassword = {
                                 showPasswordId = if (showPasswordId == vendor.id) null else vendor.id
                             },
@@ -280,6 +284,7 @@ fun AdminVendorsScreen(
 private fun AdminVendorCard(
     vendor: AdminVendorData,
     showPassword: Boolean,
+    onOpen: () -> Unit,
     onTogglePassword: () -> Unit,
     onActivate: () -> Unit,
     onDeactivate: () -> Unit,
@@ -295,10 +300,16 @@ private fun AdminVendorCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onOpen),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Column(Modifier.weight(1f)) {
                     Text(vendor.shopName ?: vendor.username, fontWeight = FontWeight.Bold)
                     Text("@${vendor.username}", style = MaterialTheme.typography.bodySmall, color = TextMuted)
+                    Text("Tap to view profile", style = MaterialTheme.typography.labelSmall, color = PrimaryBlue)
                 }
                 AssistChip(
                     onClick = {},

@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.mylaptopmarket.network.SessionManager
 import com.mylaptopmarket.ui.components.StateField
+import com.mylaptopmarket.ui.tour.tourTarget
 import com.mylaptopmarket.ui.theme.*
 import com.mylaptopmarket.util.ImagePicker
 import com.mylaptopmarket.viewmodel.ProfileViewModel
@@ -126,6 +127,7 @@ fun ProfileScreen(
                     title = {
                         Text(
                             "My Profile",
+                            modifier = Modifier.tourTarget("page-profile"),
                             fontWeight = FontWeight.ExtraBold,
                             style = MaterialTheme.typography.titleMedium,
                             color = TextPrimary

@@ -69,6 +69,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mylaptopmarket.viewmodel.AiStatus
+import com.mylaptopmarket.ui.tour.tourTarget
 import com.mylaptopmarket.viewmodel.VoiceChatbotViewModel
 
 data class ChatMessage(
@@ -211,7 +212,7 @@ private fun VoiceTopBar(
                 tint = VoiceText
             )
         }
-        Column(modifier = Modifier.weight(1f)) {
+        Column(modifier = Modifier.weight(1f).tourTarget("page-ask")) {
             Text(
                 "Floor Desk",
                 fontWeight = FontWeight.SemiBold,

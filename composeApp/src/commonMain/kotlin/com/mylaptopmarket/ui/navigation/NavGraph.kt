@@ -1,17 +1,21 @@
 package com.mylaptopmarket.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import com.mylaptopmarket.network.SessionManager
-import com.mylaptopmarket.network.VendorPushEvents
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.mylaptopmarket.network.SessionManager
+import com.mylaptopmarket.network.VendorPushEvents
 import com.mylaptopmarket.repository.ApiProductRepository
 import com.mylaptopmarket.service.SpeechRecognitionService
 import com.mylaptopmarket.service.GeminiChatbotService
@@ -19,8 +23,13 @@ import com.mylaptopmarket.ui.screens.*
 import com.mylaptopmarket.util.RequestMicrophonePermission
 import com.mylaptopmarket.util.ensureSpeechServiceInitialized
 import com.mylaptopmarket.util.ensureVendorNotifications
+import com.mylaptopmarket.util.vendorTutorialSeen
+import com.mylaptopmarket.ui.tour.AppTour
+import com.mylaptopmarket.ui.tour.TourOverlay
+import com.mylaptopmarket.ui.tour.TourPlace
 import com.mylaptopmarket.viewmodel.*
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 
 sealed class Screen(val route: String) {
     data object Home : Screen("home")
@@ -48,6 +57,9 @@ sealed class Screen(val route: String) {
     data object AddRequirement : Screen("add_requirement")
     data object ProductDetail : Screen("product_detail/{productId}") {
         fun createRoute(productId: String) = "product_detail/$productId"
+    }
+    data object MarketListing : Screen("market_listing/{listingId}") {
+        fun createRoute(listingId: String) = "market_listing/$listingId"
     }
     data object VendorProducts : Screen("vendor_products/{vendorId}/{vendorName}") {
         fun createRoute(vendorId: String, vendorName: String) =
@@ -178,6 +190,56 @@ fun NavGraph(navController: NavHostController) {
         }
     }
 
+    fun openTourPlace(place: TourPlace) {
+        val session = SessionManager.currentSession.value
+        fun feature(route: String) {
+            navController.navigate(route) {
+                popUpTo(Screen.Home.route) { inclusive = false }
+                launchSingleTop = true
+            }
+        }
+        when (place) {
+            TourPlace.Home -> {
+                if (navController.currentDestination?.route != Screen.Home.route) {
+                    val popped = navController.popBackStack(Screen.Home.route, inclusive = false)
+                    if (!popped) {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Home.route) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }
+                }
+            }
+            TourPlace.Search -> feature("search")
+            TourPlace.Sell -> when {
+                session == null -> feature(Screen.Login.route)
+                !session.isVerified -> feature(Screen.SellerVerification.createRoute())
+                else -> feature(Screen.AddProduct.route)
+            }
+            TourPlace.Requirements -> if (session == null) feature(Screen.Login.route) else feature(Screen.Requirements.route)
+            TourPlace.Favorites -> feature(Screen.FavoriteDealers.route)
+            TourPlace.Listings -> if (session == null) feature(Screen.Login.route) else feature(Screen.MyListings.route)
+            TourPlace.Messages -> if (session == null) feature(Screen.Login.route) else feature(Screen.Messages.route)
+            TourPlace.Profile -> if (session == null) feature(Screen.Login.route) else feature(Screen.Profile.route)
+            TourPlace.Ask -> feature(Screen.VoiceChatbot.route)
+        }
+    }
+
+    DisposableEffect(navController) {
+        AppTour.navigator = { openTourPlace(it) }
+        onDispose { AppTour.navigator = null }
+    }
+    LaunchedEffect(Unit) {
+        if (vendorTutorialSeen()) return@LaunchedEffect
+        androidx.compose.runtime.snapshotFlow {
+            val current = SessionManager.currentSession.value
+            !current?.adminWarning.isNullOrBlank() || SessionManager.shopTrustPrompt.value
+        }.first { blocked -> !blocked }
+        delay(700)
+        if (!vendorTutorialSeen()) AppTour.start()
+    }
+
+    Box(Modifier.fillMaxSize()) {
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route
@@ -209,6 +271,9 @@ fun NavGraph(navController: NavHostController) {
                 onVoiceChatbotClick = { navController.navigate(Screen.VoiceChatbot.route) },
                 onWishlistClick = { navController.navigate(Screen.FavoriteDealers.route) },
                 onBuyClick = { navController.navigate("search") },
+                onMarketClick = { listingId ->
+                    navController.navigate(Screen.MarketListing.createRoute(listingId))
+                },
                 messagesBadge = unreadMessages,
                 onMainTabSelected = { navigateMainTab(it) }
             )
@@ -462,6 +527,18 @@ fun NavGraph(navController: NavHostController) {
         }
 
         composable(
+            route = Screen.MarketListing.route,
+            arguments = listOf(navArgument("listingId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val listingId = backStackEntry.arguments?.getString("listingId").orEmpty()
+            MarketListingScreen(
+                listingId = listingId,
+                repository = repository,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(
             route = Screen.ProductDetail.route,
             arguments = listOf(navArgument("productId") { type = NavType.StringType })
         ) { backStackEntry ->
@@ -543,6 +620,8 @@ fun NavGraph(navController: NavHostController) {
                 }
             )
         }
+    }
+    TourOverlay()
     }
     val trustSession by SessionManager.currentSession.collectAsState()
     val showTrust by SessionManager.shopTrustPrompt.collectAsState()

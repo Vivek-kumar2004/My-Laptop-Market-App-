@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Assignment
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Inventory2
@@ -77,6 +78,7 @@ fun AdminDashboardScreen(
     onInvoicesClick: () -> Unit,
     onProductsClick: () -> Unit,
     onRequirementsClick: () -> Unit,
+    onChatsClick: () -> Unit,
     onLogout: () -> Unit,
     bottomBar: @Composable () -> Unit
 ) {
@@ -181,6 +183,26 @@ fun AdminDashboardScreen(
                             Color(0xFFDB2777),
                             onRequirementsClick
                         )
+                    }
+                    item(span = { GridItemSpan(2) }) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onChatsClick() },
+                            shape = RoundedCornerShape(18.dp),
+                            colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        ) {
+                            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Icon(Icons.Default.Chat, contentDescription = null, tint = Color(0xFF0369A1))
+                                Text("Vendor chats", fontWeight = FontWeight.Bold, color = TextSecondary)
+                                Text(
+                                    "Read messages between shops",
+                                    color = TextMuted,
+                                    fontSize = 13.sp
+                                )
+                            }
+                        }
                     }
                     item(span = { GridItemSpan(2) }) {
                         AdminStatCard("All inquiries", stats?.totalInquiries ?: 0, Icons.Default.Mail, Color(0xFF0D9488), onInquiriesClick)

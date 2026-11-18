@@ -48,6 +48,7 @@ import coil3.compose.AsyncImage
 import com.mylaptopmarket.network.FavoriteDealersManager
 import com.mylaptopmarket.repository.ApiAuthRepository
 import com.mylaptopmarket.ui.components.MainBottomBar
+import com.mylaptopmarket.ui.tour.tourTarget
 import com.mylaptopmarket.ui.components.MainTab
 import com.mylaptopmarket.ui.theme.BackgroundLight
 import com.mylaptopmarket.ui.theme.CardBorder
@@ -90,6 +91,7 @@ fun FavoriteDealersScreen(
                     title = {
                         Text(
                             "Favorite Dealers",
+                            modifier = Modifier.tourTarget("page-favorites"),
                             fontWeight = FontWeight.ExtraBold,
                             color = TextPrimary
                         )

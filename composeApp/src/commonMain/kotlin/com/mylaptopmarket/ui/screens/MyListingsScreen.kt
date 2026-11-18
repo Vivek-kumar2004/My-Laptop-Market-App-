@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mylaptopmarket.ui.theme.*
+import com.mylaptopmarket.ui.tour.tourTarget
 import com.mylaptopmarket.viewmodel.MyListingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,6 +48,7 @@ fun MyListingsScreen(
                     title = {
                         Text(
                             "My Listings",
+                            modifier = Modifier.tourTarget("page-listings"),
                             fontWeight = FontWeight.ExtraBold,
                             style = MaterialTheme.typography.titleMedium,
                             color = TextPrimary

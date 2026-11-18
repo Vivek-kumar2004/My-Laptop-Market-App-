@@ -9,10 +9,25 @@ import com.mylaptopmarket.repository.AuthPending
 import com.mylaptopmarket.repository.AuthPendingException
 import com.mylaptopmarket.repository.LoginRequest
 import com.mylaptopmarket.repository.RegisterRequest
+import com.mylaptopmarket.service.PhoneAuthBridge
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+
+object SignInNotice {
+    private val _message = MutableStateFlow<String?>(null)
+    val message: StateFlow<String?> = _message.asStateFlow()
+
+    fun show(text: String) {
+        _message.value = text
+    }
+
+    fun clear() {
+        _message.value = null
+    }
+}
 
 class AuthViewModel(private val repository: ApiAuthRepository) : ViewModel() {
     private val _isLoading = MutableStateFlow(false)
@@ -36,6 +51,26 @@ class AuthViewModel(private val repository: ApiAuthRepository) : ViewModel() {
     private val _passwordResetDone = MutableStateFlow(false)
     val passwordResetDone: StateFlow<Boolean> = _passwordResetDone.asStateFlow()
 
+    private val _registerOtpEmail = MutableStateFlow<String?>(null)
+    val registerOtpEmail: StateFlow<String?> = _registerOtpEmail.asStateFlow()
+
+    private val _verifiedEmail = MutableStateFlow<String?>(null)
+    val verifiedEmail: StateFlow<String?> = _verifiedEmail.asStateFlow()
+
+    private val _verifiedOtp = MutableStateFlow("")
+    val verifiedOtp: StateFlow<String> = _verifiedOtp.asStateFlow()
+
+    private val _registerOtpMobile = MutableStateFlow<String?>(null)
+    val registerOtpMobile: StateFlow<String?> = _registerOtpMobile.asStateFlow()
+
+    private val _verifiedMobile = MutableStateFlow<String?>(null)
+    val verifiedMobile: StateFlow<String?> = _verifiedMobile.asStateFlow()
+
+    private val _verifiedMobileOtp = MutableStateFlow("")
+    val verifiedMobileOtp: StateFlow<String> = _verifiedMobileOtp.asStateFlow()
+
+    private val _phoneVerificationId = MutableStateFlow("")
+
     fun login(username: String, password: String) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -43,19 +78,22 @@ class AuthViewModel(private val repository: ApiAuthRepository) : ViewModel() {
             _loginSuccess.value = false
             _pendingVerification.value = null
 
-            val result = repository.login(LoginRequest(username, password))
-            result.onSuccess { session ->
-                SessionManager.login(session, promptShopTrust = true)
-                _loginSuccess.value = true
-            }.onFailure { error ->
-                if (error is AuthPendingException) {
-                    _pendingVerification.value = error.pending
-                    _errorMessage.value = error.message
-                } else {
-                    _errorMessage.value = error.message ?: "Unknown error occurred"
-                }
-            }
+            applyLogin(repository.login(LoginRequest(username, password)))
             _isLoading.value = false
+        }
+    }
+
+    private fun applyLogin(result: Result<VendorSession>) {
+        result.onSuccess { session ->
+            SessionManager.login(session, promptShopTrust = true)
+            _loginSuccess.value = true
+        }.onFailure { error ->
+            if (error is AuthPendingException) {
+                _pendingVerification.value = error.pending
+                _errorMessage.value = error.message
+            } else {
+                _errorMessage.value = error.message ?: "Unknown error occurred"
+            }
         }
     }
 
@@ -66,7 +104,9 @@ class AuthViewModel(private val repository: ApiAuthRepository) : ViewModel() {
         state: String,
         mobile: String,
         email: String,
-        password: String
+        password: String,
+        emailOtp: String,
+        mobileOtp: String
     ) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -82,7 +122,9 @@ class AuthViewModel(private val repository: ApiAuthRepository) : ViewModel() {
                     state = state.trim(),
                     mobile = mobile.trim(),
                     email = email.trim(),
-                    password = password
+                    password = password,
+                    email_otp = emailOtp.trim(),
+                    mobile_otp = mobileOtp.trim()
                 )
             )
             result.onSuccess { pending ->
@@ -92,6 +134,107 @@ class AuthViewModel(private val repository: ApiAuthRepository) : ViewModel() {
             }
             _isLoading.value = false
         }
+    }
+
+    fun sendRegisterOtp(email: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _errorMessage.value = null
+            _infoMessage.value = null
+            repository.sendRegisterOtp(email)
+                .onSuccess {
+                    _infoMessage.value = it
+                    _registerOtpEmail.value = email.trim().lowercase()
+                    _verifiedEmail.value = null
+                    _verifiedOtp.value = ""
+                }
+                .onFailure { _errorMessage.value = it.message ?: "Could not send OTP" }
+            _isLoading.value = false
+        }
+    }
+
+    fun verifyRegisterOtp(email: String, otp: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _errorMessage.value = null
+            _infoMessage.value = null
+            repository.verifyRegisterOtp(email, otp)
+                .onSuccess {
+                    _infoMessage.value = it
+                    _verifiedEmail.value = email.trim().lowercase()
+                    _verifiedOtp.value = otp.trim()
+                }
+                .onFailure { _errorMessage.value = it.message ?: "Could not verify this email" }
+            _isLoading.value = false
+        }
+    }
+
+    fun sendRegisterMobileOtp(mobile: String) {
+        val start = PhoneAuthBridge.start
+        if (start == null) {
+            _errorMessage.value = "Phone verification is not ready in this build."
+            return
+        }
+        bindPhoneCallbacks(mobile.trim())
+        _isLoading.value = true
+        _errorMessage.value = null
+        _infoMessage.value = null
+        _verifiedMobile.value = null
+        _verifiedMobileOtp.value = ""
+        _phoneVerificationId.value = ""
+        start("+91" + mobile.trim())
+    }
+
+    fun verifyRegisterMobileOtp(mobile: String, otp: String) {
+        val confirm = PhoneAuthBridge.confirm
+        val verificationId = _phoneVerificationId.value
+        if (confirm == null || verificationId.isBlank()) {
+            _errorMessage.value = "Send an OTP to this mobile number first."
+            return
+        }
+        bindPhoneCallbacks(mobile.trim())
+        _isLoading.value = true
+        _errorMessage.value = null
+        _infoMessage.value = null
+        confirm(verificationId, otp.trim())
+        viewModelScope.launch {
+            delay(20000)
+            if (_isLoading.value && _verifiedMobile.value != mobile.trim()) {
+                _isLoading.value = false
+                if (_errorMessage.value.isNullOrBlank()) {
+                    _errorMessage.value = "Could not verify this mobile number. Send the SMS again."
+                }
+            }
+        }
+    }
+
+    private fun bindPhoneCallbacks(mobile: String) {
+        PhoneAuthBridge.bind(
+            onCodeSent = { verificationId ->
+                _phoneVerificationId.value = verificationId
+                _registerOtpMobile.value = mobile
+                _infoMessage.value = "OTP sent to your mobile number."
+                _isLoading.value = false
+            },
+            onVerified = { token ->
+                viewModelScope.launch {
+                    repository.verifyRegisterMobileToken(mobile, token)
+                        .onSuccess {
+                            _infoMessage.value = it
+                            _verifiedMobile.value = mobile
+                            _verifiedMobileOtp.value = ""
+                        }
+                        .onFailure {
+                            _errorMessage.value = it.message ?: "Could not verify this mobile number"
+                        }
+                    _isLoading.value = false
+                }
+            },
+            onError = { message ->
+                _errorMessage.value = message
+                _isLoading.value = false
+            }
+        )
     }
 
     fun sendPasswordOtp(email: String) {

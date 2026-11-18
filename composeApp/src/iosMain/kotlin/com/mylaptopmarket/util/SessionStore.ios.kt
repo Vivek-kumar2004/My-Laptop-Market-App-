@@ -6,6 +6,7 @@ private const val KEY_SESSION = "vendor_session"
 private const val KEY_ADMIN_SESSION = "admin_session"
 private const val KEY_WISHLIST = "wishlist"
 private const val KEY_SEEN_ANNOUNCEMENT = "seen_announcement"
+private const val KEY_VENDOR_TUTORIAL = "vendor_flow_tour_seen"
 
 internal actual fun readSessionJson(): String? =
     NSUserDefaults.standardUserDefaults.stringForKey(KEY_SESSION)
@@ -41,6 +42,13 @@ internal actual fun writeWishlistJson(json: String?) {
     } else {
         defaults.setObject(json, forKey = KEY_WISHLIST)
     }
+}
+
+internal actual fun readVendorTutorialSeen(): Boolean =
+    NSUserDefaults.standardUserDefaults.boolForKey(KEY_VENDOR_TUTORIAL)
+
+internal actual fun writeVendorTutorialSeen(seen: Boolean) {
+    NSUserDefaults.standardUserDefaults.setBool(seen, forKey = KEY_VENDOR_TUTORIAL)
 }
 
 internal actual fun readSeenAnnouncement(): String? =

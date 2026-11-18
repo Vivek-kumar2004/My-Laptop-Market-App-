@@ -22,19 +22,27 @@ import com.mylaptopmarket.util.initializePlatformContext
 class MainActivity : ComponentActivity() {
 
     private var deepLinkUri by mutableStateOf<Uri?>(null)
+    private val playStoreUpdate = PlayStoreUpdate(this)
 
     private val notificationPermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            splashScreen.setOnExitAnimationListener { splashView ->
+                splashView.remove()
+            }
+        }
         super.onCreate(savedInstanceState)
+        playStoreUpdate.start()
 
         Log.d("MainActivity", "onCreate started")
         deepLinkUri = intent?.data
 
         initPlatformContext(this)
         initializePlatformContext(this)
+        PhoneAuthInstaller.install(this)
         com.mylaptopmarket.network.SessionManager.restore()
         requestNotificationPermission()
 
@@ -70,7 +78,13 @@ class MainActivity : ComponentActivity() {
         deepLinkUri = intent.data
     }
 
+    override fun onResume() {
+        super.onResume()
+        playStoreUpdate.check()
+    }
+
     override fun onDestroy() {
+        playStoreUpdate.stop()
         super.onDestroy()
         try {
             globalSpeechService.cleanup()

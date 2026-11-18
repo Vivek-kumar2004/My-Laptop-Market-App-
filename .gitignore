@@ -10,6 +10,7 @@ dist/
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
+/.idea/vcs.xml
 .DS_Store
 /build
 build/
@@ -28,5 +29,19 @@ playstore/KEYSTORE_BACKUP.txt
 playstore/*.aab
 playstore/mapping.txt
 
+# Public site copy uploaded to Google Cloud. Large images stay off GitHub.
+firebase/hosting/
+firebase/functions/venv/
+firebase/.venv/
+firebase/node_modules/
+firebase/.firebase/
+node_modules/
+__pycache__/
+*.pyc
+
+# Xcode local user state
+xcuserdata/
+
 # AI Configuration - Don't commit API keys!
 composeApp/src/commonMain/kotlin/com/mylaptopmarket/config/AIConfig.kt
+firebase/functions/firebase_web.json

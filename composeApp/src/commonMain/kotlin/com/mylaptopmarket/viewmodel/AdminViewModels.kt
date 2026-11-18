@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mylaptopmarket.network.AdminPushEvents
 import com.mylaptopmarket.network.AdminSessionManager
+import com.mylaptopmarket.repository.AdminChatMessageData
+import com.mylaptopmarket.repository.AdminChatThreadData
 import com.mylaptopmarket.repository.AdminDashboardData
 import com.mylaptopmarket.repository.AdminInquiryData
 import com.mylaptopmarket.repository.AdminInvoiceData
@@ -173,6 +175,28 @@ class AdminVendorsViewModel(private val repository: ApiAdminRepository) : ViewMo
     }
 }
 
+class AdminVendorDetailViewModel(private val repository: ApiAdminRepository) : ViewModel() {
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
+    private val _vendor = MutableStateFlow<AdminVendorData?>(null)
+    val vendor: StateFlow<AdminVendorData?> = _vendor.asStateFlow()
+
+    fun load(id: Int) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _errorMessage.value = null
+            repository.vendor(id)
+                .onSuccess { _vendor.value = it }
+                .onFailure { _errorMessage.value = it.message }
+            _isLoading.value = false
+        }
+    }
+}
+
 class AdminVendorFormViewModel(private val repository: ApiAdminRepository) : ViewModel() {
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -228,6 +252,43 @@ class AdminVendorFormViewModel(private val repository: ApiAdminRepository) : Vie
             )
             repository.saveVendor(id, request)
                 .onSuccess { _saved.value = true }
+                .onFailure { _errorMessage.value = it.message }
+            _isLoading.value = false
+        }
+    }
+}
+
+class AdminChatsViewModel(private val repository: ApiAdminRepository) : ViewModel() {
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
+    private val _threads = MutableStateFlow<List<AdminChatThreadData>>(emptyList())
+    val threads: StateFlow<List<AdminChatThreadData>> = _threads.asStateFlow()
+
+    private val _messages = MutableStateFlow<List<AdminChatMessageData>>(emptyList())
+    val messages: StateFlow<List<AdminChatMessageData>> = _messages.asStateFlow()
+
+    fun refresh() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _errorMessage.value = null
+            repository.chats()
+                .onSuccess { _threads.value = it }
+                .onFailure { _errorMessage.value = it.message }
+            _isLoading.value = false
+        }
+    }
+
+    fun load(leftId: Int, rightId: Int) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _errorMessage.value = null
+            _messages.value = emptyList()
+            repository.chat(leftId, rightId)
+                .onSuccess { _messages.value = it }
                 .onFailure { _errorMessage.value = it.message }
             _isLoading.value = false
         }

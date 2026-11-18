@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.mylaptopmarket.model.RequirementGroup
 import com.mylaptopmarket.model.RequirementVendor
+import com.mylaptopmarket.ui.tour.tourTarget
 import com.mylaptopmarket.ui.theme.BackgroundLight
 import com.mylaptopmarket.ui.theme.CardBorder
 import com.mylaptopmarket.ui.theme.ErrorRed
@@ -101,6 +102,7 @@ fun RequirementsScreen(
                     title = {
                         Text(
                             "Requirements",
+                            modifier = Modifier.tourTarget("page-requirement"),
                             fontWeight = FontWeight.ExtraBold,
                             style = MaterialTheme.typography.titleMedium,
                             color = TextPrimary

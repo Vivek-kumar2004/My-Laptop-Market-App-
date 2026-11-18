@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.mylaptopmarket.repository.Contact
 import com.mylaptopmarket.repository.Conversation
+import com.mylaptopmarket.ui.tour.tourTarget
 import com.mylaptopmarket.ui.theme.PrimaryBlue
 import com.mylaptopmarket.ui.theme.PrimaryLight
 import com.mylaptopmarket.ui.theme.TextMuted
@@ -71,7 +72,7 @@ fun ConversationsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Messages", fontWeight = FontWeight.Bold) },
+                title = { Text("Messages", modifier = Modifier.tourTarget("page-messages"), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(

@@ -19,7 +19,10 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.mylaptopmarket.ui.theme.PrimaryBlue
+import com.mylaptopmarket.ui.tour.tourTarget
+import com.mylaptopmarket.util.openUrl
 import com.mylaptopmarket.viewmodel.AuthViewModel
+import com.mylaptopmarket.viewmodel.SignInNotice
 import mylaptopmarket.composeapp.generated.resources.Res
 import mylaptopmarket.composeapp.generated.resources.mylaptoplogo
 import org.jetbrains.compose.resources.painterResource
@@ -39,6 +42,7 @@ fun LoginScreen(
 
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
+    val signInNotice by SignInNotice.message.collectAsState()
     val loginSuccess by viewModel.loginSuccess.collectAsState()
     val pending by viewModel.pendingVerification.collectAsState()
 
@@ -73,6 +77,7 @@ fun LoginScreen(
 
             Text(
                 "Vendor Login",
+                modifier = Modifier.tourTarget("page-login"),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
@@ -115,10 +120,11 @@ fun LoginScreen(
                 shape = RoundedCornerShape(12.dp)
             )
 
-            if (errorMessage != null) {
+            val notice = signInNotice ?: errorMessage
+            if (notice != null) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = errorMessage!!,
+                    text = notice,
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodyMedium
                 )
@@ -142,6 +148,22 @@ fun LoginScreen(
                 } else {
                     Text("Login", fontWeight = FontWeight.Bold)
                 }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedButton(
+                onClick = {
+                    SignInNotice.clear()
+                    openUrl("https://mylaptopmarket-app.firebaseapp.com/google-auth.html")
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                enabled = !isLoading,
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Continue with Google", fontWeight = FontWeight.Bold, color = PrimaryBlue)
             }
 
             Spacer(modifier = Modifier.height(8.dp))

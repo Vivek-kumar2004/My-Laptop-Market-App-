@@ -13,11 +13,13 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import com.mylaptopmarket.ui.theme.PrimaryBlue
 import com.mylaptopmarket.ui.theme.SurfaceWhite
 import com.mylaptopmarket.ui.theme.TextMuted
+import com.mylaptopmarket.ui.tour.tourTarget
 
 enum class MainTab {
     Home,
@@ -30,7 +32,8 @@ enum class MainTab {
 fun MainBottomBar(
     selected: MainTab,
     messagesBadge: Int = 0,
-    onTabSelected: (MainTab) -> Unit
+    onTabSelected: (MainTab) -> Unit,
+    registerTour: Boolean = false
 ) {
     data class TabItem(val tab: MainTab, val label: String, val icon: ImageVector)
 
@@ -46,6 +49,18 @@ fun MainBottomBar(
             NavigationBarItem(
                 selected = selected == item.tab,
                 onClick = { onTabSelected(item.tab) },
+                modifier = if (registerTour) {
+                    Modifier.tourTarget(
+                        when (item.tab) {
+                            MainTab.Home -> "tab-home"
+                            MainTab.Listings -> "tab-listings"
+                            MainTab.Messages -> "tab-messages"
+                            MainTab.Profile -> "tab-profile"
+                        }
+                    )
+                } else {
+                    Modifier
+                },
                 icon = {
                     if (item.tab == MainTab.Messages && messagesBadge > 0) {
                         BadgedBox(

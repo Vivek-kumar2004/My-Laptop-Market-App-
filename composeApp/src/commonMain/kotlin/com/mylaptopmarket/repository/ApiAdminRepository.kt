@@ -58,6 +58,7 @@ data class AdminVendorData(
     val id: Int = 0,
     val username: String = "",
     @SerialName("shop_name") val shopName: String? = null,
+    val email: String? = null,
     val mobile: String? = null,
     val location: String? = null,
     val status: Int = 0,
@@ -130,6 +131,39 @@ data class AdminInquiryResponse(
     val success: Boolean = false,
     val message: String? = null,
     val data: AdminInquiryData? = null
+)
+
+@Serializable
+data class AdminChatThreadData(
+    @SerialName("left_id") val leftId: Int = 0,
+    @SerialName("right_id") val rightId: Int = 0,
+    @SerialName("left_name") val leftName: String = "",
+    @SerialName("right_name") val rightName: String = "",
+    val stamp: String = "",
+    val preview: String = "",
+    val count: Int = 0
+)
+
+@Serializable
+data class AdminChatThreadsResponse(
+    val success: Boolean = false,
+    val message: String? = null,
+    val data: List<AdminChatThreadData> = emptyList()
+)
+
+@Serializable
+data class AdminChatMessageData(
+    @SerialName("sender_id") val senderId: Int = 0,
+    @SerialName("sender_name") val senderName: String = "",
+    val message: String = "",
+    @SerialName("created_at") val createdAt: String = ""
+)
+
+@Serializable
+data class AdminChatMessagesResponse(
+    val success: Boolean = false,
+    val message: String? = null,
+    val data: List<AdminChatMessageData> = emptyList()
 )
 
 @Serializable
@@ -271,7 +305,7 @@ data class AdminPushTokenRequest(
 
 class ApiAdminRepository {
     private val client = KtorClient.httpClient
-    private val baseUrl = "${KtorClient.getBaseUrl()}api/admin"
+    private val baseUrl = "${KtorClient.getAdminBaseUrl()}api/admin"
 
     suspend fun login(username: String, password: String): Result<AdminSession> {
         return try {
@@ -388,9 +422,10 @@ class ApiAdminRepository {
         }
     }
 
-    suspend fun currentAnnouncement(): Result<String> {
+    suspend fun currentAnnouncement(forVendorApp: Boolean = false): Result<String> {
         return try {
-            val response: AnnouncementResponse = client.get("${KtorClient.getBaseUrl()}api/announcement").body()
+            val root = if (forVendorApp) KtorClient.getBaseUrl() else KtorClient.getAdminBaseUrl()
+            val response: AnnouncementResponse = client.get("${root}api/announcement").body()
             if (response.success) Result.success(response.data?.text.orEmpty())
             else Result.failure(Exception(response.message ?: "Could not load notification"))
         } catch (e: Exception) {
@@ -490,6 +525,26 @@ class ApiAdminRepository {
     suspend fun activateVendor(id: Int): Result<String> = vendorAction("vendors/$id/activate")
     suspend fun deactivateVendor(id: Int): Result<String> = vendorAction("vendors/$id/deactivate")
     suspend fun deleteVendor(id: Int): Result<String> = vendorAction("vendors/$id/delete")
+
+    suspend fun chats(): Result<List<AdminChatThreadData>> {
+        return try {
+            val response: AdminChatThreadsResponse = authedGet("chats").body()
+            if (response.success) Result.success(response.data)
+            else Result.failure(Exception(response.message ?: "Could not load chats"))
+        } catch (e: Exception) {
+            Result.failure(authOrNetworkError(e, "Could not load chats"))
+        }
+    }
+
+    suspend fun chat(leftId: Int, rightId: Int): Result<List<AdminChatMessageData>> {
+        return try {
+            val response: AdminChatMessagesResponse = authedGet("chats/$leftId/$rightId").body()
+            if (response.success) Result.success(response.data)
+            else Result.failure(Exception(response.message ?: "Could not load chat"))
+        } catch (e: Exception) {
+            Result.failure(authOrNetworkError(e, "Could not load chat"))
+        }
+    }
 
     suspend fun inquiries(): Result<Pair<List<AdminInquiryData>, Int>> {
         return try {

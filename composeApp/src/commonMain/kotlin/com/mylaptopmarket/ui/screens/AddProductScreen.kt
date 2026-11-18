@@ -25,7 +25,8 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -36,6 +37,7 @@ import coil3.compose.AsyncImage
 import com.mylaptopmarket.model.Media
 import com.mylaptopmarket.model.MediaType
 import com.mylaptopmarket.ui.theme.*
+import com.mylaptopmarket.ui.tour.tourTarget
 import com.mylaptopmarket.util.ExcelPicker
 import com.mylaptopmarket.util.ImagePicker
 import com.mylaptopmarket.util.hideKeyboard
@@ -77,11 +79,11 @@ fun AddProductScreen(
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
     var formFocused by remember { mutableStateOf(false) }
-    val keyboardOpen = WindowInsets.ime.getBottom(LocalDensity.current) > 0 || formFocused
+    val userTouching = remember { mutableStateOf(false) }
     val dismissKeyboardOnScroll = remember(focusManager) {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                if (source == NestedScrollSource.UserInput && available.y != 0f) {
+                if (userTouching.value && source == NestedScrollSource.UserInput && available.y != 0f) {
                     dismissProductKeyboard(focusManager)
                 }
                 return Offset.Zero
@@ -147,6 +149,7 @@ fun AddProductScreen(
                     title = {
                         Text(
                             if (isEdit) "Edit Product" else "Add Product",
+                            modifier = Modifier.tourTarget("page-sell"),
                             fontWeight = FontWeight.ExtraBold,
                             style = MaterialTheme.typography.titleMedium,
                             color = TextPrimary
@@ -176,27 +179,7 @@ fun AddProductScreen(
                 )
             }
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        bottomBar = {
-            if (keyboardOpen) {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .windowInsetsPadding(WindowInsets.ime),
-                    color = SurfaceWhite,
-                    shadowElevation = 8.dp
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 2.dp),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        TextButton(onClick = { dismissProductKeyboard(focusManager) }) {
-                            Text("Done", fontWeight = FontWeight.Bold, color = PrimaryBlue)
-                        }
-                    }
-                }
-            }
-        }
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         if (isEdit && !formReady && isLoading) {
             Box(
@@ -215,6 +198,14 @@ fun AddProductScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .nestedScroll(dismissKeyboardOnScroll)
+                .pointerInput(Unit) {
+                    awaitPointerEventScope {
+                        while (true) {
+                            val event = awaitPointerEvent(PointerEventPass.Initial)
+                            userTouching.value = event.changes.any { it.pressed }
+                        }
+                    }
+                }
                 .onFocusEvent { formFocused = it.hasFocus }
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
@@ -540,11 +531,7 @@ fun AddProductScreen(
                         onValueChange = { newValue -> price = newValue.filter { it.isDigit() || it == '.' } },
                         label = { Text("Price (₹) *") },
                         placeholder = { Text("Enter Product Price") },
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Number,
-                            imeAction = ImeAction.Done
-                        ),
-                        keyboardActions = KeyboardActions(onDone = { dismissProductKeyboard(focusManager) }),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         shape = RoundedCornerShape(12.dp),
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()

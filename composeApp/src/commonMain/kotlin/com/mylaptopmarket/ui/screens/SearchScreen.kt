@@ -37,6 +37,7 @@ import com.mylaptopmarket.model.StockStatus
 import com.mylaptopmarket.ui.components.PlaceFilterBar
 import com.mylaptopmarket.ui.components.productMatchesPlace
 import com.mylaptopmarket.ui.theme.*
+import com.mylaptopmarket.ui.tour.tourTarget
 import com.mylaptopmarket.viewmodel.SearchViewModel
 
 import androidx.compose.foundation.text.BasicTextField
@@ -84,6 +85,7 @@ fun SearchScreen(
                         modifier = Modifier
                             .weight(1f)
                             .height(44.dp)
+                            .tourTarget("page-search")
                     ) {
                         Row(
                             modifier = Modifier

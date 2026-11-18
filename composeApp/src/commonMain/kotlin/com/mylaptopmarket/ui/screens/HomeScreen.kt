@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -18,7 +19,9 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +46,8 @@ import com.mylaptopmarket.model.Product
 import com.mylaptopmarket.model.StockStatus
 import com.mylaptopmarket.ui.components.PlaceFilterBar
 import com.mylaptopmarket.ui.components.productMatchesPlace
+import com.mylaptopmarket.ui.tour.AppTour
+import com.mylaptopmarket.ui.tour.tourTarget
 import com.mylaptopmarket.ui.theme.*
 import com.mylaptopmarket.util.currentHourOfDay
 import com.mylaptopmarket.viewmodel.HomeViewModel
@@ -86,6 +91,7 @@ fun HomeScreen(
     onProfileClick: () -> Unit = {},
     onWishlistClick: () -> Unit = {},
     onBuyClick: () -> Unit = onSearchClick,
+    onMarketClick: (String) -> Unit = {},
     onMainTabSelected: (com.mylaptopmarket.ui.components.MainTab) -> Unit = {},
     messagesBadge: Int = 0
 ) {
@@ -93,6 +99,9 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
     val session by com.mylaptopmarket.network.SessionManager.currentSession.collectAsState()
     val topProducts by viewModel.topProducts.collectAsState()
+    val marketListings by viewModel.marketListings.collectAsState()
+    var marketChip by remember { mutableStateOf("All") }
+    val marketShown = marketListings.filter { marketChip == "All" || it.category == marketChip }
     val errorMessage by viewModel.errorMessage.collectAsState()
     var selectedState by remember { mutableStateOf("") }
     val shownProducts = topProducts.filter { productMatchesPlace(it, selectedState) }
@@ -104,7 +113,7 @@ fun HomeScreen(
             homeNotice = ""
             return@LaunchedEffect
         }
-        val text = announcementRepository.currentAnnouncement().getOrNull().orEmpty().trim()
+        val text = announcementRepository.currentAnnouncement(forVendorApp = true).getOrNull().orEmpty().trim()
         homeNotice = if (text.isNotEmpty() && text != com.mylaptopmarket.util.seenAnnouncement()) text else ""
     }
 
@@ -386,7 +395,7 @@ fun HomeScreen(
             }
         }
     ) {
-        val isLoading by viewModel.isLoading.collectAsState()
+        val isRefreshing by viewModel.isRefreshing.collectAsState()
         Scaffold(
             containerColor = BackgroundLight,
             topBar = {
@@ -419,7 +428,10 @@ fun HomeScreen(
                             }
                         },
                         navigationIcon = {
-                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                            IconButton(
+                                onClick = { scope.launch { drawerState.open() } },
+                                modifier = Modifier.tourTarget("menu")
+                            ) {
                                 Icon(Icons.Default.Menu, contentDescription = "Menu", tint = TextPrimary)
                             }
                         },
@@ -427,7 +439,9 @@ fun HomeScreen(
                             Surface(
                                 shape = CircleShape,
                                 color = SurfaceHover,
-                                modifier = Modifier.size(40.dp)
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .tourTarget("search")
                             ) {
                                 IconButton(onClick = onSearchClick) {
                                     Icon(Icons.Default.Search, contentDescription = "Search", tint = TextPrimary)
@@ -476,12 +490,14 @@ fun HomeScreen(
                 com.mylaptopmarket.ui.components.MainBottomBar(
                     selected = com.mylaptopmarket.ui.components.MainTab.Home,
                     messagesBadge = messagesBadge,
-                    onTabSelected = onMainTabSelected
+                    onTabSelected = onMainTabSelected,
+                    registerTour = true
                 )
             },
             floatingActionButton = {
                 FloatingActionButton(
                     onClick = onVoiceChatbotClick,
+                    modifier = Modifier.tourTarget("ask"),
                     containerColor = PrimaryBlue,
                     contentColor = SurfaceWhite,
                     shape = RoundedCornerShape(28.dp),
@@ -512,17 +528,43 @@ fun HomeScreen(
                 .padding(scaffoldPadding)
                 .background(BackgroundLight)
         ) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                PullToRefreshBox(
-                    isRefreshing = isLoading,
-                    onRefresh = { viewModel.refreshData() },
+            val gridState = rememberLazyGridState()
+            val errorShown = errorMessage != null && topProducts.isEmpty()
+            val emptyPlace = topProducts.isNotEmpty() && shownProducts.isEmpty()
+            SideEffect {
+                AppTour.scrollHome = { target ->
+                    val index = when (target) {
+                        "buy" -> 3
+                        "sell" -> 4
+                        "requirement" -> 5
+                        "favorites" -> 6
+                        "products" -> 7
+                        "open-market" -> if (marketListings.isEmpty()) {
+                            null
+                        } else {
+                            var start = 8
+                            if (errorShown) start += 1
+                            if (emptyPlace) start += 1
+                            start + shownProducts.size
+                        }
+                        else -> null
+                    }
+                    if (index != null) gridState.animateScrollToItem(index)
+                }
+            }
+            DisposableEffect(Unit) {
+                onDispose { AppTour.scrollHome = null }
+            }
+            PullToRefreshBox(
+                    isRefreshing = isRefreshing,
+                    onRefresh = { viewModel.refreshData(fromPull = true) },
                     modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
+                        .fillMaxSize()
                         .background(BackgroundLight)
                 ) {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
+                        state = gridState,
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(
                             start = 16.dp,
@@ -585,6 +627,7 @@ fun HomeScreen(
                                 icon = Icons.Default.ShoppingCart,
                                 tint = Color(0xFF2563EB),
                                 bg = Color(0xFFEFF6FF),
+                                tourId = "buy",
                                 onClick = onBuyClick
                             ),
                             HomeQuickAction(
@@ -593,6 +636,7 @@ fun HomeScreen(
                                 icon = Icons.Default.Storefront,
                                 tint = Color(0xFF059669),
                                 bg = Color(0xFFECFDF5),
+                                tourId = "sell",
                                 onClick = {
                                     if (session != null) onAddProductClick() else onLoginClick()
                                 }
@@ -603,6 +647,7 @@ fun HomeScreen(
                                 icon = Icons.Default.Assignment,
                                 tint = Color(0xFFD97706),
                                 bg = Color(0xFFFEF3C7),
+                                tourId = "requirement",
                                 onClick = {
                                     if (session != null) onRequirementsClick() else onLoginClick()
                                 }
@@ -613,6 +658,7 @@ fun HomeScreen(
                                 icon = Icons.Default.Storefront,
                                 tint = Color(0xFFE11D48),
                                 bg = Color(0xFFFFF1F2),
+                                tourId = "favorites",
                                 onClick = onWishlistClick
                             )
                         )
@@ -623,7 +669,7 @@ fun HomeScreen(
                     // Section: Recent Products
                     item(span = { GridItemSpan(2) }) {
                         Column(modifier = Modifier.fillMaxWidth()) {
-                            SectionTitle(title = "Recent Products")
+                            SectionTitle(title = "Recent Products", tourId = "products")
                             Spacer(Modifier.height(10.dp))
                             PlaceFilterBar(
                                 products = topProducts,
@@ -692,16 +738,41 @@ fun HomeScreen(
                         )
                     }
 
+                    if (marketListings.isNotEmpty()) {
+                        item(span = { GridItemSpan(2) }) {
+                            OpenMarketHeader(
+                                listings = marketListings,
+                                chip = marketChip,
+                                shownCount = marketShown.size,
+                                onChip = { marketChip = it }
+                            )
+                        }
+                        items(marketShown, key = { it.id }) { listing ->
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(Color(0xFF0767D8))
+                                    .padding(8.dp)
+                            ) {
+                                OpenMarketCard(
+                                    listing = listing,
+                                    onOpen = onMarketClick,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                        }
+                    }
+
                     item(span = { GridItemSpan(2) }) {
                         Spacer(Modifier.height(16.dp))
                     }
-                }
                 }
             }
         }
         }
     }
-    if (session != null && homeNotice.isNotBlank()) {
+    if (!com.mylaptopmarket.ui.tour.AppTour.running.collectAsState().value && session != null && homeNotice.isNotBlank()) {
         AlertDialog(
             onDismissRequest = {},
             confirmButton = {
@@ -722,6 +793,7 @@ private data class HomeQuickAction(
     val icon: ImageVector,
     val tint: Color,
     val bg: Color,
+    val tourId: String,
     val onClick: () -> Unit
 )
 
@@ -731,6 +803,7 @@ private fun HomeQuickActionCard(action: HomeQuickAction) {
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(1.05f)
+            .tourTarget(action.tourId)
             .clickable(onClick = action.onClick),
         shape = RoundedCornerShape(20.dp),
         color = SurfaceWhite,
@@ -777,11 +850,12 @@ private fun HomeQuickActionCard(action: HomeQuickAction) {
 }
 
 @Composable
-fun SectionTitle(title: String, subtitle: String? = null) {
+fun SectionTitle(title: String, subtitle: String? = null, tourId: String? = null) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
+            .then(if (tourId != null) Modifier.tourTarget(tourId) else Modifier)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(

@@ -23,6 +23,8 @@ import androidx.navigation.navArgument
 import com.mylaptopmarket.network.AdminPushEvents
 import com.mylaptopmarket.network.AdminSessionManager
 import com.mylaptopmarket.repository.ApiAdminRepository
+import com.mylaptopmarket.ui.screens.AdminChatDetailScreen
+import com.mylaptopmarket.ui.screens.AdminChatsScreen
 import com.mylaptopmarket.ui.screens.AdminDashboardScreen
 import com.mylaptopmarket.ui.screens.AdminInquiriesScreen
 import com.mylaptopmarket.ui.screens.AdminInquiryDetailScreen
@@ -32,14 +34,17 @@ import com.mylaptopmarket.ui.screens.AdminLoginScreen
 import com.mylaptopmarket.ui.screens.AdminProductsScreen
 import com.mylaptopmarket.ui.screens.AdminRequirementDetailScreen
 import com.mylaptopmarket.ui.screens.AdminRequirementsScreen
+import com.mylaptopmarket.ui.screens.AdminVendorDetailScreen
 import com.mylaptopmarket.ui.screens.AdminVendorFormScreen
 import com.mylaptopmarket.ui.screens.AdminVendorsScreen
 import com.mylaptopmarket.viewmodel.AdminAuthViewModel
+import com.mylaptopmarket.viewmodel.AdminChatsViewModel
 import com.mylaptopmarket.viewmodel.AdminDashboardViewModel
 import com.mylaptopmarket.viewmodel.AdminInquiriesViewModel
 import com.mylaptopmarket.viewmodel.AdminInvoicesViewModel
 import com.mylaptopmarket.viewmodel.AdminProductsViewModel
 import com.mylaptopmarket.viewmodel.AdminRequirementsViewModel
+import com.mylaptopmarket.viewmodel.AdminVendorDetailViewModel
 import com.mylaptopmarket.viewmodel.AdminVendorFilter
 import com.mylaptopmarket.viewmodel.AdminVendorFormViewModel
 import com.mylaptopmarket.viewmodel.AdminVendorsViewModel
@@ -48,9 +53,16 @@ sealed class AdminScreen(val route: String) {
     data object Login : AdminScreen("admin_login")
     data object Dashboard : AdminScreen("admin_dashboard")
     data object Vendors : AdminScreen("admin_vendors")
+    data object VendorDetail : AdminScreen("admin_vendor/{vendorId}") {
+        fun createRoute(id: Int) = "admin_vendor/$id"
+    }
     data object VendorForm : AdminScreen("admin_vendor_form?vendorId={vendorId}") {
         fun createRoute(vendorId: Int? = null) =
             if (vendorId != null) "admin_vendor_form?vendorId=$vendorId" else "admin_vendor_form"
+    }
+    data object Chats : AdminScreen("admin_chats")
+    data object ChatDetail : AdminScreen("admin_chat/{leftId}/{rightId}") {
+        fun createRoute(leftId: Int, rightId: Int) = "admin_chat/$leftId/$rightId"
     }
     data object Inquiries : AdminScreen("admin_inquiries")
     data object InquiryDetail : AdminScreen("admin_inquiry/{inquiryId}") {
@@ -85,6 +97,7 @@ fun AdminNavGraph(
     val dashboardViewModel = remember { AdminDashboardViewModel(repository) }
     val vendorsViewModel = remember { AdminVendorsViewModel(repository) }
     val inquiriesViewModel = remember { AdminInquiriesViewModel(repository) }
+    val chatsViewModel = remember { AdminChatsViewModel(repository) }
     val invoicesViewModel = remember { AdminInvoicesViewModel(repository) }
     val productsViewModel = remember { AdminProductsViewModel(repository) }
     val requirementsViewModel = remember { AdminRequirementsViewModel(repository) }
@@ -117,13 +130,17 @@ fun AdminNavGraph(
                 current == route ||
                     current == AdminScreen.Products.route ||
                     current == AdminScreen.Requirements.route ||
-                    current?.startsWith("admin_requirement/") == true
+                    current?.startsWith("admin_requirement/") == true ||
+                    current == AdminScreen.Chats.route ||
+                    current?.startsWith("admin_chat/") == true
             AdminScreen.Inquiries.route ->
                 current == route || current?.startsWith("admin_inquiry/") == true
             AdminScreen.Invoices.route ->
                 current == route || current?.startsWith("admin_invoice/") == true
             AdminScreen.Vendors.route ->
-                current == route || current?.startsWith("admin_vendor_form") == true
+                current == route ||
+                    current?.startsWith("admin_vendor/") == true ||
+                    current?.startsWith("admin_vendor_form") == true
             else -> current == route
         }
     }
@@ -222,6 +239,7 @@ fun AdminNavGraph(
                 onInvoicesClick = { navigateToTab(AdminScreen.Invoices.route) },
                 onProductsClick = { navController.navigate(AdminScreen.Products.route) },
                 onRequirementsClick = { navController.navigate(AdminScreen.Requirements.route) },
+                onChatsClick = { navController.navigate(AdminScreen.Chats.route) },
                 onLogout = { goLogin() },
                 bottomBar = { BottomBar() }
             )
@@ -231,8 +249,24 @@ fun AdminNavGraph(
             AdminVendorsScreen(
                 viewModel = vendorsViewModel,
                 onAddClick = { navController.navigate(AdminScreen.VendorForm.createRoute()) },
+                onVendorClick = { id -> navController.navigate(AdminScreen.VendorDetail.createRoute(id)) },
                 onEditClick = { id -> navController.navigate(AdminScreen.VendorForm.createRoute(id)) },
                 onBackClick = { navigateToTab(AdminScreen.Dashboard.route) },
+                bottomBar = { BottomBar() }
+            )
+        }
+
+        composable(
+            route = AdminScreen.VendorDetail.route,
+            arguments = listOf(navArgument("vendorId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val vendorId = backStackEntry.arguments?.getInt("vendorId") ?: return@composable
+            val detailViewModel = remember(vendorId) { AdminVendorDetailViewModel(repository) }
+            AdminVendorDetailScreen(
+                vendorId = vendorId,
+                viewModel = detailViewModel,
+                onBackClick = { navController.popBackStack() },
+                onEditClick = { navController.navigate(AdminScreen.VendorForm.createRoute(vendorId)) },
                 bottomBar = { BottomBar() }
             )
         }
@@ -253,6 +287,35 @@ fun AdminNavGraph(
                     vendorsViewModel.refresh()
                     navController.popBackStack()
                 }
+            )
+        }
+
+        composable(AdminScreen.Chats.route) {
+            AdminChatsScreen(
+                viewModel = chatsViewModel,
+                onChatClick = { left, right ->
+                    navController.navigate(AdminScreen.ChatDetail.createRoute(left, right))
+                },
+                onBackClick = { navController.popBackStack() },
+                bottomBar = { BottomBar() }
+            )
+        }
+
+        composable(
+            route = AdminScreen.ChatDetail.route,
+            arguments = listOf(
+                navArgument("leftId") { type = NavType.IntType },
+                navArgument("rightId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val leftId = backStackEntry.arguments?.getInt("leftId") ?: return@composable
+            val rightId = backStackEntry.arguments?.getInt("rightId") ?: return@composable
+            AdminChatDetailScreen(
+                leftId = leftId,
+                rightId = rightId,
+                viewModel = chatsViewModel,
+                onBackClick = { navController.popBackStack() },
+                bottomBar = { BottomBar() }
             )
         }
 

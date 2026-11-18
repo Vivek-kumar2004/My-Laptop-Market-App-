@@ -94,7 +94,7 @@ internal suspend fun pollVendorNotifications() {
             }
             editor.putInt(key, conversation.unread_count)
         }
-        val announcement = ApiAdminRepository().currentAnnouncement().getOrNull().orEmpty().trim()
+        val announcement = ApiAdminRepository().currentAnnouncement(forVendorApp = true).getOrNull().orEmpty().trim()
         val alreadySeen = seenAnnouncement()
         val alreadyNotified = prefs.getString(KEY_ANNOUNCEMENT, "").orEmpty()
         if (announcement.isNotEmpty() && announcement != alreadySeen && announcement != alreadyNotified) {

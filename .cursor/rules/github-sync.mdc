@@ -1,0 +1,14 @@
+---
+description: Push completed code changes to the private GitHub repo
+alwaysApply: true
+---
+
+# GitHub is the shared copy
+
+The project remote is `origin` on the private GitHub repo `Vivek-kumar2004/My-Laptop-Market`. Keep the local folder. It is the working copy used to build and run the apps.
+
+After you finish a code change the user asked for, commit the relevant files and push to `origin` `main`. Do this without waiting for a separate commit request.
+
+Do not commit or push secrets: `.env`, `keystore.properties`, `keystore/`, `*.jks`, `playstore/KEYSTORE_BACKUP.txt`, `firebase/functions/firebase_web.json`, `AIConfig.kt`, or any password, API key, or certificate. Do not commit `node_modules`, virtualenvs, `firebase/hosting/`, build outputs, or Xcode `xcuserdata`.
+
+Do not force-push. Do not delete the local project. A push updates GitHub only. It does not deploy the website or the Cloud Function.
