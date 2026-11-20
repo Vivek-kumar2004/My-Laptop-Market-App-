@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="India IT vendor network diagram">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F7FAFC"/>
+      <stop offset="100%" stop-color="#E8F1FC"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#g)"/>
+  <!-- subtle grid -->
+  <g stroke="#0767D8" stroke-opacity="0.06" stroke-width="1">
+    <path d="M0 150h1600M0 300h1600M0 450h1600M0 600h1600M0 750h1600"/>
+    <path d="M200 0v900M400 0v900M600 0v900M800 0v900M1000 0v900M1200 0v900M1400 0v900"/>
+  </g>
+  <!-- network links -->
+  <g fill="none" stroke="#0767D8" stroke-width="2" stroke-opacity="0.35">
+    <path d="M800 420 L420 260"/>
+    <path d="M800 420 L1180 250"/>
+    <path d="M800 420 L360 560"/>
+    <path d="M800 420 L1240 580"/>
+    <path d="M800 420 L800 180"/>
+    <path d="M800 420 L560 720"/>
+    <path d="M800 420 L1040 720"/>
+  </g>
+  <!-- hub -->
+  <circle cx="800" cy="420" r="78" fill="#0767D8"/>
+  <circle cx="800" cy="420" r="58" fill="#0554B3"/>
+  <text x="800" y="412" text-anchor="middle" fill="#fff" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700">My Laptop</text>
+  <text x="800" y="440" text-anchor="middle" fill="#fff" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700">Market</text>
+  <!-- nodes -->
+  <g font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600">
+    <circle cx="420" cy="260" r="46" fill="#fff" stroke="#0767D8" stroke-width="3"/>
+    <text x="420" y="266" text-anchor="middle" fill="#0F172A">Dealers</text>
+    <circle cx="1180" cy="250" r="46" fill="#fff" stroke="#0767D8" stroke-width="3"/>
+    <text x="1180" y="256" text-anchor="middle" fill="#0F172A">Suppliers</text>
+    <circle cx="360" cy="560" r="46" fill="#fff" stroke="#059669" stroke-width="3"/>
+    <text x="360" y="566" text-anchor="middle" fill="#0F172A">ITAD</text>
+    <circle cx="1240" cy="580" r="46" fill="#fff" stroke="#0767D8" stroke-width="3"/>
+    <text x="1240" y="586" text-anchor="middle" fill="#0F172A">Distributors</text>
+    <circle cx="800" cy="180" r="42" fill="#fff" stroke="#059669" stroke-width="3"/>
+    <text x="800" y="186" text-anchor="middle" fill="#0F172A">Verified</text>
+    <circle cx="560" cy="720" r="42" fill="#fff" stroke="#0767D8" stroke-width="3"/>
+    <text x="560" y="726" text-anchor="middle" fill="#0F172A">Cities</text>
+    <circle cx="1040" cy="720" r="42" fill="#fff" stroke="#0767D8" stroke-width="3"/>
+    <text x="1040" y="726" text-anchor="middle" fill="#0F172A">Leads</text>
+  </g>
+  <text x="80" y="860" fill="#475569" font-family="Arial, Helvetica, sans-serif" font-size="22">India's B2B IT vendors network</text>
+</svg>
