@@ -71,32 +71,6 @@
   transform: translateY(-2px);
 }
 
-.avatar-mono {
-  width: 90px;
-  height: 90px;
-  margin: 0 auto 20px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: #0767d8;
-  color: #ffffff;
-  font-weight: 700;
-  font-size: 1.35rem;
-  letter-spacing: 0.04em;
-  line-height: 1;
-  user-select: none;
-}
-
-.avatar-mono.is-verified {
-  box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px #059669;
-}
-
-.page-home .testimonial-card .avatar-mono,
-.theme-dark .testimonial-card .avatar-mono {
-  width: 90px;
-  height: 90px;
-}
-
 .diagram-frame {
   width: 100%;
   height: auto;

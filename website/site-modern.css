@@ -448,11 +448,6 @@
   gap: 28px;
 }
 
-.theme-dark .testimonials .testimonials-label,
-.theme-dark .testimonials .small-title {
-  text-align: center;
-}
-
 /* ── Counter section title centering ── */
 .theme-dark .counter-section .small-title {
   text-align: center;

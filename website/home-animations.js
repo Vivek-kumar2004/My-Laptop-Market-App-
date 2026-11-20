@@ -159,7 +159,7 @@
     });
 
     document.querySelectorAll(
-        ".about, .laptop-solutions, .quick-assistance, .features, .quality-guarantee, .services-home, .testimonials, .home-showcase, .home-vendors"
+        ".about, .laptop-solutions, .quick-assistance, .features, .quality-guarantee, .services-home, .home-showcase, .home-vendors"
     ).forEach((section) => {
       const cards = section.querySelectorAll(
         ".glass-card, .assistance-card, .feature-card, .guarantee-card, .service-card, .home-product-card, .home-vendor-card"
@@ -231,39 +231,4 @@
     });
   });
 
-  /* ── Testimonial slider ── */
-  const track = document.querySelector(".testimonial-track");
-  const cards = document.querySelectorAll(".testimonial-card");
-  let tIndex = 0;
-  let testimonialInterval = null;
-
-  function getVisibleCards() {
-    if (window.innerWidth <= 426) return 1;
-    if (window.innerWidth <= 769) return 2;
-    return 4;
-  }
-
-  function slideTestimonials() {
-    if (!track || !cards.length || document.hidden) return;
-    const visible = getVisibleCards();
-    tIndex++;
-    if (tIndex > cards.length - visible) tIndex = 0;
-    const cardWidth = cards[0].offsetWidth + 20;
-    gsap.to(track, { x: -tIndex * cardWidth, duration: 0.6, ease: "power2.inOut" });
-  }
-
-  if (track && cards.length) {
-    testimonialInterval = setInterval(slideTestimonials, 5000);
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden) {
-        clearInterval(testimonialInterval);
-      } else {
-        testimonialInterval = setInterval(slideTestimonials, 5000);
-      }
-    });
-    window.addEventListener("resize", () => {
-      tIndex = 0;
-      gsap.set(track, { x: 0 });
-    }, { passive: true });
-  }
 })();

@@ -648,7 +648,6 @@ DUMMY SECTION
 .features,
 .services-home,
 .faq,
-.testimonials,
 .blogs-home {
   padding: 100px 0;
 }
@@ -727,7 +726,6 @@ DUMMY SECTION
 
 .service-grid,
 .blog-grid,
-.testimonial-grid,
 .assistance-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -974,11 +972,6 @@ DUMMY SECTION
 
 .faq-content.active {
   display: block;
-}
-
-.testimonial-card {
-  padding: 30px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
 .blog-card img {
@@ -1758,7 +1751,6 @@ BLOG PAGE
 @media (max-width: 769px) {
   .feature-grid,
   .service-grid,
-  .testimonial-grid,
   .blog-grid,
   .assistance-grid,
   .guarantee-grid {
@@ -1794,7 +1786,6 @@ BLOG PAGE
   .feature-grid,
   .about-grid,
   .service-grid,
-  .testimonial-grid,
   .blog-grid,
   .laptop-solutions-grid,
   .assistance-grid,
@@ -1810,70 +1801,8 @@ BLOG PAGE
     border-radius: 20px;
   }
 }
-.testimonials {
-  padding: 100px 0;
-  background: #071523;
-  color: #fff;
-}
-
-.testimonial-slider {
-  overflow: hidden;
-  width: 100%;
-  margin-top: 60px;
-}
-
-.testimonial-track {
-  display: flex;
-  transition: transform 0.8s ease;
-}
-
-.testimonial-card {
-  flex: 0 0 calc(25% - 20px);
-  margin: 0 10px;
-  background: #162535;
-  padding: 35px 25px;
-  text-align: center;
-  border-radius: 10px;
-}
-
-.testimonial-card img {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  margin: auto;
-  margin-bottom: 20px;
-}
-
-.testimonial-card h4 {
-  margin-bottom: 15px;
-}
-
-.stars {
-  color: #3376cd;
-  font-size: 24px;
-  margin-bottom: 20px;
-}
-
-.testimonial-card p {
-  line-height: 1.8;
-  color: #d8d8d8;
-}
-
-/* 1024px */
-@media (max-width: 1024px) {
-  .testimonial-card {
-    flex: 0 0 calc(25% - 20px);
-  }
-}
-
 /* Tablet */
 @media (max-width: 769px) {
-  .testimonial-card {
-    flex: 0 0 calc(50% - 20px);
-  }
-  .testimonial-slider {
-    margin-top: 20px;
-  }
   .padding-XY {
     padding: 0px 15px !important;
   }
@@ -1884,9 +1813,6 @@ BLOG PAGE
 
 /* Mobile */
 @media (max-width: 426px) {
-  .testimonial-card {
-    flex: 0 0 calc(100% - 20px);
-  }
   .padding-XY {
     padding: 0px 15px !important;
   }
