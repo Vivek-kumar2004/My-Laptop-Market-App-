@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" role="img" aria-label="Laptop outline representing IT hardware listings">
+  <rect width="640" height="420" fill="transparent"/>
+  <!-- Screen -->
+  <rect x="110" y="36" width="420" height="268" rx="18" fill="#0F172A"/>
+  <rect x="128" y="54" width="384" height="220" rx="6" fill="#E8F1FC"/>
+  <!-- Simple UI chrome on screen -->
+  <rect x="148" y="74" width="120" height="14" rx="3" fill="#0767D8" opacity="0.85"/>
+  <rect x="148" y="104" width="344" height="10" rx="2" fill="#94A3B8" opacity="0.45"/>
+  <rect x="148" y="124" width="280" height="10" rx="2" fill="#94A3B8" opacity="0.35"/>
+  <rect x="148" y="156" width="160" height="90" rx="8" fill="#FFFFFF" stroke="#0767D8" stroke-width="2"/>
+  <rect x="324" y="156" width="160" height="90" rx="8" fill="#FFFFFF" stroke="#059669" stroke-width="2"/>
+  <circle cx="188" cy="190" r="18" fill="#0767D8" opacity="0.2"/>
+  <circle cx="364" cy="190" r="18" fill="#059669" opacity="0.2"/>
+  <!-- Base -->
+  <path d="M70 320h500c18 0 28 14 22 28l-10 24H58l-10-24c-6-14 4-28 22-28z" fill="#0F172A"/>
+  <rect x="250" y="332" width="140" height="8" rx="4" fill="#475569"/>
+</svg>
