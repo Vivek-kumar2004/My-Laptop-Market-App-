@@ -11,7 +11,6 @@
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <title>My Laptop Market - India's B2B IT Vendors Network</title>
     <meta
       name="description"
@@ -33,16 +32,10 @@
       content="India's B2B IT vendors network. Connect refurbished IT dealers, technology suppliers, and businesses nationwide."
     />
     <meta property="og:image" content="https://mylaptopmarket.com/images/og-brand.jpg" />
-    <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="My Laptop Market — India's B2B IT vendors network" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="My Laptop Market - India's B2B IT Vendors Network" />
-    <meta
-      name="twitter:description"
-      content="India's B2B IT vendors network. Connect refurbished IT dealers, technology suppliers, and businesses nationwide."
-    />
     <meta name="twitter:image" content="https://mylaptopmarket.com/images/og-brand.jpg" />
 
     <script type="application/ld+json">
@@ -70,26 +63,18 @@
             "url": "https://mylaptopmarket.com/",
             "name": "My Laptop Market - India's B2B IT Vendors Network",
             "description": "My Laptop Market is a B2B networking and lead-generation platform for India's IT industry.",
-            "isPartOf": { "@id": "https://mylaptopmarket.com/#website" },
-            "primaryImageOfPage": {
-              "@type": "ImageObject",
-              "url": "https://mylaptopmarket.com/images/og-brand.jpg",
-              "width": 1200,
-              "height": 630
-            }
+            "isPartOf": { "@id": "https://mylaptopmarket.com/#website" }
           }
         ]
       }
     </script>
 
-    <link rel="preload" as="image" href="images/lap1.jpg" />
     <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="home-unslop.css?v=20261121d" />
-
+    <link rel="stylesheet" href="home-pdf.css?v=20261121f" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
     <link
@@ -99,15 +84,6 @@
   </head>
 
   <body class="page-home">
-    <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
-      <symbol id="icon-shield-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>
-      </symbol>
-      <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M20 6 9 17l-5-5"/>
-      </symbol>
-    </svg>
-
     <header class="navbar">
       <div class="nav-container">
         <div class="logo">
@@ -115,16 +91,25 @@
         </div>
 
         <ul class="nav-links" id="navLinks">
-          <li><a href="index.html">Home</a></li>
+          <li><a class="is-active" href="index.html">Home</a></li>
           <li><a href="about.html">About</a></li>
           <li><a href="services.html">Services</a></li>
           <li><a href="products.html">Products</a></li>
           <li><a href="why-us.html">Why Us</a></li>
           <li><a href="contact.html">Contact Us</a></li>
-          <li><a href="https://mylaptopmarket.com/api/vendor/login" class="mobile-vendor-login" id="mobileVendorNavLink">Vendor Login</a></li>
+          <li>
+            <a href="https://mylaptopmarket.com/api/vendor/login" class="mobile-vendor-login" id="mobileVendorNavLink">Vendor Login</a>
+          </li>
         </ul>
 
-        <a href="https://mylaptopmarket.com/api/vendor/login" class="contact-btn" id="vendorNavBtn">Vendor Login</a>
+        <div class="nav-actions">
+          <a href="https://mylaptopmarket.com/api/vendor/login" class="pdf-btn pdf-btn-outline" id="vendorNavBtn">
+            <i class="fa-regular fa-user" aria-hidden="true"></i> Vendor Login
+          </a>
+          <a href="https://mylaptopmarket.com/api/vendor/register" class="pdf-btn pdf-btn-primary" id="heroRegisterBtn">
+            Register as Dealer <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </a>
+        </div>
 
         <button type="button" class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
           <i class="fa-solid fa-bars" aria-hidden="true"></i>
@@ -133,278 +118,327 @@
     </header>
 
     <main>
-      <section class="hu-hero">
-        <div class="hu-wrap hu-hero-grid">
-          <div class="hu-hero-copy">
-            <h1>India’s B2B network for IT vendors, dealers &amp; suppliers</h1>
-            <p class="hu-hero-lead">
-              Find verified trade partners, list hardware, and get qualified leads — built for refurbished and enterprise IT businesses, not retail shoppers.
+      <!-- PDF page 1: Hero -->
+      <section class="pdf-hero">
+        <div class="pdf-wrap pdf-hero-grid">
+          <div>
+            <div class="pdf-kicker"><i class="fa-solid fa-certificate" aria-hidden="true"></i> India's Premier B2B Platform</div>
+            <h1>Turn Industry Connections into Qualified <span class="pdf-mark">Business Leads</span></h1>
+            <p class="pdf-hero-lead">
+              Build visibility among Refurbished IT Dealers India, Networking Equipment Vendors, ITAD companies, and corporate IT sourcing teams.
             </p>
-            <div class="hu-hero-actions">
-              <a href="https://mylaptopmarket.com/api/vendor/register" class="hu-btn hu-btn-lg" id="heroRegisterBtn">Register your business</a>
-              <a href="products.html" class="hu-btn hu-btn-lg hu-btn-ghost">Browse listings</a>
+            <div class="pdf-hero-actions">
+              <a href="https://mylaptopmarket.com/api/vendor/register" class="pdf-btn pdf-btn-primary pdf-btn-lg">
+                Register Your Business <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+              </a>
+              <a href="about.html" class="pdf-btn pdf-btn-ghost pdf-btn-lg">
+                <i class="fa-solid fa-play" aria-hidden="true"></i> Know More
+              </a>
             </div>
-            <p class="hu-hero-note">Free vendor profiles · Mobile apps on Play Store &amp; App Store</p>
+            <div class="pdf-trust-row">
+              <div class="pdf-trust-item"><i class="fa-solid fa-users" aria-hidden="true"></i> 1000+ Verified Dealers</div>
+              <div class="pdf-trust-item"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Trusted Platform Across India</div>
+              <div class="pdf-trust-item"><i class="fa-solid fa-bolt" aria-hidden="true"></i> Buy · Sell · Connect · Grow</div>
+            </div>
           </div>
 
-          <div class="hu-hero-visual">
-            <img
-              src="images/lap1.jpg"
-              alt="Business laptop on a desk for IT trading work"
-              width="1200"
-              height="960"
-            />
-            <div class="hu-hero-card">
-              <div class="hu-hero-card-mark" aria-hidden="true">
-                <svg><use href="#icon-shield-check"></use></svg>
+          <div class="pdf-devices" aria-hidden="true">
+            <div class="pdf-laptop">
+              <div class="pdf-laptop-screen">
+                <div class="pdf-dash-top">
+                  <strong>Vendor Dashboard</strong>
+                  <span style="font-size:11px;color:#7a869f">Live</span>
+                </div>
+                <div class="pdf-dash-stats">
+                  <div class="pdf-dash-stat"><span>Total Listings</span><strong>1,250</strong></div>
+                  <div class="pdf-dash-stat"><span>Active Buyers</span><strong>850</strong></div>
+                </div>
+                <div class="pdf-dash-bars">
+                  <i style="height:40%"></i><i style="height:70%"></i><i style="height:55%"></i>
+                  <i style="height:85%"></i><i style="height:60%"></i><i style="height:75%"></i>
+                  <i style="height:45%"></i><i style="height:90%"></i>
+                </div>
               </div>
-              <div>
-                <strong>Verified vendor network</strong>
-                <span>Dealers, distributors, ITAD &amp; sourcing teams across India</span>
+              <div class="pdf-laptop-base"></div>
+            </div>
+            <div class="pdf-phone">
+              <div class="pdf-phone-notch"></div>
+              <div class="pdf-phone-body">
+                <h4>Quick Access</h4>
+                <div class="pdf-phone-cta">
+                  <a class="reg" href="https://mylaptopmarket.com/api/vendor/register">Register as Dealer</a>
+                  <a class="buy" href="products.html">BUY STOCK</a>
+                  <a class="sell" href="https://mylaptopmarket.com/api/vendor/register">SELL STOCK</a>
+                </div>
+                <div class="pdf-phone-grid">
+                  <span><i class="fa-solid fa-list"></i> Latest Listings</span>
+                  <span><i class="fa-solid fa-clipboard-list"></i> Requirements</span>
+                  <span><i class="fa-solid fa-comments"></i> Messages</span>
+                  <span><i class="fa-solid fa-store"></i> My Shop</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </section>
 
-      <section class="hu-proof" aria-label="Platform at a glance">
-        <div class="hu-wrap">
-          <div class="hu-proof-row">
-            <div class="hu-proof-item">
-              <strong>1,200+</strong>
-              <span>Registered IT businesses</span>
-            </div>
-            <div class="hu-proof-item">
-              <strong>85+</strong>
-              <span>Indian cities covered</span>
-            </div>
-            <div class="hu-proof-item">
-              <strong>40+</strong>
-              <span>IT product categories</span>
-            </div>
-            <div class="hu-proof-item">
-              <strong>100%</strong>
-              <span>B2B focused platform</span>
-            </div>
+        <div class="pdf-wrap pdf-cats">
+          <div class="pdf-cats-inner" role="navigation" aria-label="Product categories">
+            <a class="pdf-cat" href="products.html?category=Laptops"><i class="fa-solid fa-laptop"></i> Laptops</a>
+            <a class="pdf-cat" href="products.html?category=Desktops"><i class="fa-solid fa-desktop"></i> Desktops</a>
+            <a class="pdf-cat" href="products.html?category=Monitors"><i class="fa-solid fa-tv"></i> Monitors</a>
+            <a class="pdf-cat" href="products.html?category=Servers"><i class="fa-solid fa-server"></i> Servers</a>
+            <a class="pdf-cat" href="products.html?category=Graphics%20Cards"><i class="fa-solid fa-microchip"></i> Graphics Cards</a>
+            <a class="pdf-cat" href="products.html?category=RAM"><i class="fa-solid fa-memory"></i> RAM</a>
+            <a class="pdf-cat" href="products.html?category=SSD"><i class="fa-solid fa-hdd"></i> SSD</a>
+            <a class="pdf-cat" href="products.html"><i class="fa-solid fa-puzzle-piece"></i> Modules &amp; Components</a>
           </div>
         </div>
       </section>
 
-      <section class="hu-section hu-market" id="liveMarketplace">
-        <div class="hu-wrap">
-          <div class="hu-section-head">
-            <h2>Fresh listings from verified vendors</h2>
-            <p>Real hardware currently listed by IT businesses on My Laptop Market.</p>
+      <!-- PDF page 2: Live marketplace carousel -->
+      <section class="pdf-section" id="liveMarketplace">
+        <div class="pdf-wrap">
+          <div class="pdf-section-head">
+            <div class="pdf-badge"><span class="dot" aria-hidden="true"></span> Live Marketplace</div>
+            <h2>Real Listings, <span class="pdf-mark">Spinning in 3D</span></h2>
+            <p>Drag the ring to explore hardware currently listed by verified vendors.</p>
+            <div class="pdf-meta-line" id="listingMeta">Live listings from verified vendors</div>
           </div>
+
+          <div class="pdf-carousel-wrap">
+            <button type="button" class="pdf-nav-btn prev" id="carouselPrev" aria-label="Previous"><i class="fa-solid fa-chevron-left"></i></button>
+            <div class="pdf-carousel" id="homeCarousel"></div>
+            <button type="button" class="pdf-nav-btn next" id="carouselNext" aria-label="Next"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+
           <div class="home-products-grid" id="homeProductsGrid">
             <div class="showcase-skeleton"></div>
             <div class="showcase-skeleton"></div>
             <div class="showcase-skeleton"></div>
             <div class="showcase-skeleton"></div>
           </div>
-          <div class="hu-market-cta">
-            <a href="products.html" class="hu-btn">Browse all products</a>
+          <div style="text-align:center;margin-top:28px">
+            <a href="products.html" class="pdf-btn pdf-btn-primary">Browse all products <i class="fa-solid fa-arrow-right"></i></a>
           </div>
         </div>
       </section>
 
-      <section class="hu-section" id="popularVendors">
-        <div class="hu-wrap">
-          <div class="hu-section-head is-center">
-            <h2>Popular vendors</h2>
-            <p>Active shops with the strongest presence on the network.</p>
+      <!-- PDF page 3: Why Us -->
+      <section class="pdf-section alt" id="whyUs">
+        <div class="pdf-wrap pdf-why-grid">
+          <div class="pdf-why-copy">
+            <div class="pdf-badge"><i class="fa-solid fa-check"></i> Why Us</div>
+            <h2>Why should you <span class="pdf-mark">register here?</span></h2>
+            <p>
+              India's only B2B platform built <strong>exclusively for IT vendors, dealers, distributors, and suppliers</strong> — not a general marketplace, not a classifieds site.
+            </p>
+            <ul class="pdf-feature-mini">
+              <li><i class="fa-solid fa-check"></i> Verified vendor profiles only</li>
+              <li><i class="fa-solid fa-users"></i> 1,200+ active IT businesses</li>
+              <li><i class="fa-solid fa-bolt"></i> Instant nationwide visibility</li>
+              <li><i class="fa-solid fa-mobile-screen"></i> Mobile app + web platform</li>
+            </ul>
+            <div class="pdf-hero-actions">
+              <a href="https://mylaptopmarket.com/api/vendor/register" class="pdf-btn pdf-btn-primary pdf-btn-lg">Register Free <i class="fa-solid fa-arrow-right"></i></a>
+              <a href="why-us.html" class="pdf-btn pdf-btn-ghost pdf-btn-lg"><i class="fa-solid fa-play"></i> See inside the platform</a>
+            </div>
           </div>
+          <div class="pdf-stats">
+            <div class="pdf-stat">
+              <i class="fa-solid fa-briefcase"></i>
+              <strong>1,200+</strong>
+              <span>Registered IT Businesses</span>
+            </div>
+            <div class="pdf-stat">
+              <i class="fa-solid fa-location-dot"></i>
+              <strong>85+</strong>
+              <span>Indian Cities Covered</span>
+            </div>
+            <div class="pdf-stat">
+              <i class="fa-solid fa-border-all"></i>
+              <strong>40+</strong>
+              <span>IT Product Categories</span>
+            </div>
+            <div class="pdf-stat">
+              <i class="fa-solid fa-chart-line"></i>
+              <strong>100%</strong>
+              <span>B2B Focused Platform</span>
+            </div>
+          </div>
+        </div>
+        <div class="pdf-wrap">
+          <div class="pdf-brands">
+            <div class="pdf-brands-label">Trusted by leading brands</div>
+            <div class="pdf-brand-logos">
+              <span>DELL</span><span>HP</span><span>Lenovo</span><span>acer</span><span>ASUS</span>
+            </div>
+            <em>And many more…</em>
+          </div>
+        </div>
+      </section>
+
+      <!-- PDF page 4: Fresh listings -->
+      <section class="pdf-section" id="freshListings">
+        <div class="pdf-wrap">
+          <div class="pdf-section-head left">
+            <div class="pdf-badge"><span class="dot"></span> Live Marketplace</div>
+            <h2>Fresh listings from verified vendors</h2>
+            <p>Real hardware currently listed by verified IT businesses.</p>
+          </div>
+
+          <div class="pdf-filter-bar">
+            <a class="pdf-cat is-active" href="products.html">All Products</a>
+            <a class="pdf-cat" href="products.html?category=Laptops"><i class="fa-solid fa-laptop"></i> Laptops</a>
+            <a class="pdf-cat" href="products.html?category=Desktops"><i class="fa-solid fa-desktop"></i> Desktops</a>
+            <a class="pdf-cat" href="products.html?category=Monitors"><i class="fa-solid fa-tv"></i> Monitors</a>
+            <a class="pdf-cat" href="products.html?category=Servers"><i class="fa-solid fa-server"></i> Servers</a>
+            <a class="pdf-cat" href="products.html?category=RAM"><i class="fa-solid fa-memory"></i> RAM</a>
+            <a class="pdf-cat" href="products.html?category=SSD"><i class="fa-solid fa-hdd"></i> SSD</a>
+            <span class="pdf-sort">Sort By: Latest</span>
+          </div>
+
+          <div class="pdf-products-grid" id="homeProductsGridB">
+            <div class="showcase-skeleton"></div>
+            <div class="showcase-skeleton"></div>
+            <div class="showcase-skeleton"></div>
+            <div class="showcase-skeleton"></div>
+            <div class="showcase-skeleton"></div>
+            <div class="showcase-skeleton"></div>
+            <div class="showcase-skeleton"></div>
+            <div class="showcase-skeleton"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PDF page 5: Popular vendors -->
+      <section class="pdf-section alt" id="popularVendors">
+        <div class="pdf-wrap">
+          <div class="pdf-vendors-hero">
+            <div>
+              <div class="pdf-badge"><i class="fa-solid fa-check"></i> Trusted by 100+ Businesses</div>
+              <h2><span class="pdf-mark">Popular</span> <span class="pdf-green">Vendors</span></h2>
+              <p>Work with leading brands and trusted laptop suppliers on My Laptop Market.</p>
+              <div class="pdf-trust-row">
+                <div class="pdf-trust-item"><i class="fa-solid fa-handshake"></i> Verified Sellers</div>
+                <div class="pdf-trust-item"><i class="fa-solid fa-shield-halved"></i> Secure Transactions</div>
+                <div class="pdf-trust-item"><i class="fa-solid fa-bolt"></i> Pan India Network</div>
+              </div>
+            </div>
+            <div class="pdf-vendors-visual">
+              <img src="images/lap2.jpg" alt="Business laptops listed by verified vendors" width="800" height="560" loading="lazy" />
+            </div>
+          </div>
+
           <div class="home-vendors-grid" id="homeVendorsGrid">
             <div class="showcase-skeleton vendor-skel"></div>
             <div class="showcase-skeleton vendor-skel"></div>
             <div class="showcase-skeleton vendor-skel"></div>
             <div class="showcase-skeleton vendor-skel"></div>
           </div>
-        </div>
-      </section>
 
-      <section class="hu-section">
-        <div class="hu-wrap hu-split">
-          <div class="hu-split-copy">
-            <h2>Why register here</h2>
-            <p>
-              India’s B2B platform built for IT vendors, dealers, distributors, and suppliers — not a general marketplace, not classifieds.
-            </p>
-            <ul class="hu-pillars">
-              <li>
-                <svg aria-hidden="true"><use href="#icon-check"></use></svg>
-                <span>Verified vendor profiles only</span>
-              </li>
-              <li>
-                <svg aria-hidden="true"><use href="#icon-check"></use></svg>
-                <span>Nationwide visibility beyond WhatsApp circles</span>
-              </li>
-              <li>
-                <svg aria-hidden="true"><use href="#icon-check"></use></svg>
-                <span>Qualified leads from sourcing teams and trade partners</span>
-              </li>
-              <li>
-                <svg aria-hidden="true"><use href="#icon-check"></use></svg>
-                <span>Web platform plus Android &amp; iOS apps</span>
-              </li>
-            </ul>
-            <div class="hu-hero-actions">
-              <a href="https://mylaptopmarket.com/api/vendor/register" class="hu-btn">Register free</a>
-              <a href="why-us.html" class="hu-btn hu-btn-ghost">See inside the platform</a>
-            </div>
-          </div>
-          <div class="hu-split-media">
-            <img src="images/lap2.jpg" alt="Laptop workspace for IT trading and sourcing" width="960" height="768" loading="lazy" />
+          <div class="pdf-partner-bar">
+            <strong><i class="fa-solid fa-handshake"></i> Partner with Us</strong>
+            <span>Grow your business with My Laptop Market's trusted platform.</span>
+            <a href="https://mylaptopmarket.com/api/vendor/register" class="pdf-btn pdf-btn-primary">Become a Vendor <i class="fa-solid fa-arrow-right"></i></a>
           </div>
         </div>
       </section>
 
-      <section class="hu-section">
-        <div class="hu-wrap hu-split is-flip">
-          <div class="hu-split-media">
-            <img class="diagram-frame" src="images/diagram-network.svg" alt="Trusted B2B IT business network diagram" width="800" height="640" loading="lazy" />
-          </div>
-          <div class="hu-split-copy">
-            <h2>Building India’s trusted IT trade network</h2>
-            <p>
-              My Laptop Market connects refurbished IT dealers, technology suppliers, distributors, wholesalers, importers, exporters, ITAD companies, and enterprise hardware dealers through one credible ecosystem.
-            </p>
-            <p>
-              Vendor discovery gets faster, business visibility gets stronger, and industry collaboration becomes more reliable — from regional dealers to national distributors and corporate sourcing teams.
-            </p>
-            <a href="about.html" class="hu-btn">About us</a>
-          </div>
-        </div>
-      </section>
-
-      <section class="hu-section">
-        <div class="hu-wrap hu-split">
-          <div class="hu-split-copy">
-            <h2>Coverage across IT hardware, assets &amp; services</h2>
-            <p>
-              Laptops, desktops, workstations, monitors, servers, storage, networking gear, CCTV, printers, POS, projectors, telecom, UPS, accessories, and refurbished electronics.
-            </p>
-            <p>
-              Whether you work in IT asset management, corporate surplus, refurbished supply, networking, security, or technology services, the network helps you find the right B2B connections without sounding like a retail store.
-            </p>
-            <a href="about.html" class="hu-btn hu-btn-ghost">Learn more</a>
-          </div>
-          <div class="hu-split-media">
-            <img class="diagram-frame" src="images/diagram-coverage.svg" alt="IT hardware categories covered on My Laptop Market" width="800" height="640" loading="lazy" />
-          </div>
-        </div>
-      </section>
-
-      <section class="hu-section">
-        <div class="hu-wrap">
-          <div class="hu-section-head is-center">
+      <!-- PDF page 6: How it works + supports -->
+      <section class="pdf-section">
+        <div class="pdf-wrap">
+          <div class="pdf-section-head">
             <h2>How it works</h2>
-            <p>Three steps from registration to trade conversations.</p>
+            <p>Three simple steps to trade, connect and grow on <strong style="color:var(--green)">My Laptop Market</strong>.</p>
           </div>
-          <div class="hu-steps">
-            <div class="hu-step">
-              <span class="hu-step-num">01</span>
+          <div class="pdf-steps">
+            <div class="pdf-step">
+              <div class="pdf-step-icon"><i class="fa-solid fa-user-plus"></i></div>
+              <span class="pdf-step-num">Step 01</span>
               <h3>Register your business</h3>
               <p>Create a professional profile with categories, service areas, and capabilities.</p>
             </div>
-            <div class="hu-step">
-              <span class="hu-step-num">02</span>
+            <div class="pdf-step">
+              <div class="pdf-step-icon"><i class="fa-solid fa-shield-halved"></i></div>
+              <span class="pdf-step-num">Step 02</span>
               <h3>Get verified</h3>
               <p>Strengthen credibility with a reviewed presence and clear company information.</p>
             </div>
-            <div class="hu-step">
-              <span class="hu-step-num">03</span>
+            <div class="pdf-step">
+              <div class="pdf-step-icon"><i class="fa-solid fa-handshake"></i></div>
+              <span class="pdf-step-num">Step 03</span>
               <h3>Connect &amp; grow</h3>
               <p>Reach suppliers, dealers, distributors, asset managers, and service providers.</p>
             </div>
           </div>
-        </div>
-      </section>
 
-      <section class="hu-section">
-        <div class="hu-wrap">
-          <div class="hu-section-head">
-            <h2>What the platform supports</h2>
+          <div class="pdf-section-head left">
+            <div class="pdf-badge"><i class="fa-solid fa-grip"></i> Our Platform</div>
+            <h2>What the platform <span class="pdf-mark" style="color:var(--green)">supports</span></h2>
             <p>Registration, discovery, lead generation, matchmaking, and industry collaboration for IT businesses.</p>
           </div>
-          <div class="hu-services">
-            <div class="hu-service">
-              <h3>Verified business profiles</h3>
-              <p>Searchable presence that trade partners can trust.</p>
+          <div class="pdf-supports">
+            <div class="pdf-support">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <div>
+                <h3>Verified business profiles</h3>
+                <p>Searchable presence that trade partners can trust.</p>
+              </div>
             </div>
-            <div class="hu-service">
-              <h3>Supplier &amp; dealer discovery</h3>
-              <p>Find the right counterpart beyond local referrals.</p>
+            <div class="pdf-support">
+              <i class="fa-solid fa-users"></i>
+              <div>
+                <h3>Supplier &amp; dealer discovery</h3>
+                <p>Find the right counterpart beyond local referrals.</p>
+              </div>
             </div>
-            <div class="hu-service">
-              <h3>B2B lead generation</h3>
-              <p>Attract inquiries from companies that buy and sell IT hardware.</p>
+            <div class="pdf-support">
+              <i class="fa-solid fa-bullhorn"></i>
+              <div>
+                <h3>B2B lead generation</h3>
+                <p>Attract inquiries from companies that buy and sell IT hardware.</p>
+              </div>
             </div>
-            <div class="hu-service">
-              <h3>Business matchmaking</h3>
-              <p>Connect for distribution, sourcing, and service partnerships.</p>
+            <div class="pdf-support">
+              <i class="fa-solid fa-handshake"></i>
+              <div>
+                <h3>Business matchmaking</h3>
+                <p>Connect for distribution, sourcing, and service partnerships.</p>
+              </div>
             </div>
-            <div class="hu-service">
-              <h3>Corporate asset sourcing</h3>
-              <p>Reach teams moving surplus and enterprise equipment.</p>
+            <div class="pdf-support">
+              <i class="fa-solid fa-box"></i>
+              <div>
+                <h3>Corporate asset sourcing</h3>
+                <p>Reach teams moving surplus and enterprise equipment.</p>
+              </div>
             </div>
-            <div class="hu-service">
-              <h3>Industry collaboration</h3>
-              <p>Stay visible inside India’s IT vendor network.</p>
+            <div class="pdf-support">
+              <i class="fa-solid fa-industry"></i>
+              <div>
+                <h3>Industry collaboration</h3>
+                <p>Stay visible inside India’s IT vendor network.</p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="hu-cta">
-        <div class="hu-wrap">
-          <div class="hu-cta-inner">
-            <div>
-              <h2>Ready to build stronger IT connections across India?</h2>
-              <p>Join the network vendors already use for discovery and leads.</p>
+      <!-- PDF page 7: Newsletter -->
+      <section class="pdf-news">
+        <div class="pdf-wrap">
+          <div class="pdf-news-inner">
+            <div class="pdf-news-copy">
+              <div class="ico"><i class="fa-solid fa-envelope"></i></div>
+              <div>
+                <strong>Stay Updated with My Laptop Market</strong>
+                <span>Get the latest updates, features and industry insights.</span>
+              </div>
             </div>
-            <a href="https://mylaptopmarket.com/api/vendor/register" class="hu-btn hu-btn-lg">Join the platform</a>
-          </div>
-        </div>
-      </section>
-
-      <section class="hu-faq faq">
-        <div class="hu-wrap">
-          <div class="hu-section-head">
-            <h2>Frequently asked questions</h2>
-          </div>
-          <div class="faq-item">
-            <button type="button" class="faq-btn">
-              What is My Laptop Market?
-              <i class="fas fa-chevron-down faq-chevron" aria-hidden="true"></i>
-            </button>
-            <div class="faq-content">
-              <p>
-                My Laptop Market is a technology business network connecting refurbished IT dealers, technology suppliers, distributors, ITAD companies, accessory suppliers, and enterprise hardware businesses across India.
-              </p>
-            </div>
-          </div>
-          <div class="faq-item">
-            <button type="button" class="faq-btn">
-              How do I become a vendor?
-              <i class="fas fa-chevron-down faq-chevron" aria-hidden="true"></i>
-            </button>
-            <div class="faq-content">
-              <p>
-                Register your business, create a professional profile, share your categories and service locations, and start receiving networking and lead-generation opportunities.
-              </p>
-            </div>
-          </div>
-          <div class="faq-item">
-            <button type="button" class="faq-btn">
-              What types of vendors can join?
-              <i class="fas fa-chevron-down faq-chevron" aria-hidden="true"></i>
-            </button>
-            <div class="faq-content">
-              <p>
-                IT vendors, distributors, wholesalers, importers, exporters, refurbished hardware suppliers, networking equipment vendors, accessory suppliers, system integrators, IT asset management companies, ITAD firms, and e-waste businesses.
-              </p>
-            </div>
+            <form class="pdf-news-form" action="mailto:support@mylaptopmarket.com" method="get">
+              <input type="email" name="subject" placeholder="Enter your email address" required aria-label="Email address" />
+              <button type="submit" class="pdf-btn pdf-btn-primary">Subscribe <i class="fa-solid fa-arrow-right"></i></button>
+            </form>
           </div>
         </div>
       </section>
@@ -413,10 +447,11 @@
     <footer>
       <section class="footer">
         <div class="footer-grid">
-          <div>
+          <div class="footer-brand">
             <div class="footer-logo">
               <img src="images/mylaptoplogo.png" alt="My Laptop Market" loading="lazy" />
             </div>
+            <p>India's trusted B2B marketplace for laptops and IT hardware. Connect, trade and grow with confidence.</p>
             <div class="store-badges">
               <a href="https://play.google.com/store/apps/details?id=com.mylaptopmarket" target="_blank" rel="noopener noreferrer">
                 <img class="play-badge" src="images/google-play-badge.png" alt="Get it on Google Play" />
@@ -426,33 +461,37 @@
               </a>
             </div>
             <div class="social-icons">
-              <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-              <a href="#" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
-              <a href="https://www.instagram.com/mylaptopmarket/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
               <a href="https://www.linkedin.com/company/my-laptop-market/?viewAsMember=true" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+              <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+              <a href="#" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
+              <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
             </div>
           </div>
+
           <div>
-            <h3>Quick links</h3>
+            <h3><i class="fa-solid fa-table-cells-large"></i> Quick Links</h3>
             <ul>
-              <li><a href="index.html">Home</a></li>
-              <li><a href="about.html">About</a></li>
-              <li><a href="services.html">Services</a></li>
-              <li><a href="products.html">Products</a></li>
-              <li><a href="contact.html">Contact Us</a></li>
+              <li><a href="index.html">Home <i class="fa-solid fa-chevron-right"></i></a></li>
+              <li><a href="about.html">About Us <i class="fa-solid fa-chevron-right"></i></a></li>
+              <li><a href="services.html">Services <i class="fa-solid fa-chevron-right"></i></a></li>
+              <li><a href="products.html">Products <i class="fa-solid fa-chevron-right"></i></a></li>
+              <li><a href="why-us.html">Why Us <i class="fa-solid fa-chevron-right"></i></a></li>
+              <li><a href="contact.html">Contact Us <i class="fa-solid fa-chevron-right"></i></a></li>
             </ul>
           </div>
+
           <div>
-            <h3>Our services</h3>
+            <h3><i class="fa-solid fa-headset"></i> Our Services</h3>
             <ul>
-              <li>Vendor registration</li>
-              <li>Supplier &amp; dealer discovery</li>
-              <li>B2B lead generation</li>
-              <li>Business matchmaking</li>
+              <li><a href="services.html">Vendor Registration <i class="fa-solid fa-chevron-right"></i></a></li>
+              <li><a href="services.html">Supplier &amp; Dealer Discovery <i class="fa-solid fa-chevron-right"></i></a></li>
+              <li><a href="services.html">B2B Lead Generation <i class="fa-solid fa-chevron-right"></i></a></li>
+              <li><a href="services.html">Business Matchmaking <i class="fa-solid fa-chevron-right"></i></a></li>
             </ul>
           </div>
+
           <div>
-            <h3>Get in touch</h3>
+            <h3><i class="fa-solid fa-handshake"></i> Get in Touch</h3>
             <div class="touch-cards">
               <a class="touch-card" href="tel:+919718199976">
                 <span class="touch-icon"><i class="fa-solid fa-phone"></i></span>
@@ -481,37 +520,54 @@
                 <span class="touch-icon"><i class="fa-solid fa-location-dot"></i></span>
                 <span class="touch-copy">
                   <small>Office</small>
-                  <strong>Plot no 19, Office no 5, Veer Savarkar Block, Shakarpur-110091</strong>
+                  <strong>Shakarpur, New Delhi</strong>
                 </span>
               </a>
             </div>
           </div>
-        </div>
-      </section>
 
-      <section class="marquee" aria-hidden="true">
-        <div class="marquee-track">
-          <span>IT Vendors Network · Technology Suppliers · IT Product Distributors · Refurbished Hardware Suppliers ·&nbsp;</span>
-          <span>IT Equipment Marketplace · Enterprise Hardware Dealers · IT Asset Management · Corporate IT Equipment ·&nbsp;</span>
-          <span>IT Vendors Network · Technology Suppliers · IT Product Distributors · Refurbished Hardware Suppliers ·&nbsp;</span>
-          <span>IT Equipment Marketplace · Enterprise Hardware Dealers · IT Asset Management · Corporate IT Equipment ·&nbsp;</span>
+          <div class="pdf-trust-box">
+            <div class="shield"><i class="fa-solid fa-shield-halved"></i></div>
+            <strong>Trusted Platform</strong>
+            <ul>
+              <li>Verified Businesses</li>
+              <li>Secure Transactions</li>
+              <li>Pan India Network</li>
+            </ul>
+            <a href="https://mylaptopmarket.com/api/vendor/register" class="pdf-btn pdf-btn-outline" style="width:100%">Partner With Us <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
         </div>
       </section>
 
       <div class="copyright">
-        © 2026 My Laptop Market. All Rights Reserved |
-        <a href="privacy-policy.html">Privacy Policy</a> |
-        www.mylaptopmarket.com
-        <div class="footer-duns">
-          <script language="JavaScript" src="https://dunsregistered.dnb.com" type="text/javascript"></script>
+        <div>
+          © 2026 My Laptop Market. All Rights Reserved. |
+          <a href="privacy-policy.html">Privacy Policy</a>
+        </div>
+        <div class="copyright-right">
+          <span><i class="fa-solid fa-shield-halved"></i> Secure &amp; Reliable</span>
+          <span><i class="fa-solid fa-chart-column"></i> B2B Trusted Partner</span>
         </div>
       </div>
     </footer>
 
     <script src="vendor-auth-nav.js?v=20261016c"></script>
-    <script src="home-animations.js?v=20261121b"></script>
-    <script src="home-showcase.js?v=20261121b"></script>
-    <script src="main.js"></script>
+    <script src="home-animations.js?v=20261121e"></script>
+    <script src="home-showcase.js?v=20261121e"></script>
     <script src="pop.js?v=20261121a"></script>
+    <script>
+      (function () {
+        var track = document.getElementById("homeCarousel");
+        var prev = document.getElementById("carouselPrev");
+        var next = document.getElementById("carouselNext");
+        if (!track || !prev || !next) return;
+        prev.addEventListener("click", function () {
+          track.scrollBy({ left: -240, behavior: "smooth" });
+        });
+        next.addEventListener("click", function () {
+          track.scrollBy({ left: 240, behavior: "smooth" });
+        });
+      })();
+    </script>
   </body>
 </html>
