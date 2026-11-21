@@ -69,7 +69,7 @@
       }
     </script>
 
-    <link rel="stylesheet" href="home-pdf.css?v=20261121h" />
+    <link rel="stylesheet" href="home-pdf.css?v=20261121i" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -141,14 +141,56 @@
             </div>
           </div>
 
-          <div class="pdf-devices">
-            <img
-              class="pdf-devices-img"
-              src="images/pdf/hero-devices.png"
-              alt="My Laptop Market vendor dashboard on laptop and mobile app"
-              width="1056"
-              height="928"
-            />
+          <div class="pdf-devices" aria-hidden="true">
+            <div class="pdf-laptop">
+              <div class="pdf-laptop-screen">
+                <aside class="pdf-dash-side">
+                  <span></span><span></span><span></span><span></span><span></span>
+                </aside>
+                <div class="pdf-dash-main">
+                  <div class="pdf-dash-top"><strong>Dashboard</strong><em>Live</em></div>
+                  <div class="pdf-dash-stats">
+                    <div class="pdf-dash-stat"><span>Total Listings</span><strong>1,250</strong></div>
+                    <div class="pdf-dash-stat"><span>Active Buyers</span><strong class="is-green">850</strong></div>
+                    <div class="pdf-dash-stat"><span>Total Messages</span><strong>420</strong></div>
+                  </div>
+                  <div class="pdf-dash-chart">
+                    <div class="pdf-dash-chart-label">Business Growth</div>
+                    <svg viewBox="0 0 280 90" preserveAspectRatio="none" aria-hidden="true">
+                      <defs>
+                        <linearGradient id="gFill" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stop-color="#0767d8" stop-opacity="0.35"/>
+                          <stop offset="100%" stop-color="#0767d8" stop-opacity="0"/>
+                        </linearGradient>
+                      </defs>
+                      <path d="M0 70 C40 65 55 40 90 45 C130 52 150 20 190 28 C230 36 250 18 280 22 L280 90 L0 90 Z" fill="url(#gFill)"/>
+                      <path d="M0 70 C40 65 55 40 90 45 C130 52 150 20 190 28 C230 36 250 18 280 22" fill="none" stroke="#0767d8" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div class="pdf-laptop-base"></div>
+            </div>
+            <div class="pdf-phone">
+              <div class="pdf-phone-notch"></div>
+              <div class="pdf-phone-body">
+                <div class="pdf-phone-brand"><strong>MY LAPTOP MARKET</strong><i class="fa-regular fa-bell"></i></div>
+                <div class="pdf-phone-hero">
+                  <span>Dealer Registration</span>
+                  <a href="https://mylaptopmarket.com/api/vendor/register">Register as Dealer →</a>
+                </div>
+                <a class="pdf-phone-buy" href="products.html"><i class="fa-solid fa-cart-shopping"></i> BUY STOCK</a>
+                <a class="pdf-phone-sell" href="https://mylaptopmarket.com/api/vendor/register"><i class="fa-solid fa-upload"></i> SELL STOCK</a>
+                <div class="pdf-phone-grid">
+                  <span><i class="fa-solid fa-list"></i> Latest Listings</span>
+                  <span><i class="fa-solid fa-clipboard-list"></i> Requirements</span>
+                  <span><i class="fa-solid fa-comments"></i> Messages</span>
+                  <span><i class="fa-solid fa-plus"></i> Add Product</span>
+                  <span><i class="fa-solid fa-store"></i> Floor Desk</span>
+                  <span><i class="fa-solid fa-user"></i> My Profile</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -238,7 +280,13 @@
           </div>
         </div>
         <div class="pdf-wrap">
-          <img class="pdf-brands-img" src="images/pdf/brands-bar.png" alt="Trusted by leading brands: Dell, HP, Lenovo, Acer, ASUS" width="1200" height="140" loading="lazy" />
+          <div class="pdf-brands">
+            <div class="pdf-brands-label">Trusted by leading brands</div>
+            <div class="pdf-brand-logos" aria-label="Brand partners">
+              <span>DELL</span><span>HP</span><span>Lenovo</span><span>acer</span><span>ASUS</span>
+            </div>
+            <em>And many more…</em>
+          </div>
         </div>
       </section>
 
@@ -290,7 +338,7 @@
               </div>
             </div>
             <div class="pdf-vendors-visual">
-              <img src="images/pdf/vendors-hero.png" alt="Verified vendor laptops on My Laptop Market" width="800" height="560" loading="lazy" />
+              <img src="images/lap1.jpg" alt="Business laptops from verified vendors" width="800" height="560" loading="lazy" />
             </div>
           </div>
 
@@ -340,7 +388,7 @@
               </div>
             </div>
             <div class="pdf-how-visual">
-              <img src="images/pdf/how-laptops.png" alt="IT hardware traded on My Laptop Market" width="640" height="480" loading="lazy" />
+              <img src="images/lap2.jpg" alt="IT hardware traded on My Laptop Market" width="640" height="480" loading="lazy" />
             </div>
           </div>
 
@@ -418,9 +466,6 @@
 
     <footer>
       <section class="footer">
-        <div class="pdf-wrap">
-          <img class="pdf-footer-art" src="images/pdf/footer-skyline.png" alt="" width="1200" height="320" loading="lazy" />
-        </div>
         <div class="footer-grid">
           <div class="footer-brand">
             <div class="footer-logo">
