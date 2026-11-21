@@ -15,23 +15,28 @@ import {
 
 export function SiteFooter() {
   return (
-    <footer className="mt-6 border-t border-line bg-white text-ink">
-      <section className="bg-[radial-gradient(ellipse_45%_55%_at_80%_100%,rgba(7,103,216,0.07),transparent_60%)] px-0 pt-14 pb-8">
-        <div className="mx-auto grid w-[min(100%-40px,1180px)] gap-7 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1.2fr_0.9fr]">
+    <footer className="relative overflow-hidden border-t border-line bg-white text-ink">
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-[44px] top-[120px] bg-[linear-gradient(180deg,#ffffff_0%,#f3f8ff_42%,#e6f0fc_100%)]"
+        aria-hidden
+      />
+
+      <section className="relative z-[1] px-0 pt-12 pb-6">
+        <div className="mx-auto grid w-[min(100%-40px,1180px)] gap-8 md:grid-cols-2 lg:grid-cols-[1.35fr_0.95fr_1.05fr_1.15fr_0.95fr]">
           <div>
             <Image
               src="/images/mylaptoplogo.png"
               alt="My Laptop Market"
-              width={160}
-              height={48}
-              className="mb-3 h-12 w-auto rounded-[10px]"
+              width={168}
+              height={50}
+              className="mb-3.5 h-[50px] w-auto"
             />
-            <p className="mb-4 max-w-[28ch] text-[13px] leading-relaxed text-ink-2">
+            <p className="mb-4 max-w-[30ch] text-[13px] leading-relaxed text-ink-2">
               India&apos;s trusted B2B marketplace for laptops and IT hardware. Connect, trade and
               grow with confidence.
             </p>
-            <strong className="mb-2.5 block text-[13px] font-bold text-navy">Download Our App</strong>
-            <div className="mb-3.5 flex flex-wrap gap-2">
+            <strong className="mb-2 block text-[13px] font-bold text-navy">Download Our App</strong>
+            <div className="mb-4 flex flex-wrap items-center gap-2">
               <a
                 href="https://play.google.com/store/apps/details?id=com.mylaptopmarket"
                 target="_blank"
@@ -41,7 +46,7 @@ export function SiteFooter() {
                 <img
                   src="/images/google-play-badge.png"
                   alt="Get it on Google Play"
-                  className="h-[52px] w-auto"
+                  className="h-[44px] w-auto"
                 />
               </a>
               <a
@@ -53,7 +58,7 @@ export function SiteFooter() {
                 <img
                   src="/images/app-store-badge.svg"
                   alt="Download on the App Store"
-                  className="h-9 w-auto"
+                  className="h-[34px] w-auto"
                 />
               </a>
             </div>
@@ -77,10 +82,10 @@ export function SiteFooter() {
           </div>
 
           <div>
-            <h3 className="mb-3.5 flex items-center gap-2 text-sm font-bold text-navy">
+            <h3 className="mb-4 flex items-center gap-2 text-sm font-bold text-navy">
               <LayoutGrid className="size-4 text-brand" /> Quick Links
             </h3>
-            <ul className="space-y-2.5 text-[13px] text-ink-2">
+            <ul className="space-y-3 text-[13px] text-ink-2">
               {[
                 ["Home", "/"],
                 ["About Us", "/about.html"],
@@ -90,9 +95,12 @@ export function SiteFooter() {
                 ["Contact Us", "/contact.html"],
               ].map(([label, href]) => (
                 <li key={label}>
-                  <a href={href} className="flex items-center justify-between gap-2 hover:text-brand">
+                  <a
+                    href={href}
+                    className="flex items-center justify-between gap-2 transition hover:text-brand"
+                  >
                     {label}
-                    <ChevronRight className="size-2.5 text-ink-3" />
+                    <ChevronRight className="size-3 text-ink-3" />
                   </a>
                 </li>
               ))}
@@ -100,10 +108,10 @@ export function SiteFooter() {
           </div>
 
           <div>
-            <h3 className="mb-3.5 flex items-center gap-2 text-sm font-bold text-navy">
+            <h3 className="mb-4 flex items-center gap-2 text-sm font-bold text-navy">
               <Headset className="size-4 text-brand" /> Our Services
             </h3>
-            <ul className="space-y-2.5 text-[13px] text-ink-2">
+            <ul className="space-y-3 text-[13px] text-ink-2">
               {[
                 "Vendor Registration",
                 "Supplier & Dealer Discovery",
@@ -113,10 +121,10 @@ export function SiteFooter() {
                 <li key={label}>
                   <a
                     href="/services.html"
-                    className="flex items-center justify-between gap-2 hover:text-brand"
+                    className="flex items-center justify-between gap-2 transition hover:text-brand"
                   >
                     {label}
-                    <ChevronRight className="size-2.5 text-ink-3" />
+                    <ChevronRight className="size-3 text-ink-3" />
                   </a>
                 </li>
               ))}
@@ -124,58 +132,47 @@ export function SiteFooter() {
           </div>
 
           <div>
-            <h3 className="mb-3.5 flex items-center gap-2 text-sm font-bold text-navy">
+            <h3 className="mb-4 flex items-center gap-2 text-sm font-bold text-navy">
               <Handshake className="size-4 text-brand" /> Get in Touch
             </h3>
-            <div className="grid gap-3">
+            <div className="grid gap-4">
               <ContactRow
-                icon={<Phone className="size-3" />}
-                small="Sales assistant"
-                strong="Mr Shaizan Siddqui"
-                em="9718199976"
+                icon={<Phone className="size-3.5" />}
+                strong="+91 97181 99976"
+                small="Mon - Sat, 9 AM - 7 PM"
                 href="tel:+919718199976"
               />
               <ContactRow
-                icon={<Phone className="size-3" />}
-                small="Technical assistant"
-                strong="Mr Vivek Kumar"
-                em="7295834965"
-                href="tel:+917295834965"
-              />
-              <ContactRow
-                icon={<Mail className="size-3" />}
-                small="Email"
+                icon={<Mail className="size-3.5" />}
                 strong="support@mylaptopmarket.com"
                 href="mailto:support@mylaptopmarket.com"
               />
               <ContactRow
-                icon={<MapPin className="size-3" />}
-                small="Office"
-                strong="Shakarpur, New Delhi"
+                icon={<MapPin className="size-3.5" />}
+                strong="New Delhi, India 110091"
                 href="https://www.google.com/maps/search/?api=1&query=Plot+no+19+Office+no+5,+Veer+Savarkar+Block,+Shakarpur+110091,+Delhi"
               />
             </div>
           </div>
 
-          <div className="rounded-2xl border border-line bg-brand-soft p-[18px]">
-            <div className="mb-2.5 grid size-10 place-items-center rounded-xl bg-white text-green">
+          <div className="h-fit rounded-2xl border border-[rgba(7,103,216,0.14)] bg-[#eaf2fc] p-5">
+            <div className="mb-3 grid size-11 place-items-center rounded-xl bg-white text-green shadow-[0_4px_12px_rgba(15,40,90,0.06)]">
               <Shield className="size-5" />
             </div>
-            <strong className="mb-2 block text-navy">Trusted Platform</strong>
-            <ul className="mb-3.5 space-y-1.5 text-xs text-ink-2">
-              <li className="relative pl-3.5 before:absolute before:left-0 before:text-green before:content-['•']">
-                Verified Businesses
-              </li>
-              <li className="relative pl-3.5 before:absolute before:left-0 before:text-green before:content-['•']">
-                Secure Transactions
-              </li>
-              <li className="relative pl-3.5 before:absolute before:left-0 before:text-green before:content-['•']">
-                Pan India Network
-              </li>
+            <strong className="mb-3 block text-[15px] text-navy">Trusted Platform</strong>
+            <ul className="mb-4 space-y-2 text-[13px] text-ink-2">
+              {["Verified Businesses", "Secure Transactions", "Pan India Network"].map((item) => (
+                <li
+                  key={item}
+                  className="relative pl-3.5 before:absolute before:left-0 before:font-bold before:text-green before:content-['•']"
+                >
+                  {item}
+                </li>
+              ))}
             </ul>
             <a
               href="https://mylaptopmarket.com/api/vendor/register"
-              className="inline-flex h-[42px] w-full items-center justify-center gap-2 rounded-full border-[1.5px] border-brand/45 bg-white px-[18px] text-sm font-bold text-brand"
+              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border-[1.5px] border-brand bg-white px-4 text-sm font-bold text-brand transition hover:bg-brand hover:text-white"
             >
               Partner With Us <ArrowRight className="size-4" />
             </a>
@@ -185,28 +182,27 @@ export function SiteFooter() {
 
       <FooterSkyline />
 
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-navy px-5 py-3.5 text-xs text-white/80">
-        <div>
-          © 2026 My Laptop Market. All Rights Reserved. |{" "}
-          <a href="/privacy-policy.html" className="text-white hover:underline">
-            Privacy Policy
-          </a>{" "}
-          |{" "}
-          <a href="/privacy-policy.html" className="text-white hover:underline">
-            Terms &amp; Conditions
-          </a>
-        </div>
-        <div className="flex flex-wrap items-center gap-3.5 font-semibold">
-          <span className="inline-flex items-center gap-1.5">
-            <Shield className="size-3.5 text-green" /> Secure &amp; Reliable
-          </span>
-          <span className="inline-flex items-center gap-1.5 rounded bg-white/10 px-2 py-1 text-[10px] tracking-wide text-[#ff9933]">
-            <span className="font-extrabold text-white">Make in</span>
-            <span className="font-extrabold text-[#138808]">India</span>
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <BarChart3 className="size-3.5 text-green" /> B2B Trusted Partner
-          </span>
+      <div className="relative z-[2] flex flex-wrap items-center justify-between gap-3 bg-[#02144f] px-5 py-3.5 text-[12px] text-white/85">
+        <div className="mx-auto flex w-[min(100%,1180px)] flex-wrap items-center justify-between gap-3">
+          <div>
+            © 2026 My Laptop Market. All Rights Reserved. |{" "}
+            <a href="/privacy-policy.html" className="text-white hover:underline">
+              Privacy Policy
+            </a>{" "}
+            |{" "}
+            <a href="/privacy-policy.html" className="text-white hover:underline">
+              Terms &amp; Conditions
+            </a>
+          </div>
+          <div className="flex flex-wrap items-center gap-4 font-semibold">
+            <span className="inline-flex items-center gap-1.5">
+              <Shield className="size-3.5 text-green" /> Secure &amp; Reliable
+            </span>
+            <MakeInIndiaBadge />
+            <span className="inline-flex items-center gap-1.5">
+              <BarChart3 className="size-3.5 text-green" /> B2B Trusted Partner
+            </span>
+          </div>
         </div>
       </div>
     </footer>
@@ -228,7 +224,7 @@ function SocialLink({
       aria-label={label}
       target={href.startsWith("http") ? "_blank" : undefined}
       rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-      className="grid size-[34px] place-items-center rounded-full bg-brand-soft text-brand transition hover:bg-brand hover:text-white"
+      className="grid size-8 place-items-center rounded-full bg-brand-soft text-brand transition hover:bg-brand hover:text-white"
     >
       {children}
     </a>
@@ -253,98 +249,151 @@ function XIcon() {
 
 function ContactRow({
   icon,
-  small,
   strong,
-  em,
+  small,
   href,
 }: {
   icon: ReactNode;
-  small: string;
   strong: string;
-  em?: string;
+  small?: string;
   href: string;
 }) {
   return (
     <a
       href={href}
-      className="flex items-start gap-2.5"
+      className="flex items-start gap-3"
       target={href.startsWith("http") ? "_blank" : undefined}
       rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
     >
-      <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-brand-soft text-brand">
+      <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-brand-soft text-brand">
         {icon}
       </span>
       <span>
-        <small className="mb-0.5 block text-[11px] text-ink-3">{small}</small>
         <strong className="block text-[13px] font-bold text-ink">{strong}</strong>
-        {em ? (
-          <em className="mt-1 inline-block text-xs font-bold not-italic text-brand">{em}</em>
-        ) : null}
+        {small ? <small className="mt-0.5 block text-[11px] text-ink-3">{small}</small> : null}
       </span>
     </a>
   );
 }
 
+function MakeInIndiaBadge() {
+  return (
+    <span className="inline-flex items-center gap-1.5" title="Make in India">
+      <svg viewBox="0 0 28 28" className="size-5" aria-hidden>
+        <circle cx="14" cy="14" r="13" fill="none" stroke="#ff9933" strokeWidth="1.5" />
+        <path
+          d="M14 5c2.5 3 4 6.2 4 9.2 0 2.4-1.6 4.3-4 4.3s-4-1.9-4-4.3C10 11.2 11.5 8 14 5z"
+          fill="#ff9933"
+        />
+        <path d="M10.5 18.5c1.2 2.2 2.4 3.2 3.5 3.5 1.1-.3 2.3-1.3 3.5-3.5" fill="none" stroke="#138808" strokeWidth="1.4" />
+      </svg>
+      <span className="text-[11px] leading-tight">
+        <span className="block font-extrabold tracking-wide text-[#ff9933]">MAKE IN</span>
+        <span className="block font-extrabold tracking-wide text-[#138808]">INDIA</span>
+      </span>
+    </span>
+  );
+}
+
 function FooterSkyline() {
   return (
-    <div
-      className="relative overflow-hidden border-t border-line bg-[linear-gradient(180deg,#f4f8ff_0%,#e8f1fc_55%,#dce9fb_100%)]"
-      aria-hidden
-    >
-      <div className="pointer-events-none absolute inset-0 opacity-40 [background-image:radial-gradient(circle_at_20%_80%,rgba(7,103,216,0.12),transparent_40%),radial-gradient(circle_at_80%_70%,rgba(32,202,71,0.08),transparent_35%)]" />
+    <div className="relative z-0 -mt-2 h-[168px] overflow-hidden md:h-[210px]" aria-hidden>
       <svg
-        viewBox="0 0 1200 220"
-        className="relative mx-auto block h-[140px] w-full max-w-[1180px] md:h-[180px]"
+        viewBox="0 0 1440 260"
+        className="absolute inset-x-0 bottom-0 mx-auto h-full w-full max-w-[1400px]"
         preserveAspectRatio="xMidYMax meet"
       >
-        <ellipse cx="600" cy="210" rx="520" ry="70" fill="rgba(7,103,216,0.06)" />
-        {/* India Gate-ish */}
-        <g fill="rgba(7,103,216,0.18)">
-          <rect x="90" y="110" width="120" height="90" rx="4" />
-          <rect x="120" y="70" width="60" height="40" rx="3" />
-          <rect x="135" y="40" width="30" height="30" rx="2" />
-          <path d="M145 20h10v20h-10z" />
+        <defs>
+          <pattern id="dotMap" width="10" height="10" patternUnits="userSpaceOnUse">
+            <circle cx="1.5" cy="1.5" r="1.2" fill="rgba(7,103,216,0.22)" />
+          </pattern>
+          <linearGradient id="skyFade" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0" />
+            <stop offset="35%" stopColor="#eef5ff" stopOpacity="0.65" />
+            <stop offset="100%" stopColor="#d9e8fb" stopOpacity="1" />
+          </linearGradient>
+        </defs>
+
+        <rect x="0" y="0" width="1440" height="260" fill="url(#skyFade)" />
+
+        {/* dotted India map silhouette */}
+        <g opacity="0.55">
+          <path
+            d="M520 40c55-28 150-36 210-8 48 22 95 10 130-12 42-26 110-8 130 32 22 45-8 95-52 118-62 32-165 28-245 8-70-18-128-52-140-95-6-22 0-34-33-43z"
+            fill="url(#dotMap)"
+          />
         </g>
-        {/* Taj-ish dome */}
-        <g fill="rgba(7,103,216,0.16)">
-          <path d="M980 200h140v-50h-140z" />
-          <path d="M1000 150c20-55 80-55 100 0H1000z" />
-          <rect x="1040" y="95" width="20" height="20" />
-          <circle cx="1050" cy="88" r="8" />
+
+        {/* left landmarks */}
+        <g fill="rgba(7,103,216,0.16)" transform="translate(40 70)">
+          <rect x="20" y="90" width="28" height="70" rx="2" />
+          <rect x="56" y="70" width="34" height="90" rx="2" />
+          <rect x="98" y="95" width="24" height="65" rx="2" />
+          <path d="M150 165h90v-55h-90z" />
+          <path d="M168 110h54v-28h-54z" />
+          <path d="M182 62h26v20h-26z" />
+          <path d="M192 40h6v22h-6z" />
+          <circle cx="195" cy="36" r="5" />
         </g>
-        {/* soft map blob */}
-        <path
-          d="M420 70c40-30 120-40 170-10 35 20 70 15 95-5 30-24 80-10 95 25 18 40-5 80-40 95-50 22-130 18-190 5-55-12-100-40-110-75-5-18 0-28-20-35z"
-          fill="rgba(7,103,216,0.07)"
-        />
+
+        {/* right Taj-like */}
+        <g fill="rgba(7,103,216,0.15)" transform="translate(1120 85)">
+          <path d="M20 145h220v-40H20z" />
+          <path d="M70 105c30-70 110-70 140 0H70z" />
+          <rect x="120" y="55" width="30" height="28" rx="2" />
+          <circle cx="135" cy="48" r="10" />
+          <rect x="40" y="90" width="18" height="55" rx="2" />
+          <rect x="202" y="90" width="18" height="55" rx="2" />
+        </g>
+
+        {/* soft ground glow */}
+        <ellipse cx="720" cy="245" rx="420" ry="48" fill="rgba(7,103,216,0.08)" />
+
         {/* three laptops */}
-        <g transform="translate(310 78)">
-          <LaptopSvg />
-        </g>
-        <g transform="translate(500 58) scale(1.15)">
-          <LaptopSvg accent />
-        </g>
-        <g transform="translate(720 82)">
-          <LaptopSvg />
+        <g transform="translate(430 95)">
+          <Laptop x={0} y={28} scale={0.92} />
+          <Laptop x={170} y={0} scale={1.12} accent />
+          <Laptop x={370} y={30} scale={0.95} />
         </g>
       </svg>
     </div>
   );
 }
 
-function LaptopSvg({ accent }: { accent?: boolean }) {
+function Laptop({
+  x,
+  y,
+  scale = 1,
+  accent,
+}: {
+  x: number;
+  y: number;
+  scale?: number;
+  accent?: boolean;
+}) {
+  const body = accent ? "#0b1b3a" : "#1e3a5f";
   const lid = accent ? "#0767d8" : "#3b82f6";
-  const base = accent ? "#02144f" : "#1e3a5f";
   return (
-    <g>
-      <rect x="10" y="8" width="150" height="88" rx="8" fill={base} />
-      <rect x="18" y="16" width="134" height="72" rx="4" fill="#e8f1fc" />
-      <rect x="28" y="28" width="50" height="8" rx="2" fill={lid} opacity="0.85" />
-      <rect x="28" y="42" width="70" height="6" rx="2" fill="#93c5fd" />
-      <rect x="28" y="54" width="58" height="6" rx="2" fill="#bfdbfe" />
-      <rect x="110" y="28" width="32" height="42" rx="4" fill="#fff" stroke={lid} strokeWidth="2" />
-      <rect x="0" y="96" width="170" height="12" rx="3" fill={base} />
-      <rect x="60" y="99" width="50" height="4" rx="2" fill="#64748b" />
+    <g transform={`translate(${x} ${y}) scale(${scale})`}>
+      <rect x="8" y="6" width="168" height="98" rx="10" fill={body} />
+      <rect x="16" y="14" width="152" height="82" rx="5" fill="#eef5ff" />
+      <rect x="28" y="28" width="58" height="10" rx="3" fill={lid} />
+      <rect x="28" y="46" width="78" height="7" rx="2" fill="#93c5fd" />
+      <rect x="28" y="60" width="64" height="7" rx="2" fill="#bfdbfe" />
+      <rect
+        x="122"
+        y="30"
+        width="34"
+        height="48"
+        rx="5"
+        fill="#fff"
+        stroke={lid}
+        strokeWidth="2.5"
+      />
+      <circle cx="139" cy="48" r="6" fill={accent ? "#20ca47" : "#0767d8"} opacity="0.85" />
+      <rect x="0" y="104" width="184" height="14" rx="4" fill={body} />
+      <rect x="62" y="108" width="60" height="5" rx="2" fill="#64748b" />
+      <ellipse cx="92" cy="126" rx="70" ry="8" fill="rgba(2,20,79,0.12)" />
     </g>
   );
 }
