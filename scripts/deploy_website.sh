@@ -1,32 +1,63 @@
 #!/usr/bin/env bash
-# Publish website/ to the live Google Cloud bucket. Objects that are not in
-# this folder are left in place, so an old file is not removed by a deploy.
+# Build the Next.js marketing site (static export) and publish it together with
+# the remaining static pages under website/ to the live Google Cloud bucket.
+# Objects that are not in the publish folder are left in place.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SITE="$ROOT/website"
+WEBSITE="$ROOT/website"
+SITE_APP="$ROOT/site"
+PUBLISH="$ROOT/.website-publish"
 BUCKET="gs://mylaptopmarket-app-web"
 
-if [[ ! -d "$SITE" ]]; then
+if [[ ! -d "$WEBSITE" ]]; then
   echo "website folder is missing" >&2
+  exit 1
+fi
+
+if [[ ! -d "$SITE_APP" ]]; then
+  echo "site folder is missing" >&2
   exit 1
 fi
 
 # Refresh Google sitemap with current public product URLs before upload.
 python3 "$ROOT/scripts/generate_sitemap.py"
 
-gcloud storage rsync "$SITE" "$BUCKET" \
+# Build Next.js static export (homepage + shared assets under site/out).
+(
+  cd "$SITE_APP"
+  npm ci
+  npm run build
+)
+
+if [[ ! -d "$SITE_APP/out" ]]; then
+  echo "site/out missing after next build" >&2
+  exit 1
+fi
+
+rm -rf "$PUBLISH"
+mkdir -p "$PUBLISH"
+
+# Base: legacy static pages (about, products, etc.) and shared assets.
+cp -a "$WEBSITE"/. "$PUBLISH"/
+
+# Overlay: Next static export replaces homepage and adds /_next assets.
+cp -a "$SITE_APP/out"/. "$PUBLISH"/
+
+gcloud storage rsync "$PUBLISH" "$BUCKET" \
   --recursive \
   --cache-control="public, max-age=300"
 
 while IFS= read -r -d '' file; do
-  rel="${file#"$SITE"/}"
+  rel="${file#"$PUBLISH"/}"
   gcloud storage cp "$file" "$BUCKET/$rel" \
     --cache-control="no-cache, max-age=0, must-revalidate" \
     --content-type="text/html; charset=utf-8"
-done < <(find "$SITE" -type f -name '*.html' -print0)
+done < <(find "$PUBLISH" -type f -name '*.html' -print0)
 
 gcloud compute url-maps invalidate-cdn-cache mlm-web-https \
   --path "/*" \
   --project=mylaptopmarket-app \
   --async
+
+rm -rf "$PUBLISH"

@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-brand: #0767d8;
+  --color-brand-dark: #0554b3;
+  --color-brand-soft: #e8f1fc;
+  --color-navy: #02144f;
+  --color-ink: #0f1b3d;
+  --color-ink-2: #4b5878;
+  --color-ink-3: #7a869f;
+  --color-green: #20ca47;
+  --color-green-soft: #e8fbef;
+  --color-canvas: #ebf3fe;
+  --color-line: rgb(7 103 216 / 0.12);
+  --font-sans: var(--font-jakarta);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: #f7faff;
+  color: var(--color-ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgb(7 103 216 / 0.18);
+}
+
+.mark {
+  color: var(--color-brand);
+  position: relative;
+  display: inline-block;
+}
+
+.mark::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 8px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12' fill='none'%3E%3Cpath d='M2 8c40-8 80-8 120 0s60 6 76-2' stroke='%230767d8' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E")
+    center / 100% 100% no-repeat;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}

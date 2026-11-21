@@ -8,7 +8,7 @@ adaptive
 
 ## Stack
 
-- Marketing site: static HTML/CSS/JS in `website/` (CDN publish from that folder)
+- Marketing homepage: Next.js (TypeScript) + Tailwind CSS + Lucide in `site/` with `output: "export"`; legacy inner pages remain static HTML/CSS/JS in `website/`. CDN publish builds `site/` then overlays `site/out/` onto `website/` via `scripts/deploy_website.sh`
 - Mobile: Kotlin Multiplatform Compose in `composeApp/` with Android (`app/`) and iOS (`iosApp/`) shells
 - Backend/auth: existing API and Firebase — out of scope for UI redesign unless a screen requires a layout-only change
 

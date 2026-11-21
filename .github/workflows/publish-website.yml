@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "website/**"
+      - "site/**"
       - "scripts/deploy_website.sh"
       - "scripts/generate_sitemap.py"
       - ".github/workflows/publish-website.yml"
@@ -29,6 +30,12 @@ jobs:
           service_account: github-website-deploy@mylaptopmarket-app.iam.gserviceaccount.com
 
       - uses: google-github-actions/setup-gcloud@v2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: site/package-lock.json
 
       - name: Publish to the live site
         run: bash scripts/deploy_website.sh
