@@ -22,24 +22,6 @@
     return (name || "V").trim().charAt(0).toUpperCase() || "V";
   }
 
-  function bindTilt(root) {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    if (window.matchMedia("(pointer: coarse)").matches) return;
-
-    root.querySelectorAll("[data-tilt]").forEach(function (card) {
-      card.addEventListener("mousemove", function (e) {
-        const box = card.getBoundingClientRect();
-        const x = (e.clientX - box.left) / box.width - 0.5;
-        const y = (e.clientY - box.top) / box.height - 0.5;
-        card.style.transform =
-          "rotateY(" + x * 12 + "deg) rotateX(" + -y * 9 + "deg) translateZ(18px)";
-      });
-      card.addEventListener("mouseleave", function () {
-        card.style.transform = "";
-      });
-    });
-  }
-
   function renderProducts(products) {
     if (!productsGrid) return;
     if (!products || !products.length) {
@@ -62,7 +44,7 @@
           : '<span class="vendor-fallback">' + letter + "</span>";
 
         return (
-          '<a class="home-product-card" data-tilt href="' +
+          '<a class="home-product-card" href="' +
           (p.id ? "product.html?id=" + encodeURIComponent(p.id) : "products.html") +
           '">' +
           '<div class="home-product-visual">' +
@@ -92,8 +74,6 @@
         );
       })
       .join("");
-
-    bindTilt(productsGrid);
   }
 
   function renderVendors(vendors) {
