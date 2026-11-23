@@ -39,6 +39,7 @@ export type IconName =
   | "instagram"
   | "linkedin"
   | "youtube"
+  | "twitter"
   | "quote"
   | "star"
   | "clock"
@@ -248,6 +249,7 @@ const paths: Record<IconName, React.ReactNode> = {
       <path d="m10.5 9 5 3-5 3V9Z" />
     </>
   ),
+  twitter: <path d="M4 4h4.2l4.1 5.7L17.5 4H20l-6.1 7.2L20.5 20H16.3l-4.5-6.2L6.2 20H3.7l6.5-7.7L4 4Zm3.1 1.5 9.7 13h1.6L8.7 5.5H7.1Z" />,
   whatsapp: (
     <>
       <path d="M21 11.7a8.4 8.4 0 0 1-9 8.3 9.6 9.6 0 0 1-3.6-.7L3 21l1.4-4.8A8.2 8.2 0 0 1 3.5 11.7 8.5 8.5 0 0 1 12 3.4a8.5 8.5 0 0 1 9 8.3Z" />

@@ -149,14 +149,35 @@ export function Footer({ onRegister }: { onRegister: () => void }) {
             </p>
             <div className="mt-5 flex items-center gap-2">
               {[
-                { name: "linkedin" as const, label: "LinkedIn" },
-                { name: "instagram" as const, label: "Instagram" },
-                { name: "youtube" as const, label: "YouTube" },
-                { name: "whatsapp" as const, label: "WhatsApp" },
+                {
+                  name: "instagram" as const,
+                  label: "Instagram @mylaptopmarket",
+                  href: "https://www.instagram.com/mylaptopmarket/",
+                },
+                {
+                  name: "twitter" as const,
+                  label: "X @mylaptopmarket",
+                  href: "https://x.com/mylaptopmarket",
+                },
+                {
+                  name: "youtube" as const,
+                  label: "YouTube @mylaptopmarket",
+                  href: "https://www.youtube.com/@mylaptopmarket",
+                },
+                {
+                  name: "linkedin" as const,
+                  label: "LinkedIn My Laptop Market",
+                  href: "https://www.linkedin.com/company/my-laptop-market/",
+                },
+                {
+                  name: "whatsapp" as const,
+                  label: "WhatsApp",
+                  href: "https://wa.me/919718199976",
+                },
               ].map((social) => (
                 <a
                   key={social.name}
-                  href="https://mylaptopmarket.com"
+                  href={social.href}
                   target="_blank"
                   rel="noreferrer"
                   aria-label={social.label}
