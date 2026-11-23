@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { images, storeLinks } from "../assets";
 import { cn } from "../utils/cn";
 import { BrandLogo, Icon } from "./Icon";
 import { Reveal } from "../lib/motion";
@@ -275,26 +276,26 @@ export function Footer({ onRegister }: { onRegister: () => void }) {
             <p className="mt-6 text-[9.5px] font-bold uppercase tracking-[0.18em] text-white/40">Get the app</p>
             <div className="mt-3 flex flex-wrap items-center gap-2.5">
               <a
-                href="https://play.google.com/store/apps/details?id=com.mylaptopmarket"
+                href={storeLinks.googlePlay}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex opacity-90 transition hover:opacity-100"
               >
                 <img
-                  src="/images/google-play-badge.png"
+                  src={images.googlePlayBadge}
                   alt="Get it on Google Play"
                   className="h-[60px] w-auto"
                   loading="lazy"
                 />
               </a>
               <a
-                href="https://apps.apple.com/in/app/my-laptop-market/id6811815946"
+                href={storeLinks.appStore}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex opacity-90 transition hover:opacity-100"
               >
                 <img
-                  src="/images/app-store-badge.svg"
+                  src={images.appStoreBadge}
                   alt="Download on the App Store"
                   className="h-10 w-auto"
                   loading="lazy"

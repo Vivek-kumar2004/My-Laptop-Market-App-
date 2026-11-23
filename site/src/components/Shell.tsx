@@ -7,6 +7,7 @@ import { Icon } from "./Icon";
 import { Header } from "./Header";
 import { SideDock } from "./SideDock";
 import { Footer } from "./Footer";
+import { AppPromoModal } from "./AppPromoModal";
 import { ProductModal, RegisterDialog, type DialogIntent } from "./Dialogs";
 
 const WHATSAPP = "https://wa.me/919718199976";
@@ -152,6 +153,7 @@ export function Shell({
         onClose={() => setQuickView(null)}
         onRequirement={() => openDialog("buyer")}
       />
+      <AppPromoModal blocked={overlayOpen} />
     </div>
   );
 }
