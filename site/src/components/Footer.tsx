@@ -278,12 +278,12 @@ export function Footer({ onRegister }: { onRegister: () => void }) {
                 href="https://play.google.com/store/apps/details?id=com.mylaptopmarket"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="transition opacity-90 hover:opacity-100"
+                className="inline-flex opacity-90 transition hover:opacity-100"
               >
                 <img
                   src="/images/google-play-badge.png"
                   alt="Get it on Google Play"
-                  className="h-10 w-auto"
+                  className="h-[60px] w-auto"
                   loading="lazy"
                 />
               </a>
@@ -291,7 +291,7 @@ export function Footer({ onRegister }: { onRegister: () => void }) {
                 href="https://apps.apple.com/in/app/my-laptop-market/id6811815946"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="transition opacity-90 hover:opacity-100"
+                className="inline-flex opacity-90 transition hover:opacity-100"
               >
                 <img
                   src="/images/app-store-badge.svg"
