@@ -1,22 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { cn } from "../utils/cn";
 import { CountUp, Reveal } from "../lib/motion";
 import { Icon } from "./Icon";
 import { routes } from "../lib/routes";
 import { images } from "../assets";
-
-const DASH = [
-  { label: "Total Listings", value: 1250 },
-  { label: "Active Buyers", value: 850 },
-  { label: "Total Messages", value: 420 },
-];
-
-const LEADS = [
-  { qty: 24, item: "Cisco Catalyst 2960X", from: "Networking vendor", city: "Chennai" },
-  { qty: 120, item: "Lenovo ThinkPad T14 Gen 2", from: "Refurbished IT dealer", city: "Hyderabad" },
-  { qty: 40, item: "HP EliteBook 840 G8", from: "Corporate IT sourcing", city: "Pune" },
-  { qty: 12, item: "Dell PowerEdge R740", from: "ITAD company", city: "Mumbai" },
-];
+import { useCatalog } from "../lib/catalog";
+import { inr, type Product } from "../data";
+import { SITE_ORIGIN } from "../lib/api";
 
 function LiveDot() {
   return (
@@ -27,55 +17,121 @@ function LiveDot() {
   );
 }
 
-function LeadFeed() {
-  const [stack, setStack] = useState(() => [
-    { ...LEADS[0]!, key: 0 },
-    { ...LEADS[1]!, key: 1 },
-  ]);
+function relativeListed(listed: string, index: number) {
+  if (listed && listed !== "Live now") return listed;
+  if (index === 0) return "Just now";
+  if (index === 1) return "2 min ago";
+  return `${index + 1} min ago`;
+}
+
+function StockFeed({
+  products,
+  onQuickView,
+}: {
+  products: Product[];
+  onQuickView?: (product: Product) => void;
+}) {
+  const leads = useMemo(() => {
+    const ranked = [...products].sort((a, b) => {
+      const aReal = a.vendor.name && a.vendor.name !== "Verified vendor" ? 1 : 0;
+      const bReal = b.vendor.name && b.vendor.name !== "Verified vendor" ? 1 : 0;
+      if (bReal !== aReal) return bReal - aReal;
+      return (b.units || 0) - (a.units || 0);
+    });
+    return ranked.slice(0, 12).map((p) => ({
+      id: p.id,
+      qty: p.units,
+      item: p.name,
+      from: p.vendor.name,
+      city: p.city,
+      listed: p.listed,
+      price: p.price,
+      verified: p.vendor.verified,
+      product: p,
+    }));
+  }, [products]);
+
+  const [stack, setStack] = useState<{ lead: (typeof leads)[number]; key: number }[]>([]);
 
   useEffect(() => {
+    if (!leads.length) {
+      setStack([]);
+      return;
+    }
+    setStack([
+      { lead: leads[0]!, key: 0 },
+      ...(leads[1] ? [{ lead: leads[1], key: 1 }] : []),
+    ]);
+  }, [leads]);
+
+  useEffect(() => {
+    if (leads.length < 2) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let n = 2;
     const id = window.setInterval(() => {
-      const next = { ...LEADS[n % LEADS.length]!, key: n };
+      const lead = leads[n % leads.length]!;
       n += 1;
-      setStack((s) => [next, ...s].slice(0, 2));
+      setStack((s) => [{ lead, key: n }, ...s].slice(0, 2));
     }, 3400);
     return () => window.clearInterval(id);
-  }, []);
+  }, [leads]);
+
+  if (!stack.length) {
+    return (
+      <div className="rounded-2xl bg-white p-4 text-navy shadow-[0_22px_50px_-20px_rgba(5,7,11,0.55)] ring-1 ring-navy/5">
+        <p className="text-[13px] font-semibold text-slate-ink">Loading live stock…</p>
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex flex-col gap-2.5">
-      {stack.map((lead, i) => (
-        <div
-          key={lead.key}
-          className={cn(
-            "fade-slide-in origin-top rounded-2xl bg-white p-4 text-navy shadow-[0_22px_50px_-20px_rgba(5,7,11,0.55)] ring-1 ring-navy/5",
-            i > 0 && "max-sm:hidden",
-          )}
-          style={{ animationDelay: `${i * 40}ms` }}
-        >
-          <div className="flex items-center justify-between gap-3">
-            <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.1em] text-brand">
-              <LiveDot /> New inquiry
-            </span>
-            <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-ink">
-              {i === 0 ? "Just now" : "2 min ago"}
-            </span>
-          </div>
-          <p className="mt-2.5 text-[15px] font-bold leading-tight tracking-[-0.015em]">
-            {lead.qty} × {lead.item}
-          </p>
-          <div className="mt-2.5 flex items-center justify-between gap-2">
-            <span className="truncate text-[12px] text-slate-ink">
-              {lead.from} · {lead.city}
-            </span>
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-sky px-2 py-1 text-[10px] font-bold text-brand">
-              <Icon name="check" size={11} strokeWidth={2.4} /> Qualified
-            </span>
-          </div>
-        </div>
-      ))}
+      {stack.map((entry, i) => {
+        const lead = entry.lead;
+        const open = () => {
+          if (onQuickView) onQuickView(lead.product);
+          else if (lead.product.detailUrl) window.location.href = lead.product.detailUrl;
+        };
+        return (
+          <button
+            key={entry.key}
+            type="button"
+            onClick={open}
+            className={cn(
+              "fade-slide-in origin-top rounded-2xl bg-white p-4 text-left text-navy shadow-[0_22px_50px_-20px_rgba(5,7,11,0.55)] ring-1 ring-navy/5 transition hover:-translate-y-0.5 hover:shadow-[0_28px_56px_-22px_rgba(5,7,11,0.6)]",
+              i > 0 && "max-sm:hidden",
+            )}
+            style={{ animationDelay: `${i * 40}ms` }}
+          >
+            <div className="flex items-center justify-between gap-3">
+              <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.1em] text-brand">
+                <LiveDot /> Live stock
+              </span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-ink">
+                {relativeListed(lead.listed, i)}
+              </span>
+            </div>
+            <p className="mt-2.5 text-[15px] font-bold leading-tight tracking-[-0.015em]">
+              {lead.qty} × {lead.item}
+            </p>
+            <div className="mt-2.5 flex items-center justify-between gap-2">
+              <span className="truncate text-[12px] text-slate-ink">
+                {lead.from} · {lead.city}
+              </span>
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-sky px-2 py-1 text-[10px] font-bold text-brand">
+                <Icon name="check" size={11} strokeWidth={2.4} />
+                {lead.verified ? "Verified" : "In stock"}
+              </span>
+            </div>
+            {lead.price > 0 ? (
+              <p className="mt-2 text-[12px] font-bold text-navy">
+                {inr(lead.price)}
+                <span className="ml-1 font-semibold text-slate-ink">/ unit</span>
+              </p>
+            ) : null}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -92,7 +148,7 @@ function BuySell() {
     <div className="flex rounded-full bg-navy p-1.5 shadow-[0_18px_40px_-14px_rgba(5,7,11,0.6)]">
       {[
         { label: "Buy stock", href: routes.marketplace },
-        { label: "Sell stock", href: "https://mylaptopmarket.com/api/vendor/register" },
+        { label: "Sell stock", href: `${SITE_ORIGIN}/api/vendor/register` },
       ].map((item, i) => (
         <a
           key={item.label}
@@ -110,7 +166,28 @@ function BuySell() {
   );
 }
 
-export function HeroDashboard() {
+export function HeroDashboard({ onQuickView }: { onQuickView?: (product: Product) => void }) {
+  const { products, vendors, live } = useCatalog();
+
+  const stats = useMemo(() => {
+    const listingCount = products.length;
+    const vendorCount = Math.max(
+      vendors.length,
+      new Set(products.map((p) => p.vendor.name).filter((n) => n && n !== "Verified vendor")).size,
+    );
+    const unitCount = products.reduce((sum, p) => sum + (p.units || 0), 0);
+    return [
+      { label: "Live listings", value: listingCount },
+      { label: "Active vendors", value: vendorCount || listingCount },
+      { label: "Units in stock", value: unitCount },
+    ];
+  }, [products, vendors]);
+
+  const heroImage = useMemo(() => {
+    const withImg = products.find((p) => p.image && !p.image.startsWith("/images/product-"));
+    return withImg?.image || products[0]?.image || images.lifestyle;
+  }, [products]);
+
   return (
     <Reveal delay={160} variant="scale" className="relative min-w-0">
       <div className="relative mx-auto aspect-[4/5] w-full max-w-[540px] sm:aspect-[10/11] lg:aspect-auto lg:h-[560px] xl:h-[600px]">
@@ -128,11 +205,11 @@ export function HeroDashboard() {
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-[0.14em]">Dashboard</span>
               <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em]">
-                <LiveDot /> Live
+                <LiveDot /> {live ? "Live" : "Stock"}
               </span>
             </div>
             <dl className="mt-6 grid grid-cols-3 gap-3 sm:gap-4">
-              {DASH.map((stat) => (
+              {stats.map((stat) => (
                 <div key={stat.label} className="border-t border-white/35 pt-3">
                   <dt className="text-[9px] font-semibold uppercase leading-tight tracking-[0.1em] text-white/80 sm:text-[10px]">
                     {stat.label}
@@ -146,14 +223,14 @@ export function HeroDashboard() {
           </div>
 
           <img
-            src={images.lifestyle}
+            src={heroImage}
             alt=""
-            className="pointer-events-none absolute -bottom-[8%] -right-[12%] w-[90%] max-w-none opacity-90 mix-blend-multiply"
+            className="pointer-events-none absolute -bottom-[8%] -right-[12%] w-[90%] max-w-none object-contain opacity-90 mix-blend-multiply"
           />
         </div>
 
         <div className="absolute -left-1 top-[38%] z-20 w-[82%] max-w-[330px] sm:-left-4 sm:top-[30%] lg:-left-6 xl:-left-10">
-          <LeadFeed />
+          <StockFeed products={products} onQuickView={onQuickView} />
         </div>
 
         <div className="absolute -bottom-4 left-4 z-20 sm:left-6">

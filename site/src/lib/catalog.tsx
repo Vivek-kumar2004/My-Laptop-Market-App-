@@ -32,7 +32,7 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
         const showcase = await fetchHomeShowcase();
         let next = showcase.products;
         try {
-          const more = await fetchWebProducts(40);
+          const more = await fetchWebProducts(100);
           const seen = new Set(next.map((p) => p.id));
           next = [...next, ...more.filter((p) => !seen.has(p.id))];
         } catch {

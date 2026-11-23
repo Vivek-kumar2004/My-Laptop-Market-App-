@@ -6,7 +6,7 @@ import { HeroDashboard } from "./HeroDashboard";
 
 export function Hero({
   onSearch,
-  onQuickView: _onQuickView,
+  onQuickView,
 }: {
   onSearch: (query: string, category: string, city: string) => void;
   onQuickView: (product: Product) => void;
@@ -188,7 +188,7 @@ export function Hero({
             </Reveal>
           </div>
 
-          <HeroDashboard />
+          <HeroDashboard onQuickView={onQuickView} />
         </div>
       </div>
     </section>
