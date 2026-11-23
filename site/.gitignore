@@ -19,6 +19,7 @@
 
 # Synced from ../website at prebuild/predev — do not commit duplicates
 /public/images/
+/public/brand/
 /public/favicon.ico
 /public/apple-touch-icon.png
 

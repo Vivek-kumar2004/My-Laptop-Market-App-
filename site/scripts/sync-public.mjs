@@ -8,6 +8,7 @@ const publicDir = join(siteRoot, "public");
 
 const copies = [
   ["images", "images"],
+  ["brand", "brand"],
   ["favicon.ico", "favicon.ico"],
   ["apple-touch-icon.png", "apple-touch-icon.png"],
 ];
