@@ -1,9 +1,94 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "../utils/cn";
 import { BrandLogo, Icon } from "./Icon";
 import { Reveal } from "../lib/motion";
 import { routes } from "../lib/routes";
+
+/** Oversized wordmark — letters swell toward the cursor via variable font axes. */
+function GiantWordmark() {
+  const text = "MY LAPTOP MARKET";
+  const wrap = useRef<HTMLDivElement>(null);
+  const letters = useRef<(HTMLSpanElement | null)[]>([]);
+
+  useEffect(() => {
+    const el = wrap.current;
+    if (!el) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce || !window.matchMedia("(pointer: fine)").matches) return;
+
+    const influence = letters.current.map(() => 0);
+    let mx = 0;
+    let active = false;
+    let running = false;
+    let raf = 0;
+
+    const frame = () => {
+      let busy = false;
+      letters.current.forEach((sp, i) => {
+        if (!sp) return;
+        const r = sp.getBoundingClientRect();
+        const d = Math.abs(mx - (r.left + r.width / 2));
+        const target = active ? Math.pow(Math.max(0, 1 - d / 440), 1.5) : 0;
+        influence[i]! += (target - influence[i]!) * 0.14;
+        if (Math.abs(target - influence[i]!) > 0.003) busy = true;
+        const v = influence[i]!;
+        sp.style.fontVariationSettings = `"wght" ${(620 + v * 280).toFixed(0)}`;
+        sp.style.transform = `scale(${(1 + v * 0.22).toFixed(3)}, ${(1 + v * 0.1).toFixed(3)})`;
+      });
+      if (busy) raf = requestAnimationFrame(frame);
+      else running = false;
+    };
+
+    const start = () => {
+      if (running) return;
+      running = true;
+      raf = requestAnimationFrame(frame);
+    };
+
+    const move = (e: PointerEvent) => {
+      mx = e.clientX;
+      active = true;
+      start();
+    };
+    const leave = () => {
+      active = false;
+      start();
+    };
+
+    el.addEventListener("pointermove", move);
+    el.addEventListener("pointerleave", leave);
+    return () => {
+      cancelAnimationFrame(raf);
+      el.removeEventListener("pointermove", move);
+      el.removeEventListener("pointerleave", leave);
+    };
+  }, []);
+
+  return (
+    <div
+      ref={wrap}
+      aria-hidden
+      className="display flex select-none justify-center overflow-hidden whitespace-nowrap pb-[2vw] pt-[1vw] text-[clamp(2.4rem,9.6vw,8.5rem)] leading-[0.9] tracking-[-0.02em]"
+      style={{ fontVariationSettings: '"wght" 620' }}
+    >
+      {text.split("").map((ch, i) => (
+        <span
+          key={`${ch}-${i}`}
+          ref={(node) => {
+            letters.current[i] = node;
+          }}
+          className={cn(
+            "inline-block origin-bottom will-change-[transform,font-variation-settings]",
+            i >= 3 && i <= 8 ? "text-brand" : "text-white",
+          )}
+        >
+          {ch === " " ? "\u00A0" : ch}
+        </span>
+      ))}
+    </div>
+  );
+}
 
 export function CtaSection({
   onRegister,
@@ -282,11 +367,7 @@ export function Footer({ onRegister }: { onRegister: () => void }) {
         </div>
 
         <div className="relative pb-24 pt-6 lg:pb-8">
-          <div className="pointer-events-none select-none overflow-hidden">
-            <p className="display whitespace-nowrap text-center text-[clamp(2.4rem,8.4vw,7.2rem)] leading-[0.9] text-white/[0.055]">
-              MY LAPTOP MARKET
-            </p>
-          </div>
+          <GiantWordmark />
           <div className="mt-2 flex items-center justify-between text-[9px] font-medium uppercase tracking-[0.16em] text-white/25">
             <span>Built for the channel</span>
             <span className="hidden items-center gap-1.5 sm:flex">Made in India <span className="text-white/40">·</span> Serving 85+ cities</span>
