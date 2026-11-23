@@ -156,8 +156,8 @@ export function Footer({ onRegister }: { onRegister: () => void }) {
                 },
                 {
                   name: "twitter" as const,
-                  label: "X @mylaptopmarket",
-                  href: "https://x.com/mylaptopmarket",
+                  label: "X @mylaptopmarket_",
+                  href: "https://x.com/mylaptopmarket_",
                 },
                 {
                   name: "youtube" as const,
