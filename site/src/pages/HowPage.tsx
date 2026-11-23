@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Shell } from "../components/Shell";
-import { HowItWorks } from "../components/NetworkSection";
+import { HowItWorks } from "../components/HowItWorks";
 import { CtaSection } from "../components/Footer";
 
 export function HowPage() {

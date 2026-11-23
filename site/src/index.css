@@ -385,6 +385,21 @@
     animation: dash 26s linear infinite;
   }
 
+  .caret {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.05em;
+    margin-left: 2px;
+    vertical-align: -0.16em;
+    background: currentColor;
+    animation: blink 1s steps(1) infinite;
+  }
+
+  .dash-flow {
+    stroke-dasharray: 3 5;
+    animation: dash-flow 1.2s linear infinite;
+  }
+
   .text-gradient-blue {
     background: linear-gradient(100deg, #0767d8 0%, #2b8bff 48%, #054fa8 100%);
     -webkit-background-clip: text;
@@ -477,6 +492,18 @@
 @keyframes dash {
   to {
     stroke-dashoffset: -400;
+  }
+}
+
+@keyframes dash-flow {
+  to {
+    stroke-dashoffset: -16;
+  }
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
   }
 }
 
