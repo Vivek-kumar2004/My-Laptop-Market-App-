@@ -2,7 +2,9 @@ import { useCallback, useState } from "react";
 import { Shell, type ShellApi } from "../components/Shell";
 import { Hero } from "../components/Hero";
 import { BrandMarquee, Marketplace } from "../components/Marketplace";
-import { FaqSection } from "../components/InsightsFaq";
+import { HowItWorks, NetworkSection } from "../components/NetworkSection";
+import { VendorsSection } from "../components/Vendors";
+import { FaqSection, InsightsSection } from "../components/InsightsFaq";
 import { CtaSection } from "../components/Footer";
 
 export function HomePage() {
@@ -10,9 +12,7 @@ export function HomePage() {
 
   return (
     <Shell>
-      {(api: ShellApi) => (
-        <HomeContent api={api} search={search} setSearch={setSearch} />
-      )}
+      {(api: ShellApi) => <HomeContent api={api} search={search} setSearch={setSearch} />}
     </Shell>
   );
 }
@@ -53,6 +53,10 @@ function HomeContent({
         onQuickView={api.setQuickView}
         onRequirement={api.onRequirement}
       />
+      <NetworkSection onRegister={api.onRegister} />
+      <HowItWorks onRegister={api.onRegister} />
+      <VendorsSection onRegister={api.onRegister} />
+      <InsightsSection />
       <FaqSection />
       <CtaSection onRegister={api.onRegister} onRequirement={api.onRequirement} />
     </>

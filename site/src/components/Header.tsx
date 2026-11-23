@@ -28,16 +28,19 @@ export function Header({
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [scrollActive, setScrollActive] = useState<string>("marketplace");
 
-  const active = useMemo(() => {
+  const pathActive = useMemo(() => {
     const path = location.pathname.replace(/\/index\.html$/, "").replace(/\/?$/, "/") || "/";
     if (path.startsWith("/why")) return "why";
     if (path.startsWith("/how")) return "how";
     if (path.startsWith("/vendors")) return "vendors";
     if (path.startsWith("/insights")) return "insights";
     if (location.hash === "#marketplace") return "marketplace";
-    return path === "/" ? "marketplace" : "";
+    return path === "/" ? null : "";
   }, [location.pathname, location.hash]);
+
+  const active = pathActive ?? scrollActive;
 
   const openPalette = () => {
     setMenuOpen(false);
@@ -65,6 +68,26 @@ export function Header({
       document.body.style.overflow = "";
     };
   }, [menuOpen, paletteOpen]);
+
+  useEffect(() => {
+    const onHome = location.pathname === "/" || location.pathname === "";
+    if (!onHome) return;
+    const sections = navItems
+      .map((item) => document.getElementById(item.id))
+      .filter((el): el is HTMLElement => el !== null);
+    if (!sections.length) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) setScrollActive(visible.target.id);
+      },
+      { rootMargin: "-30% 0px -55% 0px", threshold: [0.05, 0.2, 0.5] },
+    );
+    sections.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, [location.pathname]);
 
   return (
     <>
