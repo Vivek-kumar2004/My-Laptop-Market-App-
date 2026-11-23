@@ -5,7 +5,7 @@ export const routes = {
   how: "/how/",
   vendors: "/vendors/",
   insights: "/insights/",
-  faq: "/insights/#faq",
+  faq: "/#faq",
 } as const;
 
 export type NavId = "marketplace" | "why" | "how" | "vendors" | "insights";

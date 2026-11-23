@@ -6,6 +6,7 @@ import { HowItWorks, NetworkSection } from "../components/NetworkSection";
 import { VendorsSection } from "../components/Vendors";
 import { FaqSection, InsightsSection } from "../components/InsightsFaq";
 import { CtaSection } from "../components/Footer";
+import { CategoryStrip, StatsBand } from "../components/HomeExtras";
 
 export function HomePage() {
   const [search, setSearch] = useState({ query: "", category: "All", city: "All cities", key: 0 });
@@ -45,6 +46,7 @@ function HomeContent({
     <>
       <Hero onSearch={handleSearch} onQuickView={api.setQuickView} />
       <BrandMarquee />
+      <CategoryStrip />
       <Marketplace
         initialQuery={search.query}
         initialCategory={search.category}
@@ -53,6 +55,7 @@ function HomeContent({
         onQuickView={api.setQuickView}
         onRequirement={api.onRequirement}
       />
+      <StatsBand />
       <NetworkSection onRegister={api.onRegister} />
       <HowItWorks onRegister={api.onRegister} />
       <VendorsSection onRegister={api.onRegister} />

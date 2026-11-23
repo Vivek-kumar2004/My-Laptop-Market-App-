@@ -31,14 +31,12 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
       try {
         const showcase = await fetchHomeShowcase();
         let next = showcase.products;
-        if (next.length < 6) {
-          try {
-            const more = await fetchWebProducts(24);
-            const seen = new Set(next.map((p) => p.id));
-            next = [...next, ...more.filter((p) => !seen.has(p.id))];
-          } catch {
-            /* showcase alone is enough */
-          }
+        try {
+          const more = await fetchWebProducts(40);
+          const seen = new Set(next.map((p) => p.id));
+          next = [...next, ...more.filter((p) => !seen.has(p.id))];
+        } catch {
+          /* showcase alone is enough */
         }
         if (cancelled) return;
         if (next.length) {
