@@ -272,6 +272,35 @@ export function Footer({ onRegister }: { onRegister: () => void }) {
                 </a>
               ))}
             </div>
+            <p className="mt-6 text-[9.5px] font-bold uppercase tracking-[0.18em] text-white/40">Get the app</p>
+            <div className="mt-3 flex flex-wrap items-center gap-2.5">
+              <a
+                href="https://play.google.com/store/apps/details?id=com.mylaptopmarket"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition opacity-90 hover:opacity-100"
+              >
+                <img
+                  src="/images/google-play-badge.png"
+                  alt="Get it on Google Play"
+                  className="h-10 w-auto"
+                  loading="lazy"
+                />
+              </a>
+              <a
+                href="https://apps.apple.com/in/app/my-laptop-market/id6811815946"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition opacity-90 hover:opacity-100"
+              >
+                <img
+                  src="/images/app-store-badge.svg"
+                  alt="Download on the App Store"
+                  className="h-10 w-auto"
+                  loading="lazy"
+                />
+              </a>
+            </div>
           </div>
 
           {footerLinks.map((column) => (
