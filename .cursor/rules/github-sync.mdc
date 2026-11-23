@@ -9,7 +9,7 @@ The project remote is `origin` on the private GitHub repo `Vivek-kumar2004/My-La
 
 After you finish a code change the user asked for, commit the relevant files and push to `origin` `main`. Do this without waiting for a separate commit request.
 
-A push that changes `website/` or `site/` publishes the public site. The GitHub Action builds the Next.js static export in `site/`, overlays it on `website/`, uploads to the live bucket, and refreshes the CDN. It does not delete bucket files that are absent from the folder, and it does not deploy the API or the mobile apps.
+A push that changes `website/` or `site/` publishes the public site. The GitHub Action builds the Vite static homepage in `site/`, overlays it on `website/`, uploads to the live bucket, and refreshes the CDN. It does not delete bucket files that are absent from the folder, and it does not deploy the API or the mobile apps.
 
 Do not commit or push secrets: `.env`, `keystore.properties`, `keystore/`, `*.jks`, `playstore/KEYSTORE_BACKUP.txt`, `firebase/functions/firebase_web.json`, `AIConfig.kt`, or any password, API key, or certificate. Do not commit `node_modules`, virtualenvs, `firebase/hosting/`, build outputs, or Xcode `xcuserdata`.
 

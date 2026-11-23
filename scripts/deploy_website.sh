@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build the Next.js marketing site (static export) and publish it together with
+# Build the Vite marketing homepage (static export) and publish it together with
 # the remaining static pages under website/ to the live Google Cloud bucket.
 # Objects that are not in the publish folder are left in place.
 set -euo pipefail
@@ -23,7 +23,7 @@ fi
 # Refresh Google sitemap with current public product URLs before upload.
 python3 "$ROOT/scripts/generate_sitemap.py"
 
-# Build Next.js static export (homepage + shared assets under site/out).
+# Build Vite static homepage (single-file index.html under site/out).
 (
   cd "$SITE_APP"
   npm ci
@@ -31,7 +31,7 @@ python3 "$ROOT/scripts/generate_sitemap.py"
 )
 
 if [[ ! -d "$SITE_APP/out" ]]; then
-  echo "site/out missing after next build" >&2
+  echo "site/out missing after vite build" >&2
   exit 1
 fi
 
@@ -41,7 +41,7 @@ mkdir -p "$PUBLISH"
 # Base: legacy static pages (about, products, etc.) and shared assets.
 cp -a "$WEBSITE"/. "$PUBLISH"/
 
-# Overlay: Next static export replaces homepage and adds /_next assets.
+# Overlay: Vite homepage export replaces index.html and adds any public assets.
 cp -a "$SITE_APP/out"/. "$PUBLISH"/
 
 gcloud storage rsync "$PUBLISH" "$BUCKET" \
