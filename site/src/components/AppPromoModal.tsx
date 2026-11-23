@@ -296,11 +296,11 @@ export function AppPromoModal({ blocked = false }: { blocked?: boolean }) {
             <div className="grain pointer-events-none absolute inset-0 opacity-30" />
             <div className="relative flex items-center gap-3">
               <div className="relative h-[88px] w-[72px] shrink-0 overflow-hidden rounded-[14px] border-2 border-white/25 bg-[#050d1a] p-1 shadow-lg">
-                <div className="h-full overflow-hidden rounded-[10px] bg-white">
+                <div className="flex h-full items-center justify-center overflow-hidden rounded-[10px] bg-white p-2">
                   <img
-                    src={images.appSearch}
-                    alt="My Laptop Market app search"
-                    className="h-full w-full object-cover object-top"
+                    src={images.logoMark}
+                    alt="My Laptop Market"
+                    className="h-auto w-full max-w-[44px] object-contain"
                     loading="lazy"
                   />
                 </div>
