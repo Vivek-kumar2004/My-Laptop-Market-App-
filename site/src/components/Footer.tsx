@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { cn } from "../utils/cn";
 import { Icon, LogoMark, Wordmark } from "./Icon";
 import { Reveal } from "../lib/motion";
+import { routes } from "../lib/routes";
 
 export function CtaSection({
   onRegister,
@@ -138,10 +140,10 @@ export function Footer({ onRegister }: { onRegister: () => void }) {
       <div className="wrap relative">
         <div className="grid gap-10 border-b border-white/10 pb-12 lg:grid-cols-12 lg:gap-8">
           <div className="lg:col-span-3">
-            <a href="#top" className="inline-flex items-center gap-2.5" aria-label="My Laptop Market home">
+            <Link to={routes.home} className="inline-flex items-center gap-2.5" aria-label="My Laptop Market home">
               <LogoMark className="h-10 w-10" />
               <Wordmark light />
-            </a>
+            </Link>
             <p className="mt-4 max-w-[250px] text-[11.5px] leading-relaxed text-white/50">
               India&apos;s B2B network for IT vendors, dealers, suppliers and technology businesses. Connecting refurbished IT
               dealers since day one.
@@ -173,23 +175,25 @@ export function Footer({ onRegister }: { onRegister: () => void }) {
               <ul className="mt-3.5 space-y-2.5">
                 {column.links.map((link) => (
                   <li key={link}>
-                    <a
-                      href={
+                    <Link
+                      to={
                         link === "Why My Laptop Market"
-                          ? "#why"
+                          ? routes.why
                           : link === "How it works"
-                            ? "#how"
+                            ? routes.how
                             : link === "Verified vendors"
-                              ? "#vendors"
+                              ? routes.vendors
                               : link === "Insights & guides"
-                                ? "#insights"
-                                : "#marketplace"
+                                ? routes.insights
+                                : link === "Vendor registration"
+                                  ? routes.vendors
+                                  : routes.marketplace
                       }
                       className="group inline-flex items-center gap-1 text-[11.5px] font-medium text-white/65 transition hover:text-white"
                     >
                       {link}
                       <Icon name="arrow-up-right" size={10} className="opacity-0 transition group-hover:opacity-100" />
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>

@@ -1,25 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "../utils/cn";
 import { brands, products, type Product } from "../data";
 import { Icon, LogoMark, Wordmark } from "./Icon";
 import { useScrolled } from "../lib/motion";
-
-const navItems = [
-  { label: "Live marketplace", href: "#marketplace", id: "marketplace" },
-  { label: "Why us", href: "#why", id: "why" },
-  { label: "How it works", href: "#how", id: "how" },
-  { label: "Vendors", href: "#vendors", id: "vendors" },
-  { label: "Insights", href: "#insights", id: "insights" },
-];
+import { navItems, routes } from "../lib/routes";
 
 const pageLinks = [
-  { label: "Home", href: "#top" },
-  { label: "Live marketplace", href: "#marketplace" },
-  { label: "Why My Laptop Market", href: "#why" },
-  { label: "How it works", href: "#how" },
-  { label: "Popular vendors", href: "#vendors" },
-  { label: "Insights & guides", href: "#insights" },
-  { label: "FAQs", href: "#faq" },
+  { label: "Home", href: routes.home },
+  { label: "Live marketplace", href: routes.marketplace },
+  { label: "Why My Laptop Market", href: routes.why },
+  { label: "How it works", href: routes.how },
+  { label: "Popular vendors", href: routes.vendors },
+  { label: "Insights & guides", href: routes.insights },
+  { label: "FAQs", href: routes.faq },
 ];
 
 export function Header({
@@ -30,9 +24,19 @@ export function Header({
   onOpenProduct: (product: Product) => void;
 }) {
   const scrolled = useScrolled(24);
+  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
-  const [active, setActive] = useState("marketplace");
+
+  const active = useMemo(() => {
+    const path = location.pathname.replace(/\/index\.html$/, "").replace(/\/?$/, "/") || "/";
+    if (path.startsWith("/why")) return "why";
+    if (path.startsWith("/how")) return "how";
+    if (path.startsWith("/vendors")) return "vendors";
+    if (path.startsWith("/insights")) return "insights";
+    if (location.hash === "#marketplace") return "marketplace";
+    return path === "/" ? "marketplace" : "";
+  }, [location.pathname, location.hash]);
 
   const openPalette = () => {
     setMenuOpen(false);
@@ -61,24 +65,6 @@ export function Header({
     };
   }, [menuOpen, paletteOpen]);
 
-  useEffect(() => {
-    const sections = navItems
-      .map((item) => document.getElementById(item.id))
-      .filter((el): el is HTMLElement => el !== null);
-    if (!sections.length) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (visible) setActive(visible.target.id);
-      },
-      { rootMargin: "-30% 0px -55% 0px", threshold: [0.05, 0.2, 0.5] },
-    );
-    sections.forEach((section) => observer.observe(section));
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <>
       <div className="relative z-[60] bg-navy text-white">
@@ -102,12 +88,12 @@ export function Header({
           </div>
           <div className="hidden items-center gap-5 text-white/65 sm:flex">
             <a className="inline-flex items-center gap-1.5 transition hover:text-white" href="tel:+919718199976">
-              <Icon name="phone" size={12} /> +91 98765 43210
+              <Icon name="phone" size={12} /> +91 97181 99976
             </a>
             <span className="h-3 w-px bg-white/15" />
-            <a className="inline-flex items-center gap-1.5 transition hover:text-white" href="#vendors">
+            <Link className="inline-flex items-center gap-1.5 transition hover:text-white" to={routes.vendors}>
               <Icon name="store" size={12} /> Become a vendor
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -119,16 +105,16 @@ export function Header({
         )}
       >
         <div className={cn("wrap flex items-center justify-between gap-6 transition-all duration-500", scrolled ? "h-[68px]" : "h-[82px]")}>
-          <a href="#top" className="group flex shrink-0 items-center gap-2.5" aria-label="My Laptop Market home">
+          <Link to={routes.home} className="group flex shrink-0 items-center gap-2.5" aria-label="My Laptop Market home">
             <LogoMark className="h-10 w-10 transition-transform duration-500 group-hover:rotate-[-6deg]" />
             <Wordmark />
-          </a>
+          </Link>
 
           <nav className="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
             {navItems.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
+              <Link
+                key={item.id}
+                to={item.href}
                 className={cn(
                   "relative rounded-full px-3.5 py-2 text-[13px] font-semibold transition-colors",
                   active === item.id ? "text-brand" : "text-navy/70 hover:text-navy",
@@ -141,7 +127,7 @@ export function Header({
                     active === item.id ? "scale-x-100" : "scale-x-0",
                   )}
                 />
-              </a>
+              </Link>
             ))}
           </nav>
 
@@ -193,16 +179,16 @@ export function Header({
               <span className="ml-auto rounded-md border border-line bg-white px-1.5 py-0.5 text-[10px] font-bold">⌘K</span>
             </button>
             {navItems.map((item, index) => (
-              <a
-                key={item.href}
-                href={item.href}
+              <Link
+                key={item.id}
+                to={item.href}
                 onClick={() => setMenuOpen(false)}
                 className="flex items-center justify-between border-b border-line/60 py-3 text-[15px] font-semibold text-navy"
                 style={{ animationDelay: `${index * 40}ms` }}
               >
                 {item.label}
                 <Icon name="arrow-up-right" size={16} className="text-brand" />
-              </a>
+              </Link>
             ))}
             <div className="mt-4 flex gap-2">
               <button onClick={() => { setMenuOpen(false); onRegister(); }} className="btn btn-primary flex-1">
@@ -246,6 +232,7 @@ function CommandPalette({
   onClose: () => void;
   onOpenProduct: (product: Product) => void;
 }) {
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [cursor, setCursor] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -286,7 +273,7 @@ function CommandPalette({
     }
     const link = filteredPages[index - matches.length];
     if (link) {
-      window.location.hash = link.href;
+      navigate(link.href);
       onClose();
     }
   };
@@ -387,7 +374,7 @@ function CommandPalette({
                   >
                     <Icon name="arrow-right" size={14} className="text-brand" />
                     {link.label}
-                    <span className="ml-auto text-[10px] font-medium text-slate-ink">Section</span>
+                    <span className="ml-auto text-[10px] font-medium text-slate-ink">Page</span>
                   </button>
                 );
               })}

@@ -1,9 +1,11 @@
 import { useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { networkNodes, steps } from "../data";
 import { cn } from "../utils/cn";
 import { Icon } from "./Icon";
 import { CountUp, Reveal } from "../lib/motion";
 import { images } from "../assets";
+import { routes } from "../lib/routes";
 
 export function NetworkSection({ onRegister }: { onRegister: () => void }) {
   const [activeCity, setActiveCity] = useState(networkNodes[3]!);
@@ -42,14 +44,12 @@ export function NetworkSection({ onRegister }: { onRegister: () => void }) {
             <button onClick={onRegister} className="btn btn-primary h-11 min-h-0 px-5 text-[12.5px]">
               Join the network <Icon name="arrow-up-right" size={15} className="arrow" />
             </button>
-            <a
-              href="https://mylaptopmarket.com/why-us.html"
-              target="_blank"
-              rel="noreferrer"
+            <Link
+              to={routes.marketplace}
               className="btn h-11 min-h-0 border border-white/20 bg-white/5 px-5 text-[12.5px] text-white backdrop-blur hover:bg-white/10"
             >
               See inside the platform
-            </a>
+            </Link>
           </Reveal>
         </div>
 
