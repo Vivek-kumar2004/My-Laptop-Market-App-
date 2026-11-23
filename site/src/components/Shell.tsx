@@ -7,10 +7,12 @@ import { Icon } from "./Icon";
 import { Header } from "./Header";
 import { SideDock } from "./SideDock";
 import { Footer } from "./Footer";
+import { floatingDockConfig } from "../lib/floatingDock";
 import { AppPromoModal } from "./AppPromoModal";
+import { FloatingDock } from "./FloatingDock";
 import { ProductModal, RegisterDialog, type DialogIntent } from "./Dialogs";
 
-const WHATSAPP = "https://wa.me/919718199976";
+const WHATSAPP = floatingDockConfig.whatsappUrl;
 
 export function Shell({
   children,
@@ -81,30 +83,7 @@ export function Shell({
 
       <Footer onRegister={() => openDialog("vendor")} />
 
-      <div
-        className={cn(
-          "fixed right-4 bottom-4 z-40 hidden flex-col gap-2 transition-all duration-500 lg:flex",
-          scrolled && !overlayOpen ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-6 opacity-0",
-        )}
-      >
-        <a
-          href={WHATSAPP}
-          target="_blank"
-          rel="noreferrer"
-          className="group flex h-11 w-11 items-center justify-center rounded-full border border-line bg-white text-navy shadow-soft transition hover:-translate-y-1 hover:border-brand/30 hover:text-brand"
-          aria-label="Chat with us on WhatsApp"
-        >
-          <Icon name="whatsapp" size={18} />
-        </a>
-        <button
-          type="button"
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-white text-navy shadow-soft transition hover:-translate-y-1 hover:border-brand/30 hover:text-brand"
-          aria-label="Back to top"
-        >
-          <Icon name="arrow-down" size={17} className="rotate-180" />
-        </button>
-      </div>
+      <FloatingDock visible={scrolled && !overlayOpen} />
 
       <div
         className={cn(
