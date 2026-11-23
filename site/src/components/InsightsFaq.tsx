@@ -25,9 +25,7 @@ export function InsightsSection() {
           </Reveal>
           <Reveal delay={100}>
             <a
-              href="https://mylaptopmarket.com"
-              target="_blank"
-              rel="noreferrer"
+              href="https://mylaptopmarket.com/blogs.html"
               className="link-arrow rounded-full border border-line bg-white px-4 py-2.5 text-[12px] transition hover:border-brand/30"
             >
               View all insights <Icon name="arrow-up-right" size={14} />

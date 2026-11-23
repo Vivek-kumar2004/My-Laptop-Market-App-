@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
-import { categories, cities, inr, listingActivity, products, savings, type Product } from "../data";
+import { useEffect, useMemo, useState } from "react";
+import { categories, cities, inr, listingActivity, savings, type Product } from "../data";
 import { Icon } from "./Icon";
 import { CountUp, Reveal, useTilt } from "../lib/motion";
+import { useCatalog } from "../lib/catalog";
 
 export function Hero({
   onSearch,
@@ -11,18 +12,24 @@ export function Hero({
   onQuickView: (product: Product) => void;
 }) {
   const tilt = useTilt(5);
+  const { products, loading } = useCatalog();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All categories");
   const [city, setCity] = useState("All India");
   const [activityIndex, setActivityIndex] = useState(0);
-  const heroProduct = products[0]!;
+  const heroProduct = products[0];
+
+  const liveActivity = useMemo(() => {
+    if (!products.length) return listingActivity;
+    return products.slice(0, 5).map((p) => `${p.vendor.name} listed ${p.units} × ${p.name} in ${p.city}`);
+  }, [products]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
-      setActivityIndex((value) => (value + 1) % listingActivity.length);
+      setActivityIndex((value) => (value + 1) % liveActivity.length);
     }, 4600);
     return () => window.clearInterval(timer);
-  }, []);
+  }, [liveActivity.length]);
 
   return (
     <section id="top" className="relative overflow-hidden bg-white pb-16 pt-10 sm:pb-20 sm:pt-14 lg:pb-24 lg:pt-16">
@@ -204,6 +211,8 @@ export function Hero({
 
               <div ref={tilt.ref} onMouseMove={tilt.onMove} onMouseLeave={tilt.onLeave} className="tilt-card relative">
                 <div className="relative overflow-hidden rounded-[26px] border border-white/70 bg-white shadow-[0_36px_90px_-34px_rgba(11,27,58,0.5)]">
+                  {heroProduct ? (
+                    <>
                   <div className="flex items-center justify-between border-b border-line/80 px-4 py-3">
                     <div className="flex items-center gap-2 text-[10.5px] font-bold tracking-wide text-navy">
                       <span className="relative flex h-2 w-2">
@@ -218,7 +227,7 @@ export function Hero({
                     </span>
                   </div>
 
-                  <button onClick={() => onQuickView(heroProduct)} className="group relative block w-full overflow-hidden bg-[#f2f6fc] text-left">
+                  <button type="button" onClick={() => onQuickView(heroProduct)} className="group relative block w-full overflow-hidden bg-[#f2f6fc] text-left">
                     <span className="absolute left-4 top-4 z-10 rounded-full border border-navy/5 bg-white/90 px-2.5 py-1 text-[10px] font-bold text-navy shadow-sm backdrop-blur">
                       {heroProduct.condition} · Refurbished
                     </span>
@@ -240,11 +249,13 @@ export function Hero({
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-brand">{heroProduct.brand} · {heroProduct.category}</p>
-                        <button onClick={() => onQuickView(heroProduct)} className="mt-1 block text-left text-[16px] font-bold tracking-[-0.02em] text-navy hover:text-brand sm:text-[17px]">
+                        <button type="button" onClick={() => onQuickView(heroProduct)} className="mt-1 block text-left text-[16px] font-bold tracking-[-0.02em] text-navy hover:text-brand sm:text-[17px]">
                           {heroProduct.name}
                         </button>
                       </div>
-                      <span className="shrink-0 rounded-full bg-verified/10 px-2 py-1 text-[10px] font-bold text-[#0f9a38]">Save {savings(heroProduct.price, heroProduct.mrp)}%</span>
+                      {heroProduct.mrp > heroProduct.price ? (
+                        <span className="shrink-0 rounded-full bg-verified/10 px-2 py-1 text-[10px] font-bold text-[#0f9a38]">Save {savings(heroProduct.price, heroProduct.mrp)}%</span>
+                      ) : null}
                     </div>
                     <div className="mt-3 flex flex-wrap gap-1.5">
                       {heroProduct.specs.map((spec) => (
@@ -257,18 +268,28 @@ export function Hero({
                         <p className="text-[22px] font-bold leading-tight tracking-[-0.03em] text-navy">{inr(heroProduct.price)}</p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className={`flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br ${heroProduct.vendor.tint} text-[9px] font-bold text-white`}>
-                          {heroProduct.vendor.initials}
-                        </div>
+                        {heroProduct.vendor.logoUrl ? (
+                          <img src={heroProduct.vendor.logoUrl} alt="" className="h-8 w-8 rounded-full object-cover" />
+                        ) : (
+                          <div className={`flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br ${heroProduct.vendor.tint} text-[9px] font-bold text-white`}>
+                            {heroProduct.vendor.initials}
+                          </div>
+                        )}
                         <div className="text-right text-[10px] leading-tight">
                           <p className="font-bold text-navy">{heroProduct.vendor.name}</p>
                           <p className="flex items-center justify-end gap-0.5 text-slate-ink">
-                            <Icon name="badge" size={9} className="text-verified" /> MOQ {heroProduct.moq}
+                            <Icon name="badge" size={9} className="text-verified" /> {heroProduct.units} in stock
                           </p>
                         </div>
                       </div>
                     </div>
                   </div>
+                    </>
+                  ) : (
+                    <div className="flex h-[420px] items-center justify-center bg-mist px-6 text-center text-sm text-slate-ink">
+                      {loading ? "Loading live stock…" : "Live listings will appear here shortly."}
+                    </div>
+                  )}
                 </div>
 
                 <div className="animate-float absolute -left-5 bottom-[30%] hidden w-[166px] rounded-2xl border border-line bg-white/95 p-3 shadow-[0_20px_50px_-22px_rgba(11,27,58,0.4)] backdrop-blur sm:block">
@@ -326,7 +347,7 @@ export function Hero({
                 </span>
                 <p key={activityIndex} className="fade-slide-in truncate text-[10.5px] font-medium text-slate-ink">
                   <span className="font-bold text-navy">Live now · </span>
-                  {listingActivity[activityIndex]}
+                  {liveActivity[activityIndex % liveActivity.length]}
                 </p>
               </div>
             </div>

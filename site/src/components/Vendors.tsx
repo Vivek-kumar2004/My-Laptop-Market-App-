@@ -1,81 +1,48 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { testimonials } from "../data";
 import { cn } from "../utils/cn";
 import { Icon } from "./Icon";
 import { CountUp, Reveal } from "../lib/motion";
+import { useCatalog } from "../lib/catalog";
+import { SITE_ORIGIN } from "../lib/api";
 
-const vendors = [
-  {
-    name: "TechRenew India",
-    initials: "TR",
-    city: "Mumbai",
-    rating: 4.9,
-    deals: 312,
-    specialties: ["Enterprise laptops", "Bulk supply"],
-    since: "2016",
-    tint: "from-[#0767D8] to-[#1E86FF]",
-    response: "Replies in 1h",
-  },
-  {
-    name: "ReCompute Labs",
-    initials: "RL",
-    city: "Bengaluru",
-    rating: 4.8,
-    deals: 248,
-    specialties: ["Laptops", "Corporate ITAD"],
-    since: "2014",
-    tint: "from-[#0B1B3A] to-[#0767D8]",
-    response: "Replies in 2h",
-  },
-  {
-    name: "ServerSphere",
-    initials: "SS",
-    city: "Hyderabad",
-    rating: 4.8,
-    deals: 137,
-    specialties: ["Servers", "Storage"],
-    since: "2018",
-    tint: "from-[#054FA8] to-[#2B8BFF]",
-    response: "Replies in 3h",
-  },
-  {
-    name: "iAsset Recovery",
-    initials: "IA",
-    city: "Pune",
-    rating: 4.9,
-    deals: 421,
-    specialties: ["Apple", "Asset recovery"],
-    since: "2012",
-    tint: "from-[#14294D] to-[#2B8BFF]",
-    response: "Replies in 1h",
-  },
-  {
-    name: "Netline Systems",
-    initials: "NS",
-    city: "Noida",
-    rating: 4.7,
-    deals: 154,
-    specialties: ["Networking", "Cisco"],
-    since: "2017",
-    tint: "from-[#054FA8] to-[#1E86FF]",
-    response: "Replies in 2h",
-  },
-  {
-    name: "Chennai Peripherals",
-    initials: "CP",
-    city: "Chennai",
-    rating: 4.6,
-    deals: 96,
-    specialties: ["Monitors", "Peripherals"],
-    since: "2019",
-    tint: "from-[#0767D8] to-[#5EA9FF]",
-    response: "Replies in 4h",
-  },
+const TINTS = [
+  "from-[#0767D8] to-[#1E86FF]",
+  "from-[#0B1B3A] to-[#0767D8]",
+  "from-[#054FA8] to-[#2B8BFF]",
+  "from-[#14294D] to-[#2B8BFF]",
+  "from-[#0767D8] to-[#5EA9FF]",
+  "from-[#054FA8] to-[#1E86FF]",
 ];
 
+function initials(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "V";
+  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
+  return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+}
+
 export function VendorsSection({ onRegister }: { onRegister: () => void }) {
+  const { vendors: liveVendors } = useCatalog();
   const [active, setActive] = useState(0);
   const testimonial = testimonials[active]!;
+
+  const vendors = useMemo(() => {
+    if (!liveVendors.length) return [];
+    return liveVendors.slice(0, 6).map((v, index) => ({
+      name: v.vendor_name,
+      initials: initials(v.vendor_name),
+      city: v.vendor_location || "India",
+      rating: 4.8,
+      deals: Number(v.product_count) || 0,
+      specialties: [`${Number(v.product_count) || 0} live listings`],
+      since: "Verified",
+      tint: TINTS[index % TINTS.length]!,
+      response: "Active now",
+      logoUrl: v.vendor_logo_url,
+      href: `${SITE_ORIGIN}/products.html?vendor_id=${encodeURIComponent(String(v.vendor_id))}&vendor_name=${encodeURIComponent(v.vendor_name || "")}`,
+    }));
+  }, [liveVendors]);
 
   return (
     <section id="vendors" className="relative scroll-mt-24 overflow-hidden bg-white py-16 sm:py-20 lg:py-24">
@@ -97,14 +64,23 @@ export function VendorsSection({ onRegister }: { onRegister: () => void }) {
           <Reveal delay={100} className="flex items-center gap-4">
             <div className="flex items-center gap-3">
               <div className="flex -space-x-2.5">
-                {vendors.slice(0, 4).map((vendor) => (
-                  <span
-                    key={vendor.initials}
-                    className={`flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br ${vendor.tint} text-[9px] font-bold text-white`}
-                  >
-                    {vendor.initials}
-                  </span>
-                ))}
+                {vendors.slice(0, 4).map((vendor) =>
+                  vendor.logoUrl ? (
+                    <img
+                      key={vendor.name}
+                      src={vendor.logoUrl}
+                      alt=""
+                      className="h-9 w-9 rounded-full border-2 border-white object-cover"
+                    />
+                  ) : (
+                    <span
+                      key={vendor.name}
+                      className={`flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br ${vendor.tint} text-[9px] font-bold text-white`}
+                    >
+                      {vendor.initials}
+                    </span>
+                  ),
+                )}
                 <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-sky text-[8.5px] font-bold text-brand">
                   +1k
                 </span>
@@ -115,9 +91,7 @@ export function VendorsSection({ onRegister }: { onRegister: () => void }) {
               </div>
             </div>
             <a
-              href="https://mylaptopmarket.com"
-              target="_blank"
-              rel="noreferrer"
+              href={`${SITE_ORIGIN}/products.html`}
               className="flex h-10 w-10 items-center justify-center rounded-full border border-line text-navy transition hover:border-brand hover:bg-brand hover:text-white"
               aria-label="See all vendors"
             >
@@ -130,24 +104,26 @@ export function VendorsSection({ onRegister }: { onRegister: () => void }) {
           {vendors.map((vendor, index) => (
             <Reveal key={vendor.name} delay={(index % 3) * 60}>
               <a
-                href="https://mylaptopmarket.com"
-                target="_blank"
-                rel="noreferrer"
+                href={vendor.href}
                 className="group relative flex h-full flex-col overflow-hidden rounded-[20px] border border-line bg-white p-5 transition-all duration-500 hover:-translate-y-1 hover:border-brand/25 hover:shadow-[0_26px_50px_-32px_rgba(11,27,58,0.4)]"
               >
                 <span className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-sky opacity-0 blur-2xl transition group-hover:opacity-100" />
                 <div className="relative flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <span className={`flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${vendor.tint} font-display text-[13px] font-bold text-white shadow-md`}>
-                      {vendor.initials}
-                    </span>
+                    {vendor.logoUrl ? (
+                      <img src={vendor.logoUrl} alt="" className="h-11 w-11 rounded-xl object-cover shadow-md" />
+                    ) : (
+                      <span className={`flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${vendor.tint} font-display text-[13px] font-bold text-white shadow-md`}>
+                        {vendor.initials}
+                      </span>
+                    )}
                     <div>
                       <p className="flex items-center gap-1.5 text-[13.5px] font-bold tracking-[-0.01em] text-navy">
                         {vendor.name}
                         <Icon name="badge" size={13} className="text-verified" />
                       </p>
                       <p className="mt-0.5 flex items-center gap-1 text-[10.5px] text-slate-ink">
-                        <Icon name="pin" size={10} /> {vendor.city} · Since {vendor.since}
+                        <Icon name="pin" size={10} /> {vendor.city} · {vendor.since}
                       </p>
                     </div>
                   </div>
@@ -166,12 +142,12 @@ export function VendorsSection({ onRegister }: { onRegister: () => void }) {
 
                 <div className="relative mt-auto flex items-center justify-between border-t border-line/70 pt-3.5">
                   <div className="flex items-center gap-3 text-[10px] text-slate-ink">
-                    <span><span className="font-bold text-navy">{vendor.deals}</span> deals</span>
+                    <span><span className="font-bold text-navy">{vendor.deals}</span> listings</span>
                     <span className="h-3 w-px bg-line" />
                     <span className="flex items-center gap-1"><Icon name="clock" size={10} /> {vendor.response}</span>
                   </div>
                   <span className="flex items-center gap-1 text-[10.5px] font-bold text-brand">
-                    View profile
+                    View stock
                     <Icon name="arrow-up-right" size={12} className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                   </span>
                 </div>

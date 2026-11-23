@@ -11,6 +11,7 @@ export type Vendor = {
   rating: number;
   deals: number;
   tint: string;
+  logoUrl?: string;
 };
 
 export type Product = {
@@ -30,6 +31,7 @@ export type Product = {
   vendor: Vendor;
   featured?: boolean;
   tags: string[];
+  detailUrl?: string;
 };
 
 export const products: Product[] = [
@@ -313,7 +315,7 @@ export const insights = [
     category: "Market watch",
     title: "Refurbished laptop prices in India: the 2026 buyer's index",
     excerpt: "What ₹30,000 actually buys across Dell, HP and Lenovo — and which generations hold their value.",
-    image: images.dell,
+    image: images.lifestyle,
     read: "8 min read",
     date: "18 Dec 2025",
   },
@@ -321,7 +323,7 @@ export const insights = [
     category: "Playbook",
     title: "How to inspect a used ThinkPad before a bulk purchase",
     excerpt: "A seven-point checklist dealers use to grade laptops, from battery cycles to hinge tolerance.",
-    image: images.thinkpad,
+    image: images.lifestyleAlt,
     read: "6 min read",
     date: "11 Dec 2025",
   },
@@ -329,7 +331,7 @@ export const insights = [
     category: "Sustainability",
     title: "The ITAD opportunity: turning retired fleets into working capital",
     excerpt: "Why corporate asset disposition is becoming the quiet engine of India's refurbished IT trade.",
-    image: images.hp,
+    image: images.thinkpad,
     read: "5 min read",
     date: "02 Dec 2025",
   },

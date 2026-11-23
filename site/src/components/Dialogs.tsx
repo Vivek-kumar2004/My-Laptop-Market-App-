@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { cities, inr, type Product } from "../data";
 import { cn } from "../utils/cn";
-import { Icon, LogoMark, Wordmark } from "./Icon";
+import { BrandLogo, Icon } from "./Icon";
 
 export type DialogIntent = "vendor" | "buyer";
 
@@ -83,8 +83,7 @@ export function RegisterDialog({
             <div className="pointer-events-none absolute inset-0 opacity-[0.15] [background-image:radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px]" />
             <div className="pointer-events-none absolute -right-16 top-1/4 h-56 w-56 rounded-full bg-brand/40 blur-3xl" />
             <div className="relative flex items-center gap-2.5">
-              <LogoMark className="h-9 w-9" />
-              <Wordmark light />
+              <BrandLogo light className="h-10 max-w-[180px]" />
             </div>
 
             <div className="relative mt-10">
@@ -416,12 +415,10 @@ export function ProductModal({
                   </p>
                 </div>
                 <a
-                  href="https://mylaptopmarket.com"
-                  target="_blank"
-                  rel="noreferrer"
+                  href={product.detailUrl || "https://mylaptopmarket.com/products.html"}
                   className="flex items-center gap-1 rounded-full border border-line px-2.5 py-1.5 text-[9.5px] font-bold text-navy transition hover:border-brand/30 hover:text-brand"
                 >
-                  Profile <Icon name="arrow-up-right" size={10} />
+                  Full listing <Icon name="arrow-up-right" size={10} />
                 </a>
               </div>
             </div>

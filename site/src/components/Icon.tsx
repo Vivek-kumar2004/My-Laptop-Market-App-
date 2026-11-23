@@ -355,21 +355,12 @@ export function Icon({ name, size = 18, strokeWidth = 1.7, className, ...props }
 
 export function LogoMark({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 40 40" className={className} aria-hidden="true" fill="none">
-      <rect width="40" height="40" rx="11" fill="#0767D8" />
-      <path
-        d="M31.5 15.6A12.2 12.2 0 0 0 8.8 20a12.2 12.2 0 0 0 20 9.1"
-        stroke="#BFDBFE"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-      />
-      <rect x="10.2" y="12.8" width="19.6" height="12.6" rx="1.8" fill="#fff" />
-      <path d="M7.2 27.6h25.6" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" />
-      <circle cx="15.6" cy="17.4" r="1.7" fill="#0767D8" />
-      <circle cx="24.2" cy="17.4" r="1.7" fill="#1FBF4F" />
-      <circle cx="20" cy="21.6" r="1.7" fill="#0767D8" />
-      <path d="M15.6 17.4 20 21.6l4.2-4.2M20 21.6v-9" stroke="#0B1B3A" strokeWidth="1.1" strokeLinecap="round" />
-    </svg>
+    <img
+      src="/images/logo.png"
+      alt=""
+      aria-hidden="true"
+      className={cn("h-10 w-10 rounded-[11px] object-cover", className)}
+    />
   );
 }
 
@@ -384,5 +375,26 @@ export function Wordmark({ light = false, className }: { light?: boolean; classN
         MARKET
       </span>
     </span>
+  );
+}
+
+/** Full brand lockup used on the marketing site header/footer. */
+export function BrandLogo({
+  light = false,
+  className,
+}: {
+  light?: boolean;
+  className?: string;
+}) {
+  return (
+    <img
+      src="/images/mylaptoplogo.png"
+      alt="My Laptop Market"
+      className={cn(
+        "h-11 w-auto max-w-[200px] object-contain object-left sm:h-12 sm:max-w-[220px]",
+        light && "rounded-md bg-white/95 p-1",
+        className,
+      )}
+    />
   );
 }

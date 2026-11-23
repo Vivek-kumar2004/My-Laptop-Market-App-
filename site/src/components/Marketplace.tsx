@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { categories, cities, inr, products, savings, type Product } from "../data";
+import { categories, cities, inr, savings, type Product } from "../data";
 import { cn } from "../utils/cn";
 import { Icon } from "./Icon";
 import { Reveal } from "../lib/motion";
+import { useCatalog } from "../lib/catalog";
+import { SITE_ORIGIN } from "../lib/api";
 
 const categoryFilters = ["All", "Laptops", "Servers", "Networking", "Monitors"] as const;
 const sortOptions = [
@@ -34,6 +36,7 @@ export function Marketplace({
   const [sort, setSort] = useState<(typeof sortOptions)[number]["value"]>("newest");
   const [showFilters, setShowFilters] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const { products, loading, live } = useCatalog();
 
   useEffect(() => {
     setQuery(initialQuery);
@@ -45,6 +48,11 @@ export function Marketplace({
 
   const toggleFavorite = (id: string) =>
     setFavorites((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
+
+  const cityOptions = useMemo(() => {
+    const fromStock = Array.from(new Set(products.map((p) => p.city).filter(Boolean)));
+    return fromStock.length ? ["All cities", ...fromStock] : ["All cities", ...cities];
+  }, [products]);
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -59,7 +67,8 @@ export function Marketplace({
       const matchesCity = city === "All cities" || product.city === city;
       const matchesCondition =
         condition === "All grades" ||
-        (condition === "Grade A+" ? product.condition === "Grade A+" : product.condition.startsWith("Grade A"));
+        product.condition === condition ||
+        /refurb|grade a/i.test(product.condition);
       return matchesQuery && matchesCategory && matchesCity && matchesCondition;
     });
     const sorted = [...result];
@@ -67,7 +76,7 @@ export function Marketplace({
     if (sort === "price-desc") sorted.sort((a, b) => b.price - a.price);
     if (sort === "stock") sorted.sort((a, b) => b.units - a.units);
     return sorted;
-  }, [query, category, city, condition, sort]);
+  }, [query, category, city, condition, sort, products]);
 
   const activeFilters = (city !== "All cities" ? 1 : 0) + (condition !== "All grades" ? 1 : 0);
   const reset = () => {
@@ -101,14 +110,13 @@ export function Marketplace({
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-verified" />
               </span>
               <span className="font-bold text-navy">{filtered.length}</span> of {products.length} listings shown
+              {live ? <span className="text-verified"> · live</span> : loading ? " · loading…" : null}
             </div>
             <button onClick={onRequirement} className="link-arrow h-11 rounded-full border border-line bg-white px-4 text-[12px] transition hover:border-brand/30">
               Post a requirement <Icon name="plus" size={14} />
             </button>
             <a
-              href="https://mylaptopmarket.com/products.html"
-              target="_blank"
-              rel="noreferrer"
+              href={`${SITE_ORIGIN}/products.html`}
               className="btn btn-ghost h-11 min-h-0 px-4 text-[12.5px]"
             >
               All listings <Icon name="arrow-up-right" size={14} className="arrow" />
@@ -203,8 +211,9 @@ export function Marketplace({
                       className="w-full cursor-pointer appearance-none bg-transparent outline-none"
                       aria-label="Filter by city"
                     >
-                      <option>All cities</option>
-                      {cities.map((item) => <option key={item}>{item}</option>)}
+                      {cityOptions.map((item) => (
+                        <option key={item}>{item}</option>
+                      ))}
                     </select>
                     <Icon name="chevron-down" size={12} className="text-slate-ink/60" />
                   </label>
@@ -341,16 +350,18 @@ function ProductCard({
           >
             Quick view <Icon name="arrow-up-right" size={12} />
           </button>
-          <span className="absolute bottom-3 right-3 rounded-full bg-white/90 px-2 py-1 text-[9px] font-bold text-[#0f9a38] shadow-sm backdrop-blur">
-            −{savings(product.price, product.mrp)}% vs new
-          </span>
+          {product.mrp > product.price ? (
+            <span className="absolute bottom-3 right-3 rounded-full bg-white/90 px-2 py-1 text-[9px] font-bold text-[#0f9a38] shadow-sm backdrop-blur">
+              −{savings(product.price, product.mrp)}% vs new
+            </span>
+          ) : null}
         </div>
 
         <div className="flex flex-1 flex-col p-4">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
               <p className="text-[9.5px] font-bold uppercase tracking-[0.15em] text-brand">{product.brand}</p>
-              <button onClick={onQuickView} className="mt-1 block truncate text-left text-[14.5px] font-bold tracking-[-0.015em] text-navy transition hover:text-brand">
+              <button type="button" onClick={onQuickView} className="mt-1 block truncate text-left text-[14.5px] font-bold tracking-[-0.015em] text-navy transition hover:text-brand">
                 {product.name}
               </button>
             </div>
@@ -369,9 +380,13 @@ function ProductCard({
 
           <div className="mt-3 flex items-center justify-between border-t border-line/70 pt-2.5">
             <div className="flex items-center gap-1.5 min-w-0">
-              <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${product.vendor.tint} text-[8px] font-bold text-white`}>
-                {product.vendor.initials}
-              </span>
+              {product.vendor.logoUrl ? (
+                <img src={product.vendor.logoUrl} alt="" className="h-6 w-6 shrink-0 rounded-full object-cover" />
+              ) : (
+                <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${product.vendor.tint} text-[8px] font-bold text-white`}>
+                  {product.vendor.initials}
+                </span>
+              )}
               <span className="truncate text-[10px] font-semibold text-navy/80">{product.vendor.name}</span>
               {product.vendor.verified && <Icon name="badge" size={11} className="shrink-0 text-verified" />}
             </div>
@@ -381,17 +396,26 @@ function ProductCard({
           <div className="mt-auto flex items-end justify-between gap-2 pt-3">
             <div>
               <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-ink/70">Trade price</p>
-              <p className="text-[17px] font-bold leading-tight tracking-[-0.03em] text-navy">{inr(product.price)}</p>
-              <p className="text-[9.5px] text-slate-ink/65">
-                <span className="line-through">{inr(product.mrp)}</span> new · MOQ {product.moq}
-              </p>
+              <p className="text-[17px] font-bold leading-tight tracking-[-0.03em] text-navy">{product.price > 0 ? inr(product.price) : "Ask"}</p>
+              <p className="text-[9.5px] text-slate-ink/65">{product.units} in stock</p>
             </div>
-            <button
-              onClick={onQuickView}
-              className="flex h-9 items-center gap-1.5 rounded-full bg-brand px-3.5 text-[11px] font-bold text-white transition hover:bg-brand-deep active:scale-95"
-            >
-              Get quote <Icon name="arrow-up-right" size={12} className="arrow" />
-            </button>
+            <div className="flex flex-col items-end gap-1.5">
+              {product.detailUrl ? (
+                <a
+                  href={product.detailUrl}
+                  className="flex h-9 items-center gap-1.5 rounded-full border border-brand/20 bg-white px-3 text-[11px] font-bold text-brand transition hover:border-brand hover:bg-sky"
+                >
+                  View details <Icon name="arrow-up-right" size={12} />
+                </a>
+              ) : null}
+              <button
+                type="button"
+                onClick={onQuickView}
+                className="flex h-9 items-center gap-1.5 rounded-full bg-brand px-3.5 text-[11px] font-bold text-white transition hover:bg-brand-deep active:scale-95"
+              >
+                Get quote <Icon name="arrow-up-right" size={12} className="arrow" />
+              </button>
+            </div>
           </div>
         </div>
       </article>

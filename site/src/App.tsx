@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { CatalogProvider } from "./lib/catalog";
 import { HomePage } from "./pages/HomePage";
 import { WhyPage } from "./pages/WhyPage";
 import { HowPage } from "./pages/HowPage";
@@ -26,19 +27,21 @@ function ScrollManager() {
 export default function App() {
   return (
     <BrowserRouter>
-      <ScrollManager />
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/why" element={<Navigate to="/why/" replace />} />
-        <Route path="/why/" element={<WhyPage />} />
-        <Route path="/how" element={<Navigate to="/how/" replace />} />
-        <Route path="/how/" element={<HowPage />} />
-        <Route path="/vendors" element={<Navigate to="/vendors/" replace />} />
-        <Route path="/vendors/" element={<VendorsPage />} />
-        <Route path="/insights" element={<Navigate to="/insights/" replace />} />
-        <Route path="/insights/" element={<InsightsPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <CatalogProvider>
+        <ScrollManager />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/why" element={<Navigate to="/why/" replace />} />
+          <Route path="/why/" element={<WhyPage />} />
+          <Route path="/how" element={<Navigate to="/how/" replace />} />
+          <Route path="/how/" element={<HowPage />} />
+          <Route path="/vendors" element={<Navigate to="/vendors/" replace />} />
+          <Route path="/vendors/" element={<VendorsPage />} />
+          <Route path="/insights" element={<Navigate to="/insights/" replace />} />
+          <Route path="/insights/" element={<InsightsPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </CatalogProvider>
     </BrowserRouter>
   );
 }

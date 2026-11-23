@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "../utils/cn";
-import { brands, products, type Product } from "../data";
-import { Icon, LogoMark, Wordmark } from "./Icon";
+import { brands, type Product } from "../data";
+import { BrandLogo, Icon } from "./Icon";
+import { useCatalog } from "../lib/catalog";
 import { useScrolled } from "../lib/motion";
 import { navItems, routes } from "../lib/routes";
 
@@ -105,9 +106,8 @@ export function Header({
         )}
       >
         <div className={cn("wrap flex items-center justify-between gap-6 transition-all duration-500", scrolled ? "h-[68px]" : "h-[82px]")}>
-          <Link to={routes.home} className="group flex shrink-0 items-center gap-2.5" aria-label="My Laptop Market home">
-            <LogoMark className="h-10 w-10 transition-transform duration-500 group-hover:rotate-[-6deg]" />
-            <Wordmark />
+          <Link to={routes.home} className="group flex shrink-0 items-center" aria-label="My Laptop Market home">
+            <BrandLogo className="transition-transform duration-500 group-hover:scale-[1.02]" />
           </Link>
 
           <nav className="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
@@ -233,6 +233,7 @@ function CommandPalette({
   onOpenProduct: (product: Product) => void;
 }) {
   const navigate = useNavigate();
+  const { products } = useCatalog();
   const [query, setQuery] = useState("");
   const [cursor, setCursor] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -253,7 +254,7 @@ function CommandPalette({
           .includes(needle),
       )
       .slice(0, 5);
-  }, [query]);
+  }, [query, products]);
 
   const filteredPages = useMemo(() => {
     const needle = query.trim().toLowerCase();

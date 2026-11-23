@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "../utils/cn";
-import { Icon, LogoMark, Wordmark } from "./Icon";
+import { BrandLogo, Icon } from "./Icon";
 import { Reveal } from "../lib/motion";
 import { routes } from "../lib/routes";
 
@@ -140,9 +140,8 @@ export function Footer({ onRegister }: { onRegister: () => void }) {
       <div className="wrap relative">
         <div className="grid gap-10 border-b border-white/10 pb-12 lg:grid-cols-12 lg:gap-8">
           <div className="lg:col-span-3">
-            <Link to={routes.home} className="inline-flex items-center gap-2.5" aria-label="My Laptop Market home">
-              <LogoMark className="h-10 w-10" />
-              <Wordmark light />
+            <Link to={routes.home} className="inline-flex items-center" aria-label="My Laptop Market home">
+              <BrandLogo light className="h-12 max-w-[210px]" />
             </Link>
             <p className="mt-4 max-w-[250px] text-[11.5px] leading-relaxed text-white/50">
               India&apos;s B2B network for IT vendors, dealers, suppliers and technology businesses. Connecting refurbished IT
