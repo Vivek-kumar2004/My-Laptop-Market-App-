@@ -89,112 +89,99 @@ export function Header({
     return () => observer.disconnect();
   }, [location.pathname]);
 
+  const solid = scrolled || menuOpen;
+
   return (
     <>
-      <div className="relative z-[60] bg-navy text-white">
-        <div className="wrap flex h-9 items-center justify-between gap-4 text-[11px] font-medium">
-          <span className="hidden items-center gap-2 text-white/70 sm:flex">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-verified opacity-75" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-verified" />
-            </span>
-            India&apos;s B2B marketplace for refurbished IT
-          </span>
-          <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden sm:hidden">
-            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-verified" />
-            <div className="marquee-mask relative min-w-0 flex-1 overflow-hidden">
-              <div className="animate-marquee flex w-max gap-8 whitespace-nowrap text-white/70">
-                {[...listingTicker, ...listingTicker].map((item, index) => (
-                  <span key={`${item}-${index}`}>{item}</span>
-                ))}
-              </div>
-            </div>
-          </div>
-          <div className="hidden items-center gap-5 text-white/65 sm:flex">
-            <a className="inline-flex items-center gap-1.5 transition hover:text-white" href="tel:+919718199976">
-              <Icon name="phone" size={12} /> +91 97181 99976
-            </a>
-            <span className="h-3 w-px bg-white/15" />
-            <Link className="inline-flex items-center gap-1.5 transition hover:text-white" to={routes.vendors}>
-              <Icon name="store" size={12} /> Become a vendor
+      <header className="fixed inset-x-0 top-0 z-[60]">
+        <div className="relative z-10 px-3 pt-3 sm:px-5 sm:pt-4 xl:pl-20">
+          <div
+            className={cn(
+              "mx-auto flex items-center justify-between gap-3 rounded-full border py-2 pl-3 pr-2 transition-[max-width,background-color,border-color,box-shadow] duration-700 sm:pl-5",
+              solid
+                ? "max-w-[1120px] border-line/80 bg-white/88 shadow-[0_12px_40px_-14px_rgba(5,7,11,0.28)] backdrop-blur-xl"
+                : "max-w-[1320px] border-transparent bg-white/0",
+            )}
+          >
+            <Link to={routes.home} className="group flex shrink-0 items-center" aria-label="My Laptop Market home">
+              <BrandLogo className="h-9 max-w-[170px] sm:h-10 sm:max-w-[200px]" />
             </Link>
-          </div>
-        </div>
-      </div>
 
-      <header
-        className={cn(
-          "sticky top-0 z-50 transition-all duration-500",
-          scrolled ? "border-b border-line/80 bg-white/85 shadow-[0_8px_30px_-24px_rgba(11,27,58,0.5)] backdrop-blur-xl" : "bg-white/0",
-        )}
-      >
-        <div className={cn("wrap flex items-center justify-between gap-6 transition-all duration-500", scrolled ? "h-[68px]" : "h-[82px]")}>
-          <Link to={routes.home} className="group flex shrink-0 items-center" aria-label="My Laptop Market home">
-            <BrandLogo className="transition-transform duration-500 group-hover:scale-[1.02]" />
-          </Link>
-
-          <nav className="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
-            {navItems.map((item) => (
-              <Link
-                key={item.id}
-                to={item.href}
-                className={cn(
-                  "relative rounded-full px-3.5 py-2 text-[13px] font-semibold transition-colors",
-                  active === item.id ? "text-brand" : "text-navy/70 hover:text-navy",
-                )}
-              >
-                {item.label}
-                <span
+            <nav aria-label="Main navigation" className="hidden items-center xl:flex">
+              {navItems.map((item) => (
+                <Link
+                  key={item.id}
+                  to={item.href}
                   className={cn(
-                    "absolute inset-x-3.5 -bottom-0.5 h-[2px] origin-left rounded-full bg-brand transition-transform duration-300",
-                    active === item.id ? "scale-x-100" : "scale-x-0",
+                    "relative px-3.5 py-2 text-[13px] font-semibold transition-colors after:absolute after:inset-x-3.5 after:bottom-1 after:h-[2px] after:origin-left after:rounded-full after:bg-brand after:transition-transform after:duration-300",
+                    active === item.id
+                      ? "text-brand after:scale-x-100"
+                      : "text-navy/70 after:scale-x-0 hover:text-navy hover:after:scale-x-100",
                   )}
-                />
-              </Link>
-            ))}
-          </nav>
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={openPalette}
-              className="group hidden h-10 items-center gap-2 rounded-full border border-line bg-mist px-3 text-[12.5px] font-medium text-slate-ink transition hover:border-brand/30 hover:bg-white hover:text-navy sm:flex"
-              aria-label="Search the marketplace"
-            >
-              <Icon name="search" size={15} />
-              <span className="hidden md:inline">Search stock…</span>
-              <kbd className="ml-1 hidden items-center gap-0.5 rounded-md border border-line bg-white px-1.5 py-0.5 font-sans text-[10px] font-semibold text-slate-ink/70 md:inline-flex">
-                ⌘K
-              </kbd>
-            </button>
-            <a
-              href="https://mylaptopmarket.com/api/vendor/login"
-              className="hidden rounded-full px-3 py-2 text-[13px] font-semibold text-navy/70 transition hover:text-navy xl:block"
-            >
-              Sign in
-            </a>
-            <button onClick={onRegister} className="btn btn-primary hidden h-10 min-h-0 px-4 text-[12.5px] sm:inline-flex">
-              List your business
-              <Icon name="arrow-up-right" size={14} className="arrow" />
-            </button>
-            <button
-              onClick={() => setMenuOpen((value) => !value)}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-white text-navy transition hover:bg-mist lg:hidden"
-              aria-label={menuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={menuOpen}
-            >
-              <Icon name={menuOpen ? "x" : "menu"} size={19} />
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={openPalette}
+                className="hidden h-10 w-10 items-center justify-center rounded-full text-navy/70 transition hover:bg-mist hover:text-navy md:inline-flex"
+                aria-label="Search the marketplace"
+              >
+                <Icon name="search" size={16} />
+              </button>
+              <a
+                href="https://mylaptopmarket.com/api/vendor/login"
+                className="hidden rounded-full px-4 py-2.5 text-[13px] font-semibold text-navy/75 transition hover:bg-mist hover:text-navy md:inline-flex"
+              >
+                Vendor Login
+              </a>
+              <button
+                type="button"
+                onClick={onRegister}
+                className="btn btn-primary hidden h-10 min-h-0 px-4 text-[12.5px] sm:inline-flex"
+              >
+                Register as Dealer
+                <Icon name="arrow-up-right" size={14} className="arrow" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setMenuOpen((value) => !value)}
+                className="grid h-10 w-10 place-items-center rounded-full bg-navy text-white xl:hidden"
+                aria-label={menuOpen ? "Close menu" : "Open menu"}
+                aria-expanded={menuOpen}
+              >
+                <span className="relative block h-3 w-4">
+                  <span
+                    className={cn(
+                      "absolute left-0 top-0 h-[2px] w-4 bg-current transition-transform duration-300",
+                      menuOpen && "translate-y-[5px] rotate-45",
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      "absolute bottom-0 left-0 h-[2px] w-4 bg-current transition-transform duration-300",
+                      menuOpen && "-translate-y-[5px] -rotate-45",
+                    )}
+                  />
+                </span>
+              </button>
+            </div>
           </div>
         </div>
 
         <div
           className={cn(
-            "overflow-hidden border-line bg-white/97 backdrop-blur-xl transition-[max-height,opacity] duration-500 lg:hidden",
-            menuOpen ? "max-h-[80vh] border-t opacity-100" : "max-h-0 opacity-0",
+            "mx-3 mt-2 overflow-hidden rounded-[22px] border border-line bg-white/95 shadow-soft backdrop-blur-xl transition-[max-height,opacity] duration-500 xl:hidden",
+            menuOpen ? "max-h-[80vh] opacity-100" : "pointer-events-none max-h-0 border-transparent opacity-0",
           )}
         >
-          <div className="wrap flex flex-col gap-1 py-5">
+          <div className="flex flex-col gap-1 px-4 py-5">
             <button
+              type="button"
               onClick={openPalette}
               className="mb-3 flex h-12 items-center gap-3 rounded-xl border border-line bg-mist px-4 text-sm font-medium text-slate-ink"
             >
@@ -214,19 +201,29 @@ export function Header({
               </Link>
             ))}
             <div className="mt-4 flex gap-2">
-              <button onClick={() => { setMenuOpen(false); onRegister(); }} className="btn btn-primary flex-1">
-                List your business <Icon name="arrow-up-right" size={15} className="arrow" />
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onRegister();
+                }}
+                className="btn btn-primary flex-1"
+              >
+                Register as Dealer <Icon name="arrow-up-right" size={15} className="arrow" />
               </button>
-              <a href="tel:+919718199976" className="btn btn-ghost h-12 w-12 min-h-0 p-0" aria-label="Call us">
-                <Icon name="phone" size={17} />
+              <a
+                href="https://mylaptopmarket.com/api/vendor/login"
+                className="btn btn-ghost h-12 min-h-0 px-4 text-[12px]"
+              >
+                Login
               </a>
             </div>
-            <p className="mt-4 text-center text-[11px] text-slate-ink">
-              1,200+ verified IT businesses · 85+ cities
-            </p>
           </div>
         </div>
       </header>
+
+      {/* Spacer so content clears the fixed floating bar */}
+      <div className="h-[72px] sm:h-[80px]" aria-hidden />
 
       {paletteOpen && (
         <CommandPalette
@@ -240,13 +237,6 @@ export function Header({
     </>
   );
 }
-
-const listingTicker = [
-  "1,240+ verified IT businesses",
-  "85+ cities covered",
-  "12,480 live listings",
-  "Zero commission on direct deals",
-];
 
 function CommandPalette({
   onClose,

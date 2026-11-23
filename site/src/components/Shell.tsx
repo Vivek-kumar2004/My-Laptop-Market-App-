@@ -5,6 +5,7 @@ import { cn } from "../utils/cn";
 import { useScrollProgress, useScrolled } from "../lib/motion";
 import { Icon } from "./Icon";
 import { Header } from "./Header";
+import { SideDock } from "./SideDock";
 import { Footer } from "./Footer";
 import { ProductModal, RegisterDialog, type DialogIntent } from "./Dialogs";
 
@@ -73,6 +74,7 @@ export function Shell({
       </a>
 
       <Header onRegister={() => openDialog("vendor")} onOpenProduct={setQuickView} />
+      <SideDock onRegister={() => openDialog("vendor")} />
 
       <main>{typeof children === "function" ? children(api) : children}</main>
 
