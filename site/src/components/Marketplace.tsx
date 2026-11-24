@@ -243,7 +243,7 @@ export function Marketplace({
           </div>
         </Reveal>
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+        <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((product, index) => (
             <ProductCard
               key={product.id}
@@ -311,24 +311,24 @@ function ProductCard({
 }) {
   return (
     <Reveal delay={(index % 3) * 70} className="h-full">
-      <article className="group flex h-full flex-col overflow-hidden rounded-[20px] border border-line bg-white transition duration-500 hover:-translate-y-1 hover:border-brand/25 hover:shadow-[0_30px_60px_-32px_rgba(11,27,58,0.4)]">
+      <article className="group flex h-full flex-col overflow-hidden rounded-[16px] border border-line bg-white transition duration-500 hover:-translate-y-0.5 hover:border-brand/25 hover:shadow-[0_22px_44px_-28px_rgba(11,27,58,0.4)]">
         <div className="relative overflow-hidden bg-[#f2f6fc]">
           <button onClick={onQuickView} className="block w-full" aria-label={`View ${product.name}`}>
             <img
               src={product.image}
               alt={product.name}
               loading="lazy"
-              className="h-[192px] w-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.06]"
+              className="h-[148px] w-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.05]"
             />
           </button>
-          <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-3">
-            <span className="rounded-full border border-navy/5 bg-white/95 px-2.5 py-1 text-[9.5px] font-bold text-navy shadow-sm backdrop-blur">
+          <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-2.5">
+            <span className="rounded-full border border-navy/5 bg-white/95 px-2 py-0.5 text-[8.5px] font-bold text-navy shadow-sm backdrop-blur">
               {product.condition} · {product.category}
             </span>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
               {product.featured && (
-                <span className="flex items-center gap-1 rounded-full bg-brand px-2 py-1 text-[9px] font-bold text-white shadow-sm">
-                  <Icon name="zap" size={9} className="fill-white" /> Featured
+                <span className="flex items-center gap-0.5 rounded-full bg-brand px-1.5 py-0.5 text-[8px] font-bold text-white shadow-sm">
+                  <Icon name="zap" size={8} className="fill-white" /> Featured
                 </span>
               )}
               <button
@@ -336,84 +336,84 @@ function ProductCard({
                 aria-label={favorite ? "Remove from saved" : "Save listing"}
                 aria-pressed={favorite}
                 className={cn(
-                  "pointer-events-auto flex h-7 w-7 items-center justify-center rounded-full border border-white/60 bg-white/95 shadow-sm backdrop-blur transition hover:scale-110",
+                  "pointer-events-auto flex h-6 w-6 items-center justify-center rounded-full border border-white/60 bg-white/95 shadow-sm backdrop-blur transition hover:scale-110",
                   favorite ? "text-[#e0446c]" : "text-slate-ink hover:text-brand",
                 )}
               >
-                <Icon name="heart" size={13} className={cn(favorite && "fill-current")} />
+                <Icon name="heart" size={11} className={cn(favorite && "fill-current")} />
               </button>
             </div>
           </div>
           <button
             onClick={onQuickView}
-            className="absolute bottom-3 left-1/2 flex -translate-x-1/2 translate-y-2 items-center gap-1.5 whitespace-nowrap rounded-full bg-navy/90 px-3.5 py-1.5 text-[10.5px] font-semibold text-white opacity-0 shadow-lg backdrop-blur transition-all duration-300 hover:bg-brand group-hover:translate-y-0 group-hover:opacity-100"
+            className="absolute bottom-2.5 left-1/2 flex -translate-x-1/2 translate-y-2 items-center gap-1 whitespace-nowrap rounded-full bg-navy/90 px-3 py-1 text-[10px] font-semibold text-white opacity-0 shadow-lg backdrop-blur transition-all duration-300 hover:bg-brand group-hover:translate-y-0 group-hover:opacity-100"
           >
-            Quick view <Icon name="arrow-up-right" size={12} />
+            Quick view <Icon name="arrow-up-right" size={11} />
           </button>
           {product.mrp > product.price ? (
-            <span className="absolute bottom-3 right-3 rounded-full bg-white/90 px-2 py-1 text-[9px] font-bold text-[#0f9a38] shadow-sm backdrop-blur">
+            <span className="absolute bottom-2.5 right-2.5 rounded-full bg-white/90 px-1.5 py-0.5 text-[8px] font-bold text-[#0f9a38] shadow-sm backdrop-blur">
               −{savings(product.price, product.mrp)}% vs new
             </span>
           ) : null}
         </div>
 
-        <div className="flex flex-1 flex-col p-4">
-          <div className="flex items-start justify-between gap-2">
+        <div className="flex flex-1 flex-col p-3">
+          <div className="flex items-start justify-between gap-1.5">
             <div className="min-w-0">
-              <p className="text-[9.5px] font-bold uppercase tracking-[0.15em] text-brand">{product.brand}</p>
-              <button type="button" onClick={onQuickView} className="mt-1 block truncate text-left text-[14.5px] font-bold tracking-[-0.015em] text-navy transition hover:text-brand">
+              <p className="text-[8.5px] font-bold uppercase tracking-[0.14em] text-brand">{product.brand}</p>
+              <button type="button" onClick={onQuickView} className="mt-0.5 block truncate text-left text-[13px] font-bold tracking-[-0.015em] text-navy transition hover:text-brand">
                 {product.name}
               </button>
             </div>
-            <span className="flex shrink-0 items-center gap-1 text-[10px] font-semibold text-slate-ink">
-              <Icon name="pin" size={11} className="text-slate-ink/70" /> {product.city}
+            <span className="flex shrink-0 items-center gap-0.5 text-[9px] font-semibold text-slate-ink">
+              <Icon name="pin" size={10} className="text-slate-ink/70" /> {product.city}
             </span>
           </div>
 
-          <div className="mt-2.5 flex flex-wrap gap-1">
+          <div className="mt-2 flex flex-wrap gap-1">
             {product.specs.slice(0, 3).map((spec) => (
-              <span key={spec} className="rounded-md border border-line bg-mist/70 px-1.5 py-1 text-[9.5px] font-medium text-slate-ink">
+              <span key={spec} className="rounded-md border border-line bg-mist/70 px-1.5 py-0.5 text-[8.5px] font-medium text-slate-ink">
                 {spec}
               </span>
             ))}
           </div>
 
-          <div className="mt-3 flex items-center justify-between border-t border-line/70 pt-2.5">
-            <div className="flex items-center gap-1.5 min-w-0">
+          <div className="mt-2.5 flex items-center justify-between border-t border-line/70 pt-2">
+            <div className="flex min-w-0 items-center gap-1.5">
               {product.vendor.logoUrl ? (
-                <img src={product.vendor.logoUrl} alt="" className="h-6 w-6 shrink-0 rounded-full object-cover" />
+                <img src={product.vendor.logoUrl} alt="" className="h-5 w-5 shrink-0 rounded-full object-cover" />
               ) : (
-                <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${product.vendor.tint} text-[8px] font-bold text-white`}>
+                <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${product.vendor.tint} text-[7px] font-bold text-white`}>
                   {product.vendor.initials}
                 </span>
               )}
-              <span className="truncate text-[10px] font-semibold text-navy/80">{product.vendor.name}</span>
-              {product.vendor.verified && <Icon name="badge" size={11} className="shrink-0 text-verified" />}
+              <span className="truncate text-[9.5px] font-semibold text-navy/80">{product.vendor.name}</span>
+              {product.vendor.verified && <Icon name="badge" size={10} className="shrink-0 text-verified" />}
             </div>
-            <span className="shrink-0 rounded bg-sky px-1.5 py-0.5 text-[9px] font-bold text-brand">{product.units} units</span>
+            <span className="shrink-0 rounded bg-sky px-1.5 py-0.5 text-[8px] font-bold text-brand">{product.units} units</span>
           </div>
 
-          <div className="mt-auto flex items-end justify-between gap-2 pt-3">
+          <div className="mt-auto flex items-end justify-between gap-2 pt-2.5">
             <div>
-              <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-ink/70">Trade price</p>
-              <p className="text-[17px] font-bold leading-tight tracking-[-0.03em] text-navy">{product.price > 0 ? inr(product.price) : "Ask"}</p>
-              <p className="text-[9.5px] text-slate-ink/65">{product.units} in stock</p>
+              <p className="text-[8px] font-semibold uppercase tracking-[0.1em] text-slate-ink/70">Trade price</p>
+              <p className="text-[15px] font-bold leading-tight tracking-[-0.03em] text-navy">{product.price > 0 ? inr(product.price) : "Ask"}</p>
+              <p className="text-[8.5px] text-slate-ink/65">{product.units} in stock</p>
             </div>
-            <div className="flex flex-col items-end gap-1.5">
+            <div className="flex flex-col items-end gap-1">
               {product.detailUrl ? (
                 <a
                   href={product.detailUrl}
-                  className="flex h-9 items-center gap-1.5 rounded-full border border-brand/20 bg-white px-3 text-[11px] font-bold text-brand transition hover:border-brand hover:bg-sky"
+                  className="flex h-8 items-center gap-1 rounded-full border border-brand/20 bg-white px-2.5 text-[10px] font-bold text-brand transition hover:border-brand hover:bg-sky"
                 >
-                  View details <Icon name="arrow-up-right" size={12} />
+                  View details <Icon name="arrow-up-right" size={11} />
                 </a>
               ) : null}
               <button
                 type="button"
                 onClick={onQuickView}
-                className="flex h-9 items-center gap-1.5 rounded-full bg-brand px-3.5 text-[11px] font-bold text-white transition hover:bg-brand-deep active:scale-95"
+                className="flex h-8 items-center gap-1 rounded-full bg-brand px-3 text-[10px] font-bold text-white transition hover:bg-brand-deep active:scale-95"
               >
-                Get quote <Icon name="arrow-up-right" size={12} className="arrow" />
+                Get quote <Icon name="arrow-up-right" size={11} className="arrow" />
               </button>
             </div>
           </div>
