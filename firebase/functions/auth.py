@@ -1,4 +1,5 @@
 import json
+import re
 import secrets
 from datetime import date, datetime, timedelta, timezone
 
@@ -115,12 +116,33 @@ def _password_matches(password: str, stored: str) -> bool:
 
 
 def _find_vendor(username: str):
+    needle = _text(username).strip()
+    if needle == "":
+        return None
     client = firestore.client()
-    matches = client.collection("vendors").where("username", "==", username).limit(1).stream()
+    matches = client.collection("vendors").where("username", "==", needle).limit(1).stream()
     for doc in matches:
         data = doc.to_dict() or {}
         data["_ref"] = doc.reference
         return data
+    if "@" in needle:
+        return _find_vendor_by_email(needle)
+    digits = re.sub(r"\D", "", needle)
+    if len(digits) >= 12 and digits.startswith("91"):
+        digits = digits[-10:]
+    if re.fullmatch(r"[6-9]\d{9}", digits):
+        for doc in client.collection("vendors").where("mobile", "==", digits).limit(1).stream():
+            data = doc.to_dict() or {}
+            data["_ref"] = doc.reference
+            return data
+        for doc in client.collection("vendors").stream():
+            data = doc.to_dict() or {}
+            mobile = re.sub(r"\D", "", _text(data.get("mobile")))
+            if len(mobile) >= 12 and mobile.startswith("91"):
+                mobile = mobile[-10:]
+            if mobile == digits:
+                data["_ref"] = doc.reference
+                return data
     return None
 
 

@@ -281,6 +281,72 @@ def release_vendor_keys(vendor: dict) -> None:
         _release_unique(kind, key, vendor_id)
 
 
+def slug_username(shop: str) -> str:
+    raw = re.sub(r"[^a-zA-Z0-9]+", "_", _text(shop).lower())
+    raw = re.sub(r"_+", "_", raw).strip("._")
+    if len(raw) < 4:
+        raw = (raw + "_shop").strip("._")
+    if not raw:
+        raw = "vendor"
+    return raw[:20].strip("._") or "vendor"
+
+
+def username_available(username: str = "", shop: str = "") -> dict:
+    requested = _text(username)
+    base = requested or slug_username(shop)
+    if not re.fullmatch(r"[a-zA-Z0-9._]{4,20}", base):
+        return {
+            "ok": False,
+            "available": False,
+            "username": base,
+            "message": "Use 4–20 letters, numbers, dots or underscores.",
+        }
+    if not _taken("username", base):
+        return {"ok": True, "available": True, "username": base, "suggestion": base, "message": "Username is available."}
+    for index in range(2, 100):
+        suffix = str(index)
+        stem = base[: max(1, 20 - len(suffix))].rstrip("._")
+        candidate = (stem + suffix)[:20]
+        if re.fullmatch(r"[a-zA-Z0-9._]{4,20}", candidate) and not _taken("username", candidate):
+            return {
+                "ok": True,
+                "available": False,
+                "username": base,
+                "suggestion": candidate,
+                "message": "That username is taken. Try " + candidate + ".",
+            }
+    return {
+        "ok": False,
+        "available": False,
+        "username": base,
+        "message": "That username is taken. Pick another.",
+    }
+
+
+def check_gstin(gstin_raw: str) -> dict:
+    raw = _text(gstin_raw)
+    if raw == "":
+        return {"ok": True, "empty": True, "verified": False, "message": ""}
+    gstin = _normalize_gstin(raw)
+    if not _valid_gstin(gstin):
+        return {"ok": False, "empty": False, "verified": False, "gstin": gstin, "message": "Enter a valid 15-character GSTIN."}
+    lookup = _lookup_gstin(gstin)
+    if not lookup["ok"]:
+        return {"ok": False, "empty": False, "verified": False, "gstin": gstin, "message": lookup["message"]}
+    if not lookup["found"]:
+        return {"ok": False, "empty": False, "verified": False, "gstin": gstin, "message": lookup["message"]}
+    details = lookup["details"]
+    active = _text(details.get("status")).lower() == "active"
+    return {
+        "ok": True,
+        "empty": False,
+        "verified": active,
+        "gstin": gstin,
+        "details": details,
+        "message": "GST verified — builds dealer trust." if active else f"This GSTIN is {_text(details.get('status')) or 'inactive'}.",
+    }
+
+
 def register(body: dict) -> dict:
     shop = _text(body.get("shop_name"))
     username = _text(body.get("username"))
@@ -289,6 +355,7 @@ def register(body: dict) -> dict:
     mobile = _mobile_key(body.get("mobile"))
     email = _text(body.get("email")).lower()
     password = body.get("password") or ""
+    gstin_raw = _text(body.get("gstin"))
     if shop == "" or username == "" or city == "" or mobile == "" or email == "" or password == "":
         return {"success": False, "message": "Fill shop name, username, city, state, mobile, email and password."}
     if state == "":
@@ -297,6 +364,8 @@ def register(body: dict) -> dict:
         return {"success": False, "message": "Enter a 10-digit mobile number."}
     if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email):
         return {"success": False, "message": "Enter a valid email address."}
+    if not re.fullmatch(r"[a-zA-Z0-9._]{4,20}", username):
+        return {"success": False, "message": "Username must be 4–20 letters, numbers, dots or underscores."}
     if len(password) < 6:
         return {"success": False, "message": "Password must be at least 6 characters."}
     if _taken("username", username):
@@ -307,6 +376,12 @@ def register(body: dict) -> dict:
         return {"success": False, "message": "The email has already been taken."}
     if _taken("shop_name", shop):
         return {"success": False, "message": "This shop name is already registered."}
+
+    gst_probe: dict = {"gstin": "", "gst_verified": 0, "gst_details": None}
+    if gstin_raw:
+        gst_error = _apply_gst(gst_probe, gstin_raw)
+        if gst_error:
+            return {"success": False, "message": gst_error}
 
     from feature_flags import SHOW_VENDOR_OTP
 
@@ -351,9 +426,9 @@ def register(body: dict) -> dict:
         "subscription_start": None,
         "subscription_end": None,
         "state": state,
-        "gstin": "",
-        "gst_verified": 0,
-        "gst_details": None,
+        "gstin": gst_probe.get("gstin") or "",
+        "gst_verified": int(gst_probe.get("gst_verified") or 0),
+        "gst_details": gst_probe.get("gst_details"),
         "shop_photo": None,
         "admin_warning": "",
     }
