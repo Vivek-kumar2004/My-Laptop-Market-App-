@@ -1,4 +1,7 @@
 venv/
+venv.mac.bak/
 __pycache__/
 *.pyc
 .venv/
+*.pyc
+.git/

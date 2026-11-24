@@ -1,0 +1,9 @@
+specVersion: v1alpha1
+endpoints:
+  api:
+    platform: gcfv2
+    region:
+      - asia-south1
+    entryPoint: api
+    availableMemoryMb: 256
+    httpsTrigger: {}
