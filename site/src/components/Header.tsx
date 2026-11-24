@@ -18,10 +18,8 @@ const pageLinks = [
 ];
 
 export function Header({
-  onRegister,
   onOpenProduct,
 }: {
-  onRegister: () => void;
   onOpenProduct: (product: Product) => void;
 }) {
   const scrolled = useScrolled(24);
@@ -139,14 +137,13 @@ export function Header({
               >
                 Vendor Login
               </a>
-              <button
-                type="button"
-                onClick={onRegister}
+              <a
+                href="https://mylaptopmarket.com/api/vendor/register"
                 className="btn btn-primary hidden h-10 min-h-0 px-4 text-[12.5px] sm:inline-flex"
               >
                 Register as Dealer
                 <Icon name="arrow-up-right" size={14} className="arrow" />
-              </button>
+              </a>
               <button
                 type="button"
                 onClick={() => setMenuOpen((value) => !value)}
@@ -201,16 +198,13 @@ export function Header({
               </Link>
             ))}
             <div className="mt-4 flex gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onRegister();
-                }}
+              <a
+                href="https://mylaptopmarket.com/api/vendor/register"
                 className="btn btn-primary flex-1"
+                onClick={() => setMenuOpen(false)}
               >
                 Register as Dealer <Icon name="arrow-up-right" size={15} className="arrow" />
-              </button>
+              </a>
               <a
                 href="https://mylaptopmarket.com/api/vendor/login"
                 className="btn btn-ghost h-12 min-h-0 px-4 text-[12px]"

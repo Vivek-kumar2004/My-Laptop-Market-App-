@@ -10,9 +10,14 @@ import { Footer } from "./Footer";
 import { floatingDockConfig } from "../lib/floatingDock";
 import { AppPromoModal } from "./AppPromoModal";
 import { FloatingDock } from "./FloatingDock";
+import { VENDOR_REGISTER_URL } from "../lib/api";
 import { ProductModal, RegisterDialog, type DialogIntent } from "./Dialogs";
 
 const WHATSAPP = floatingDockConfig.whatsappUrl;
+
+function goRegister() {
+  window.location.assign(VENDOR_REGISTER_URL);
+}
 
 export function Shell({
   children,
@@ -57,7 +62,7 @@ export function Shell({
     setQuickView,
     scrollToMarketplace,
     onRequirement: () => openDialog("buyer"),
-    onRegister: () => openDialog("vendor"),
+    onRegister: goRegister,
   };
 
   return (
@@ -76,12 +81,12 @@ export function Shell({
         Skip to live marketplace
       </a>
 
-      <Header onRegister={() => openDialog("vendor")} onOpenProduct={setQuickView} />
-      <SideDock onRegister={() => openDialog("vendor")} />
+      <Header onOpenProduct={setQuickView} />
+      <SideDock />
 
       <main>{typeof children === "function" ? children(api) : children}</main>
 
-      <Footer onRegister={() => openDialog("vendor")} />
+      <Footer onRegister={goRegister} />
 
       <FloatingDock visible={scrolled && !overlayOpen} />
 
@@ -119,8 +124,8 @@ export function Shell({
       </div>
 
       <RegisterDialog
-        open={Boolean(dialog)}
-        intent={dialog?.intent ?? "vendor"}
+        open={dialog?.intent === "buyer"}
+        intent="buyer"
         onClose={() => setDialog(null)}
         onExplore={() => {
           setDialog(null);

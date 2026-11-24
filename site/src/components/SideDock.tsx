@@ -8,7 +8,7 @@ const INSTAGRAM = "https://www.instagram.com/mylaptopmarket/";
 const TWITTER = "https://x.com/mylaptopmarket_";
 const LINKEDIN = "https://www.linkedin.com/company/my-laptop-market/";
 
-export function SideDock({ onRegister }: { onRegister: () => void }) {
+export function SideDock() {
   return (
     <aside
       aria-label="Quick links"
@@ -77,15 +77,14 @@ export function SideDock({ onRegister }: { onRegister: () => void }) {
 
         <span className="my-0.5 h-px w-6 bg-white/10" aria-hidden />
 
-        <button
-          type="button"
-          onClick={onRegister}
+        <a
+          href="https://mylaptopmarket.com/api/vendor/register"
           className="flex h-10 w-10 items-center justify-center rounded-full bg-brand text-white shadow-blue transition hover:bg-brand-bright hover:scale-105"
           aria-label="List your business"
           title="Register"
         >
           <Icon name="plus" size={18} strokeWidth={2.2} />
-        </button>
+        </a>
       </div>
     </aside>
   );

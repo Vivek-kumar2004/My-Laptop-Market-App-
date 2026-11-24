@@ -2,6 +2,8 @@ import type { Product, Vendor } from "../data";
 
 export const API_BASE = "https://asia-south1-mylaptopmarket-app.cloudfunctions.net/api/api";
 export const SITE_ORIGIN = "https://mylaptopmarket.com";
+export const VENDOR_REGISTER_URL = `${SITE_ORIGIN}/api/vendor/register`;
+export const VENDOR_LOGIN_URL = `${SITE_ORIGIN}/api/vendor/login`;
 
 export type LiveVendor = {
   vendor_id: number;
