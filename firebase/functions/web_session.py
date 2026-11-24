@@ -9,8 +9,8 @@ from flask import Response
 
 from datetime import date
 
-from accounts import register
-from auth import _days_left, acknowledge_warning, login
+from accounts import complete_google_profile, register
+from auth import _days_left, acknowledge_warning, login, profile_incomplete
 from email_verify import confirm as confirm_email_otp
 from email_verify import send as send_email_otp
 from phone_verify import confirm as confirm_mobile_otp
@@ -19,6 +19,8 @@ from subscription import SHOW_VENDOR_PAYMENT
 from feature_flags import SHOW_VENDOR_OTP
 from vendor_auth_ui import (
     auth_document,
+    complete_profile_main,
+    complete_profile_scripts,
     forgot_main,
     login_main,
     login_scripts,
@@ -304,6 +306,8 @@ def _guest_page(
 def _vendor_panel(title: str, body: str, status: int, bare: bool, extra_scripts: str = "") -> Response:
     session, vendor = _session_vendor()
     current = _request_path()
+    if session is not None and profile_incomplete(vendor) and not current.endswith("/complete-profile"):
+        return _redirect("/api/vendor/complete-profile" if current.startswith("/api/") else "complete-profile")
     vendor_id = int((session or {}).get("vendor_id") or 0)
     unread = _unread_count(vendor_id) if vendor_id else 0
     shop = html.escape(_text(vendor.get("shop_name")) or _text((session or {}).get("shop_name")) or "Vendor Panel")
@@ -341,10 +345,16 @@ def _page(
     document_html: str | None = None,
 ) -> Response:
     path = _request_path()
-    if document_html is not None or title in {"Vendor Login", "Vendor Register", "Forgot Password"} or path in {
+    if document_html is not None or title in {
+        "Vendor Login",
+        "Vendor Register",
+        "Forgot Password",
+        "Complete Profile",
+    } or path in {
         "/vendor/login",
         "/vendor/register",
         "/vendor/forgot-password",
+        "/vendor/complete-profile",
     }:
         return _guest_page(title, body, status, width or "420px", document_html=document_html)
     if path.startswith("/vendor/"):
@@ -594,16 +604,38 @@ def _count(value) -> int:
         return 0
 
 
-def dashboard(req) -> Response:
+def _redirect(location: str) -> Response:
+    response = Response("", status=302)
+    response.headers["Location"] = location
+    return response
+
+
+def _load_session_vendor(req) -> tuple[dict | None, dict]:
     session = vendor_session(req)
     if session is None:
-        response = Response("", status=302)
-        response.headers["Location"] = "login"
-        return response
+        return None, {}
     vendor_id = int(session.get("vendor_id") or 0)
+    doc = firestore.client().collection("vendors").document(str(vendor_id)).get()
+    vendor = doc.to_dict() or {} if doc.exists else {}
+    return session, vendor
+
+
+def _guard_incomplete(req) -> Response | None:
+    session, vendor = _load_session_vendor(req)
+    if session is None:
+        return _redirect("login")
+    if profile_incomplete(vendor):
+        return _redirect("complete-profile")
+    return None
+
+
+def dashboard(req) -> Response:
+    blocked = _guard_incomplete(req)
+    if blocked is not None:
+        return blocked
+    session, vendor = _load_session_vendor(req)
+    vendor_id = int((session or {}).get("vendor_id") or 0)
     client = firestore.client()
-    vendor_doc = client.collection("vendors").document(str(vendor_id)).get()
-    vendor = vendor_doc.to_dict() or {} if vendor_doc.exists else {}
     products = []
     active = inactive = 0
     for doc in client.collection("products").where("vendor_id", "==", vendor_id).stream():
@@ -868,8 +900,14 @@ def register_page(error: str = "", values: dict | None = None, success: str = ""
     values = values or {}
     main = register_main(error=error, values=values, success=success, otp_enabled=SHOW_VENDOR_OTP)
     scripts = ""
+    # Google signup uses the same firebase-login endpoint as the login page.
+    scripts += _firebase_login_script()
     if SHOW_VENDOR_OTP:
-        scripts += mobile_firebase_scripts(_firebase_config())
+        # Avoid double-loading Firebase scripts if Google already injected them.
+        if "firebase-app-compat.js" not in scripts:
+            scripts += mobile_firebase_scripts(_firebase_config())
+        else:
+            scripts += f"<script>window.__MLM_FIREBASE__ = {__import__('json').dumps(_firebase_config())};</script>"
     scripts += register_scripts(_firebase_config(), otp_enabled=SHOW_VENDOR_OTP)
     document = auth_document(
         "Vendor Register",
@@ -881,6 +919,62 @@ def register_page(error: str = "", values: dict | None = None, success: str = ""
         scripts=scripts,
     )
     return _page("Vendor Register", main, width="460px", document_html=document)
+
+
+def complete_profile_page(req, error: str = "", values: dict | None = None, success: str = "") -> Response:
+    session, vendor = _load_session_vendor(req)
+    if session is None:
+        return _redirect("login")
+    if not profile_incomplete(vendor):
+        return _redirect("dashboard")
+    values = values or {
+        "shop_name": _text(vendor.get("shop_name")),
+        "city": _text(vendor.get("location")),
+        "state": _text(vendor.get("state")),
+        "username": _text(vendor.get("username")),
+        "mobile": _text(vendor.get("mobile")),
+        "gstin": _text(vendor.get("gstin")),
+    }
+    main = complete_profile_main(
+        error=error,
+        values=values,
+        success=success,
+        email=_text(vendor.get("email")),
+        otp_enabled=SHOW_VENDOR_OTP,
+    )
+    scripts = ""
+    if SHOW_VENDOR_OTP:
+        scripts += mobile_firebase_scripts(_firebase_config())
+    scripts += complete_profile_scripts(_firebase_config(), otp_enabled=SHOW_VENDOR_OTP)
+    document = auth_document(
+        "Complete Profile",
+        main,
+        back_href="logout",
+        back_label="Sign out",
+        scripts=scripts,
+    )
+    return _page("Complete Profile", main, width="460px", document_html=document)
+
+
+def complete_profile_store(req) -> Response:
+    session, vendor = _load_session_vendor(req)
+    if session is None:
+        return _redirect("login")
+    body = {
+        name: _field(req, name)
+        for name in ("shop_name", "username", "city", "state", "mobile", "password", "mobile_otp", "gstin")
+    }
+    result = complete_google_profile(int(session.get("vendor_id") or 0), body)
+    if not result.get("success"):
+        return complete_profile_page(req, error=result.get("message") or "Could not save profile.", values=body)
+    response = Response("", status=302)
+    if SHOW_VENDOR_PAYMENT:
+        response.headers["Location"] = (
+            f"/api/subscription/checkout?vendor_id={int(result.get('vendor_id') or 0)}&source=web"
+        )
+    else:
+        response.headers["Location"] = "dashboard"
+    return response
 
 
 def _register_values(req) -> dict:

@@ -476,11 +476,14 @@ def register_main(error: str = "", values: dict | None = None, success: str = ""
 
     return f"""
 {alert}
+<button type="button" class="btn btn-secondary" id="google-sign-in" style="margin-bottom:8px">{GOOGLE_SVG} Continue with Google</button>
+<div id="sign-note" style="margin-bottom:16px"></div>
+<div class="or-line" style="margin:16px 0 24px">or</div>
 <form class="vendor-register" id="registerForm" action="registerStore" method="post" novalidate>
 <section class="step-panel" data-step="1">
   <p class="auth-trust">{ICON_CHECK} Join 1,200+ verified IT businesses across 85+ cities. Zero commission.</p>
   <h1 class="auth-title">Tell us about your business</h1>
-  <p class="auth-sub">Takes about 2 minutes.</p>
+  <p class="auth-sub">Takes about 2 minutes. Or start with Google above — then add shop details.</p>
   <div style="margin-top:24px">
     {floating_field("shop_name", "Shop or company name", value=_text(values.get("shop_name")), autocomplete="organization")}
     {floating_field("city", "City", value=_text(values.get("city")), autocomplete="address-level2")}
@@ -1042,4 +1045,271 @@ def mobile_firebase_scripts(config: dict) -> str:
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script>window.__MLM_FIREBASE__ = {payload};</script>
+"""
+
+
+def complete_profile_main(
+    error: str = "",
+    values: dict | None = None,
+    success: str = "",
+    email: str = "",
+    otp_enabled: bool = True,
+) -> str:
+    values = values or {}
+    options = ['<option value=""></option>']
+    selected_state = _text(values.get("state"))
+    for name in STATES:
+        sel = " selected" if selected_state == name else ""
+        options.append(f'<option value="{html.escape(name)}"{sel}>{html.escape(name)}</option>')
+    state_filled = " select-filled" if selected_state else ""
+    alert = ""
+    if error:
+        alert += f'<div class="alert alert-error" role="alert">{html.escape(error)}</div>'
+    if success:
+        alert += f'<div class="alert alert-ok" role="status">{html.escape(success)}</div>'
+    email_note = html.escape(email) if email else "your Google email"
+    gst_action = '<button type="button" id="checkGst" class="inline-btn">Check</button>'
+    show_pw = '<button type="button" id="togglePassword" aria-label="Show password">Show</button>'
+    send_otp = (
+        '<button type="button" class="send-otp" id="sendMobileOtp">Send OTP</button>' if otp_enabled else ""
+    )
+    return f"""
+{_logo_block()}
+<div style="margin-top:32px">
+  <h1 class="auth-title">Finish your business details</h1>
+  <p class="auth-sub">Signed in as {email_note}. Add your shop and mobile to join the marketplace.</p>
+</div>
+{alert}
+<form class="vendor-register" id="completeForm" action="complete-profile" method="post" novalidate style="margin-top:28px">
+  {floating_field("shop_name", "Shop or company name", value=_text(values.get("shop_name")), autocomplete="organization")}
+  {floating_field("city", "City", value=_text(values.get("city")), autocomplete="address-level2")}
+  <div class="field" data-field="state">
+    <div class="field-box">
+      <div class="field-inner{state_filled}">
+        <select id="state" name="state" autocomplete="address-level1">{"".join(options)}</select>
+        <label for="state">State</label>
+        {ICON_CHEVRON}
+      </div>
+    </div>
+    <p class="field-msg" id="state-msg" hidden></p>
+  </div>
+  {floating_field("gstin", "GSTIN (optional)", value=_text(values.get("gstin")), autocomplete="off", maxlength="15", action=gst_action, extra_attrs='style="text-transform:uppercase" spellcheck="false"')}
+  <div class="badge-trust" id="gstTrust">{ICON_CHECK} <span>GST verified — builds dealer trust</span></div>
+  {floating_field("mobile", "Mobile number", value=_text(values.get("mobile")), kind="tel", autocomplete="tel", prefix="+91", action=send_otp)}
+  <div id="recaptcha"></div>
+  <div id="mobileOtpWrap" hidden>
+    <p class="auth-sub" style="font-size:14px;margin:0 0 8px">Enter the 6-digit SMS code</p>
+    <div class="otp-row" id="mobileOtpBoxes"></div>
+    <input type="hidden" name="mobile_otp" id="mobile_otp" value="">
+    <p class="field-msg" id="mobileNote"></p>
+    <button type="button" class="btn btn-secondary" id="verifyMobileOtp" style="margin-top:12px">Verify mobile</button>
+  </div>
+  <div id="mobileVerified" class="badge-verified" hidden>{ICON_CHECK} Verified</div>
+  {floating_field("username", "Username", value=_text(values.get("username")), autocomplete="username", extra_attrs='autocapitalize="none" spellcheck="false"')}
+  <p class="username-status" id="usernameStatus">Suggested from your shop name — you can edit it.</p>
+  {floating_field("password", "Password (optional)", kind="password", autocomplete="new-password", action=show_pw)}
+  <p class="field-msg">Optional if you only sign in with Google. Min 6 characters if set.</p>
+  <button type="submit" class="btn btn-primary" id="completeSubmit" style="margin-top:12px">Save and continue</button>
+</form>
+"""
+
+
+def complete_profile_scripts(firebase_config: dict, otp_enabled: bool = True) -> str:
+    config_json = json.dumps(firebase_config or {})
+    otp_flag = "true" if otp_enabled else "false"
+    return f"""
+<script>
+(function() {{
+  var OTP_ON = {otp_flag};
+  var config = {config_json};
+  var phoneVerified = !OTP_ON;
+  var usernameEdited = false;
+  var form = document.getElementById("completeForm");
+  function val(name) {{
+    var el = document.getElementById(name) || (form && form.querySelector('[name="'+name+'"]'));
+    return el ? String(el.value || "").trim() : "";
+  }}
+  function showMsg(id, text, isError) {{
+    var el = document.getElementById(id);
+    if (!el) return;
+    if (!text) {{ el.hidden = true; el.textContent = ""; return; }}
+    el.hidden = false;
+    el.textContent = text;
+    el.className = "field-msg" + (isError ? " error" : (isError === false ? " ok" : ""));
+  }}
+  var stateSelect = document.getElementById("state");
+  if (stateSelect) {{
+    stateSelect.addEventListener("change", function() {{
+      var inner = stateSelect.parentElement;
+      if (stateSelect.value) inner.classList.add("select-filled");
+      else inner.classList.remove("select-filled");
+    }});
+  }}
+  function runGstCheck() {{
+    var gstin = val("gstin").toUpperCase();
+    var trust = document.getElementById("gstTrust");
+    var input = document.getElementById("gstin");
+    if (input) input.value = gstin;
+    if (!gstin) {{ showMsg("gstin-msg", ""); if (trust) trust.classList.remove("show"); return; }}
+    showMsg("gstin-msg", "Checking GST…");
+    fetch("gst-check", {{
+      method: "POST",
+      headers: {{ "Content-Type": "application/json" }},
+      credentials: "same-origin",
+      body: JSON.stringify({{ gstin: gstin }})
+    }}).then(function(r) {{ return r.json(); }}).then(function(data) {{
+      if (data && data.verified) {{
+        showMsg("gstin-msg", data.message || "GST verified", false);
+        if (trust) trust.classList.add("show");
+        if (data.gstin && input) input.value = data.gstin;
+      }} else {{
+        showMsg("gstin-msg", (data && data.message) || "Could not verify GSTIN.", true);
+        if (trust) trust.classList.remove("show");
+      }}
+    }}).catch(function() {{ showMsg("gstin-msg", "GST check failed.", true); }});
+  }}
+  var checkGst = document.getElementById("checkGst");
+  if (checkGst) checkGst.addEventListener("click", runGstCheck);
+
+  function ensureUsername() {{
+    if (usernameEdited && val("username")) return;
+    fetch("username-available?shop=" + encodeURIComponent(val("shop_name")), {{ credentials: "same-origin" }})
+      .then(function(r) {{ return r.json(); }})
+      .then(function(data) {{
+        var input = document.getElementById("username");
+        var status = document.getElementById("usernameStatus");
+        var pick = (data && (data.suggestion || data.username)) || "";
+        if (input && !usernameEdited && pick) input.value = pick;
+        if (status) {{
+          status.className = "username-status " + (data && data.available ? "ok" : "ok");
+          status.textContent = pick ? ("Suggested: " + pick) : "Pick a username";
+        }}
+      }});
+  }}
+  var shopInput = document.getElementById("shop_name");
+  if (shopInput) shopInput.addEventListener("blur", ensureUsername);
+  var usernameInput = document.getElementById("username");
+  if (usernameInput) usernameInput.addEventListener("input", function() {{ usernameEdited = true; }});
+  ensureUsername();
+
+  var pw = document.getElementById("password");
+  var toggle = document.getElementById("togglePassword");
+  if (toggle && pw) {{
+    toggle.addEventListener("click", function() {{
+      var show = pw.type === "password";
+      pw.type = show ? "text" : "password";
+      toggle.textContent = show ? "Hide" : "Show";
+    }});
+  }}
+
+  function buildOtpBoxes(containerId, hiddenId) {{
+    var wrap = document.getElementById(containerId);
+    if (!wrap || wrap.dataset.ready) return;
+    wrap.dataset.ready = "1";
+    for (var i = 0; i < 6; i++) {{
+      var input = document.createElement("input");
+      input.type = "text";
+      input.inputMode = "numeric";
+      input.maxLength = 1;
+      input.dataset.idx = String(i);
+      input.addEventListener("input", function(e) {{
+        var el = e.target;
+        el.value = el.value.replace(/\\D/g, "").slice(0, 1);
+        var idx = Number(el.dataset.idx);
+        if (el.value && idx < 5) {{
+          var next = wrap.querySelector('input[data-idx="'+(idx+1)+'"]');
+          if (next) next.focus();
+        }}
+        var code = "";
+        wrap.querySelectorAll("input").forEach(function(box) {{ code += box.value || ""; }});
+        var hidden = document.getElementById(hiddenId);
+        if (hidden) hidden.value = code;
+      }});
+      wrap.appendChild(input);
+    }}
+  }}
+  var confirmation = null;
+  var verifier = null;
+  function sayMobile(text, ok) {{
+    var note = document.getElementById("mobileNote");
+    if (!note) return;
+    note.hidden = !text;
+    note.textContent = text || "";
+    note.className = "field-msg" + (ok === true ? " ok" : ok === false ? " error" : "");
+  }}
+  var sendMobile = document.getElementById("sendMobileOtp");
+  var verifyMobile = document.getElementById("verifyMobileOtp");
+  if (OTP_ON && config.apiKey && sendMobile && typeof firebase !== "undefined") {{
+    if (!firebase.apps || !firebase.apps.length) firebase.initializeApp(config);
+    sendMobile.addEventListener("click", function() {{
+      var mobile = val("mobile").replace(/\\D/g, "");
+      if (!/^[6-9]\\d{{9}}$/.test(mobile)) {{ showMsg("mobile-msg", "Enter a valid 10-digit mobile number", true); return; }}
+      showMsg("mobile-msg", "");
+      sayMobile("Sending…");
+      var wrap = document.getElementById("mobileOtpWrap");
+      if (wrap) wrap.hidden = false;
+      buildOtpBoxes("mobileOtpBoxes", "mobile_otp");
+      if (!verifier) verifier = new firebase.auth.RecaptchaVerifier("recaptcha", {{ size: "normal" }});
+      firebase.auth().signInWithPhoneNumber("+91" + mobile, verifier).then(function(result) {{
+        confirmation = result;
+        sayMobile("OTP sent to your mobile.", true);
+      }}).catch(function() {{
+        sayMobile("Could not send SMS.", false);
+        if (verifier && verifier.clear) verifier.clear();
+        verifier = null;
+      }});
+    }});
+  }}
+  if (OTP_ON && verifyMobile) {{
+    verifyMobile.addEventListener("click", function() {{
+      var mobile = val("mobile").replace(/\\D/g, "");
+      var code = val("mobile_otp");
+      if (!confirmation) {{ sayMobile("Send an OTP first.", false); return; }}
+      if (code.length !== 6) {{ sayMobile("Enter the 6-digit code.", false); return; }}
+      sayMobile("Checking…");
+      confirmation.confirm(code).then(function(result) {{ return result.user.getIdToken(); }})
+        .then(function(token) {{
+          return fetch("mobile-verify", {{
+            method: "POST",
+            headers: {{ "Content-Type": "application/json" }},
+            credentials: "same-origin",
+            body: JSON.stringify({{ mobile: mobile, firebase_token: token }})
+          }});
+        }}).then(function(r) {{ return r.json(); }}).then(function(data) {{
+          try {{ firebase.auth().signOut(); }} catch (e) {{}}
+          if (data && data.success) {{
+            phoneVerified = true;
+            sayMobile(data.message || "Mobile verified.", true);
+            var badge = document.getElementById("mobileVerified");
+            var wrap = document.getElementById("mobileOtpWrap");
+            if (badge) badge.hidden = false;
+            if (wrap) wrap.hidden = true;
+            if (sendMobile) sendMobile.style.display = "none";
+          }} else {{
+            sayMobile((data && data.message) || "Could not verify mobile.", false);
+          }}
+        }}).catch(function() {{ sayMobile("Incorrect OTP.", false); }});
+    }});
+  }}
+
+  if (form) {{
+    form.addEventListener("submit", function(e) {{
+      if (val("shop_name").length < 2) {{ e.preventDefault(); showMsg("shop_name-msg", "Enter your shop name", true); return; }}
+      if (val("city").length < 2) {{ e.preventDefault(); showMsg("city-msg", "Enter your city", true); return; }}
+      if (!val("state")) {{ e.preventDefault(); showMsg("state-msg", "Select your state", true); return; }}
+      if (!/^[6-9]\\d{{9}}$/.test(val("mobile").replace(/\\D/g, ""))) {{
+        e.preventDefault(); showMsg("mobile-msg", "Enter a valid mobile number", true); return;
+      }}
+      if (OTP_ON && !phoneVerified) {{
+        e.preventDefault(); sayMobile("Verify your mobile to continue.", false); return;
+      }}
+      if (!/^[a-zA-Z0-9._]{{4,20}}$/.test(val("username"))) {{
+        e.preventDefault(); showMsg("username-msg", "Use 4–20 letters, numbers, dots or underscores", true); return;
+      }}
+      var submit = document.getElementById("completeSubmit");
+      if (submit) {{ submit.disabled = true; submit.textContent = "Saving…"; }}
+    }});
+  }}
+}})();
+</script>
 """

@@ -87,6 +87,8 @@ from web_session import register_send_mobile_otp as vendor_register_send_mobile_
 from web_session import register_verify_mobile_otp as vendor_register_verify_mobile_otp
 from web_session import reset_store as vendor_reset_store
 from web_session import register_store as vendor_register_store
+from web_session import complete_profile_page as vendor_complete_profile_page
+from web_session import complete_profile_store as vendor_complete_profile_store
 from vendor_invoices import invoice_list as vendor_invoice_list
 from vendor_invoices import invoice_page as vendor_invoice_page
 from vendor_messages import inbox as vendor_messages
@@ -156,8 +158,25 @@ def _firebase_sign_in_result(result: dict, handoff: str) -> Response:
         code = issue_app_handoff(vendor_id)
         return _json({"redirect": "mylaptopmarket://auth?code=" + code})
     if result.get("success"):
-        response = _json({"success": True, "redirect": "dashboard", "vendor": vendor})
-        return attach_vendor_cookie(response, vendor)
+        redirect = result.get("redirect") or "dashboard"
+        if result.get("code") == "needs_profile":
+            redirect = "complete-profile"
+        response = _json(
+            {
+                "success": True,
+                "code": result.get("code") or "",
+                "redirect": redirect,
+                "message": result.get("message") or "",
+                "vendor": vendor,
+            }
+        )
+        # Cookie needs raw vendor fields; rebuild a minimal row if payload-only.
+        cookie_vendor = {
+            "id": vendor_id or int(vendor.get("id") or 0),
+            "username": vendor.get("username"),
+            "shop_name": vendor.get("shop_name") or "",
+        }
+        return attach_vendor_cookie(response, cookie_vendor)
     return _json(result)
 
 
@@ -257,6 +276,10 @@ def api(req: Request) -> Response:
         return admin_inquiry_delete(req, int(admin_inquiry_delete_match.group(1)))
     if req.method == "GET" and path == "/vendor/register":
         return vendor_register_page()
+    if req.method == "GET" and path == "/vendor/complete-profile":
+        return vendor_complete_profile_page(req)
+    if req.method == "POST" and path == "/vendor/complete-profile":
+        return vendor_complete_profile_store(req)
     if req.method == "GET" and path == "/vendor/phone-auth":
         return vendor_phone_auth_page(req.args.get("mobile") or "")
     if req.method == "POST" and path == "/vendor/registerStore":
