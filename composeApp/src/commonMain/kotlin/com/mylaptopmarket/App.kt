@@ -15,6 +15,7 @@ import com.mylaptopmarket.util.appCacheDir
 import okio.Path.Companion.toPath
 import com.mylaptopmarket.network.SessionManager
 import com.mylaptopmarket.repository.ApiAuthRepository
+import com.mylaptopmarket.repository.AuthNeedsProfileException
 import com.mylaptopmarket.repository.AuthPendingException
 import com.mylaptopmarket.ui.navigation.NavGraph
 import com.mylaptopmarket.ui.navigation.Screen
@@ -66,19 +67,43 @@ fun App(
                     } else {
                         val result = ApiAuthRepository().loginWithFirebaseCode(code)
                         result.onSuccess { session ->
-                            SessionManager.login(session, promptShopTrust = true)
-                            SignInNotice.clear()
-                            navController.navigate(Screen.Home.route) {
-                                popUpTo(Screen.Home.route) { inclusive = true }
-                                launchSingleTop = true
-                            }
-                        }.onFailure { error ->
-                            if (error is AuthPendingException && error.pending.vendorId > 0) {
-                                navController.navigate(Screen.SellerVerification.createRoute(error.pending.vendorId)) {
+                            if (!session.profileComplete) {
+                                SignInNotice.clear()
+                                navController.navigate(
+                                    Screen.CompleteProfile.createRoute(session.id, session.email)
+                                ) {
                                     launchSingleTop = true
                                 }
                             } else {
-                                SignInNotice.show(error.message ?: "Google sign-in could not be finished.")
+                                SessionManager.login(session, promptShopTrust = true)
+                                SignInNotice.clear()
+                                navController.navigate(Screen.Home.route) {
+                                    popUpTo(Screen.Home.route) { inclusive = true }
+                                    launchSingleTop = true
+                                }
+                            }
+                        }.onFailure { error ->
+                            when {
+                                error is AuthNeedsProfileException && error.vendorId > 0 -> {
+                                    SignInNotice.clear()
+                                    navController.navigate(
+                                        Screen.CompleteProfile.createRoute(error.vendorId, error.email)
+                                    ) {
+                                        launchSingleTop = true
+                                    }
+                                }
+                                error is AuthPendingException && error.pending.vendorId > 0 -> {
+                                    navController.navigate(
+                                        Screen.SellerVerification.createRoute(error.pending.vendorId)
+                                    ) {
+                                        launchSingleTop = true
+                                    }
+                                }
+                                else -> {
+                                    SignInNotice.show(
+                                        error.message ?: "Google sign-in could not be finished."
+                                    )
+                                }
                             }
                         }
                     }

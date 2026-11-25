@@ -34,6 +34,7 @@ fun LoginScreen(
     onRegisterClick: () -> Unit,
     onForgotPasswordClick: () -> Unit,
     onPendingVerification: (Int) -> Unit,
+    onNeedsProfile: (vendorId: Int, email: String) -> Unit,
     onBackClick: () -> Unit
 ) {
     var username by remember { mutableStateOf("") }
@@ -45,6 +46,7 @@ fun LoginScreen(
     val signInNotice by SignInNotice.message.collectAsState()
     val loginSuccess by viewModel.loginSuccess.collectAsState()
     val pending by viewModel.pendingVerification.collectAsState()
+    val needsProfile by viewModel.needsProfile.collectAsState()
 
     LaunchedEffect(loginSuccess) {
         if (loginSuccess) onLoginSuccess()
@@ -55,6 +57,14 @@ fun LoginScreen(
         if (vendorId != null && vendorId > 0) {
             onPendingVerification(vendorId)
             viewModel.clearPending()
+        }
+    }
+
+    LaunchedEffect(needsProfile) {
+        val pendingProfile = needsProfile
+        if (pendingProfile != null && pendingProfile.vendorId > 0) {
+            onNeedsProfile(pendingProfile.vendorId, pendingProfile.email)
+            viewModel.clearNeedsProfile()
         }
     }
 
@@ -88,7 +98,7 @@ fun LoginScreen(
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
-                label = { Text("Username") },
+                label = { Text("Username, email or mobile") },
                 leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,

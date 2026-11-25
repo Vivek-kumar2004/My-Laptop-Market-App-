@@ -37,6 +37,10 @@ sealed class Screen(val route: String) {
     data object Login : Screen("login")
     data object Register : Screen("register")
     data object ForgotPassword : Screen("forgot_password")
+    data object CompleteProfile : Screen("complete_profile/{vendorId}?email={email}") {
+        fun createRoute(vendorId: Int, email: String = "") =
+            "complete_profile/$vendorId?email=${email.replace("&", "").replace("?", "")}"
+    }
     data object SellerVerification : Screen("seller_verification?vendorId={vendorId}") {
         fun createRoute(vendorId: Int? = null) =
             if (vendorId != null) "seller_verification?vendorId=$vendorId" else "seller_verification"
@@ -112,8 +116,18 @@ fun NavGraph(navController: NavHostController) {
     LaunchedEffect(session?.id) {
         val vendorId = session?.id ?: return@LaunchedEffect
         authRepository.getVendorStatus(vendorId).onSuccess { loaded ->
+            if (!loaded.profileComplete) {
+                SessionManager.logout()
+                navController.navigate(Screen.CompleteProfile.createRoute(loaded.id, loaded.email)) {
+                    launchSingleTop = true
+                }
+                return@onSuccess
+            }
             SessionManager.update { current ->
-                if (current.id != vendorId) current else current.copy(adminWarning = loaded.adminWarning)
+                if (current.id != vendorId) current else current.copy(
+                    adminWarning = loaded.adminWarning,
+                    profileComplete = loaded.profileComplete
+                )
             }
         }
     }
@@ -289,6 +303,34 @@ fun NavGraph(navController: NavHostController) {
                 onPendingVerification = { vendorId ->
                     navController.navigate(Screen.SellerVerification.createRoute(vendorId)) {
                         popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                },
+                onNeedsProfile = { vendorId, email ->
+                    navController.navigate(Screen.CompleteProfile.createRoute(vendorId, email)) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Screen.CompleteProfile.route,
+            arguments = listOf(
+                navArgument("vendorId") { type = NavType.IntType },
+                navArgument("email") { type = NavType.StringType; nullable = true; defaultValue = "" }
+            )
+        ) { backStackEntry ->
+            val vendorId = backStackEntry.arguments?.getInt("vendorId") ?: 0
+            val email = backStackEntry.arguments?.getString("email").orEmpty()
+            val viewModel = remember { AuthViewModel(authRepository) }
+            CompleteProfileScreen(
+                vendorId = vendorId,
+                email = email,
+                viewModel = viewModel,
+                onCompleted = { id ->
+                    navController.navigate(Screen.SellerVerification.createRoute(id)) {
+                        popUpTo(Screen.CompleteProfile.route) { inclusive = true }
                     }
                 },
                 onBackClick = { navController.popBackStack() }

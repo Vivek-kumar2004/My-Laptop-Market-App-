@@ -9,6 +9,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.get
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -35,7 +36,58 @@ data class RegisterRequest(
     val email: String,
     val password: String,
     val email_otp: String = "",
-    val mobile_otp: String = ""
+    val mobile_otp: String = "",
+    val gstin: String = ""
+)
+
+@Serializable
+data class CompleteProfileRequest(
+    val vendor_id: Int,
+    val shop_name: String,
+    val username: String,
+    val city: String,
+    val state: String,
+    val mobile: String,
+    val mobile_otp: String = "",
+    val password: String = "",
+    val gstin: String = ""
+)
+
+@Serializable
+data class GstCheckRequest(val gstin: String)
+
+@Serializable
+data class UsernameAvailabilityResponse(
+    val ok: Boolean = false,
+    val available: Boolean = false,
+    val username: String? = null,
+    val suggestion: String? = null,
+    val message: String? = null
+)
+
+@Serializable
+data class GstCheckResponse(
+    val ok: Boolean = false,
+    val empty: Boolean = false,
+    val verified: Boolean = false,
+    val gstin: String? = null,
+    val message: String? = null
+)
+
+data class UsernameAvailability(
+    val ok: Boolean,
+    val available: Boolean,
+    val username: String,
+    val suggestion: String,
+    val message: String
+)
+
+data class GstCheckResult(
+    val ok: Boolean,
+    val empty: Boolean,
+    val verified: Boolean,
+    val gstin: String,
+    val message: String
 )
 
 @Serializable
@@ -85,6 +137,7 @@ data class VendorData(
     val state: String? = null,
     val status: Int? = null,
     val verified: Boolean? = null,
+    @SerialName("profile_complete") val profileComplete: Boolean? = null,
     val subscription_start: String? = null,
     val subscription_end: String? = null,
     val logo: String? = null,
@@ -156,6 +209,8 @@ class ApiAuthRepository {
             response.asSessionResult("Invalid username or password")
         } catch (e: AuthPendingException) {
             Result.failure(e)
+        } catch (e: AuthNeedsProfileException) {
+            Result.failure(e)
         } catch (e: Exception) {
             val errorMsg = if (e.message?.contains("required", ignoreCase = true) == true) {
                 "Server error: Database not reachable. Please start MySQL in XAMPP."
@@ -175,12 +230,26 @@ class ApiAuthRepository {
             response.asSessionResult("Google sign-in could not be finished")
         } catch (e: AuthPendingException) {
             Result.failure(e)
+        } catch (e: AuthNeedsProfileException) {
+            Result.failure(e)
         } catch (e: Exception) {
             Result.failure(Exception(e.message ?: "Google sign-in could not be finished"))
         }
     }
 
     private fun LoginResponse.asSessionResult(fallback: String): Result<VendorSession> {
+        val needsProfile = code == "needs_profile" ||
+            (success && vendor != null && vendor.profileComplete == false)
+        if (needsProfile) {
+            val id = vendor_id ?: vendor?.id ?: 0
+            return Result.failure(
+                AuthNeedsProfileException(
+                    message = message ?: "Finish a few business details to continue.",
+                    vendorId = id,
+                    email = vendor?.email.orEmpty()
+                )
+            )
+        }
         return when {
             success && vendor != null -> Result.success(vendor.toSession(daysLeft = 0))
             code == "pending_verification" || code == "expired" -> Result.failure(
@@ -198,6 +267,72 @@ class ApiAuthRepository {
                 )
             )
             else -> Result.failure(Exception(message ?: fallback))
+        }
+    }
+
+    suspend fun usernameAvailable(username: String = "", shop: String = ""): Result<UsernameAvailability> {
+        return try {
+            val response: UsernameAvailabilityResponse = client.get("$baseUrl/vendor/username-available") {
+                if (username.isNotBlank()) parameter("u", username.trim())
+                if (shop.isNotBlank()) parameter("shop", shop.trim())
+            }.body()
+            Result.success(
+                UsernameAvailability(
+                    ok = response.ok,
+                    available = response.available,
+                    username = response.username.orEmpty(),
+                    suggestion = response.suggestion ?: response.username.orEmpty(),
+                    message = response.message.orEmpty()
+                )
+            )
+        } catch (e: Exception) {
+            Result.failure(Exception(e.message ?: "Could not check username"))
+        }
+    }
+
+    suspend fun gstCheck(gstin: String): Result<GstCheckResult> {
+        return try {
+            val response: GstCheckResponse = client.post("$baseUrl/vendor/gst-check") {
+                contentType(ContentType.Application.Json)
+                setBody(GstCheckRequest(gstin.trim()))
+            }.body()
+            Result.success(
+                GstCheckResult(
+                    ok = response.ok,
+                    empty = response.empty,
+                    verified = response.verified,
+                    gstin = response.gstin.orEmpty(),
+                    message = response.message.orEmpty()
+                )
+            )
+        } catch (e: Exception) {
+            Result.failure(Exception(e.message ?: "Could not check GSTIN"))
+        }
+    }
+
+    suspend fun completeProfile(request: CompleteProfileRequest): Result<AuthPending> {
+        return try {
+            val response: LoginResponse = client.post("$baseUrl/vendor/complete-profile") {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }.body()
+            if (response.success && (response.vendor_id != null || response.vendor != null)) {
+                Result.success(
+                    AuthPending(
+                        vendorId = response.vendor_id ?: response.vendor!!.id,
+                        code = "pending_verification",
+                        message = response.message ?: if (SHOW_VENDOR_PAYMENT) {
+                            "Profile saved. Activate subscription to go live."
+                        } else {
+                            "Profile saved."
+                        }
+                    )
+                )
+            } else {
+                Result.failure(Exception(response.message ?: "Could not save profile"))
+            }
+        } catch (e: Exception) {
+            Result.failure(Exception(e.message ?: "Could not save profile"))
         }
     }
 
@@ -463,6 +598,7 @@ class ApiAuthRepository {
             location = location ?: "",
             state = state ?: "",
             isVerified = verified == true || status == 1,
+            profileComplete = profileComplete != false,
             subscriptionEnd = subscription_end,
             daysLeft = daysLeft,
             logoUrl = resolvedLogo,
@@ -503,4 +639,10 @@ class ApiAuthRepository {
 class AuthPendingException(
     message: String,
     val pending: AuthPending
+) : Exception(message)
+
+class AuthNeedsProfileException(
+    message: String,
+    val vendorId: Int,
+    val email: String = ""
 ) : Exception(message)

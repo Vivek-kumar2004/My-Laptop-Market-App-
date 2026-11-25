@@ -11,15 +11,17 @@ Yeh file sirf authentication-related website updates ko Play Store app me port k
 
 ## 1) Kya website pe live hai (summary)
 
-| Feature | Website | App aaj | App me karna hai |
-|---|---|---|---|
-| Password login (username / email / mobile) | Yes | Partial (username) | Email + 10-digit mobile login bhi allow |
-| Google Sign-In — existing dealer | Yes | Yes (deep link) | `needs_profile` handle karo |
-| Google Sign-In — **naya** dealer → complete profile | Yes | **Broken** (full login maan leta hai) | Naya screen + API |
-| Register: optional GSTIN + blue trust badge | Yes | GST profile update hai, register pe nahi | Register form me optional GST |
-| Username auto-suggest from shop name + availability | Yes | Manual username | Suggest + live check |
-| Email OTP + Mobile OTP on register | Yes (flag) | Yes (`SHOW_VENDOR_OTP`) | Same rakho |
-| Incomplete Google vendor dashboard block | Yes | Nahi | Guard: `profile_complete == false` → Complete Profile |
+| Feature | Website | App (1.1.4 AAB) |
+|---|---|---|
+| Password login (username / email / mobile) | Yes | Yes |
+| Google Sign-In — existing dealer | Yes | Yes |
+| Google Sign-In — **naya** dealer → complete profile | Yes | Yes (`CompleteProfileScreen`) |
+| Register: optional GSTIN + blue trust badge | Yes | Yes |
+| Username auto-suggest from shop name + availability | Yes | Yes |
+| Email OTP + Mobile OTP on register | Yes (flag) | Yes (`SHOW_VENDOR_OTP`) |
+| Incomplete Google vendor dashboard block | Yes | Yes → Complete Profile |
+
+**Play upload file:** `playstore/MyLaptopMarket-1.1.4.aab` (versionCode **14**, versionName **1.1.4**)
 
 ---
 

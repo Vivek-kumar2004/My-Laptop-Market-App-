@@ -5,11 +5,16 @@ import androidx.lifecycle.viewModelScope
 import com.mylaptopmarket.network.SessionManager
 import com.mylaptopmarket.network.VendorSession
 import com.mylaptopmarket.repository.ApiAuthRepository
+import com.mylaptopmarket.repository.AuthNeedsProfileException
 import com.mylaptopmarket.repository.AuthPending
 import com.mylaptopmarket.repository.AuthPendingException
+import com.mylaptopmarket.repository.CompleteProfileRequest
+import com.mylaptopmarket.repository.GstCheckResult
 import com.mylaptopmarket.repository.LoginRequest
 import com.mylaptopmarket.repository.RegisterRequest
+import com.mylaptopmarket.repository.UsernameAvailability
 import com.mylaptopmarket.service.PhoneAuthBridge
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,6 +34,12 @@ object SignInNotice {
     }
 }
 
+data class NeedsProfile(
+    val vendorId: Int,
+    val email: String = "",
+    val message: String = ""
+)
+
 class AuthViewModel(private val repository: ApiAuthRepository) : ViewModel() {
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -41,6 +52,9 @@ class AuthViewModel(private val repository: ApiAuthRepository) : ViewModel() {
 
     private val _pendingVerification = MutableStateFlow<AuthPending?>(null)
     val pendingVerification: StateFlow<AuthPending?> = _pendingVerification.asStateFlow()
+
+    private val _needsProfile = MutableStateFlow<NeedsProfile?>(null)
+    val needsProfile: StateFlow<NeedsProfile?> = _needsProfile.asStateFlow()
 
     private val _sellerStatus = MutableStateFlow<VendorSession?>(null)
     val sellerStatus: StateFlow<VendorSession?> = _sellerStatus.asStateFlow()
@@ -69,7 +83,19 @@ class AuthViewModel(private val repository: ApiAuthRepository) : ViewModel() {
     private val _verifiedMobileOtp = MutableStateFlow("")
     val verifiedMobileOtp: StateFlow<String> = _verifiedMobileOtp.asStateFlow()
 
+    private val _usernameStatus = MutableStateFlow<UsernameAvailability?>(null)
+    val usernameStatus: StateFlow<UsernameAvailability?> = _usernameStatus.asStateFlow()
+
+    private val _suggestedUsername = MutableStateFlow<String?>(null)
+    val suggestedUsername: StateFlow<String?> = _suggestedUsername.asStateFlow()
+
+    private val _gstStatus = MutableStateFlow<GstCheckResult?>(null)
+    val gstStatus: StateFlow<GstCheckResult?> = _gstStatus.asStateFlow()
+
     private val _phoneVerificationId = MutableStateFlow("")
+    private var usernameJob: Job? = null
+    private var shopUsernameJob: Job? = null
+    private var gstJob: Job? = null
 
     fun login(username: String, password: String) {
         viewModelScope.launch {
@@ -77,6 +103,7 @@ class AuthViewModel(private val repository: ApiAuthRepository) : ViewModel() {
             _errorMessage.value = null
             _loginSuccess.value = false
             _pendingVerification.value = null
+            _needsProfile.value = null
 
             applyLogin(repository.login(LoginRequest(username, password)))
             _isLoading.value = false
@@ -85,14 +112,30 @@ class AuthViewModel(private val repository: ApiAuthRepository) : ViewModel() {
 
     private fun applyLogin(result: Result<VendorSession>) {
         result.onSuccess { session ->
+            if (!session.profileComplete) {
+                _needsProfile.value = NeedsProfile(
+                    vendorId = session.id,
+                    email = session.email,
+                    message = "Finish a few business details to continue."
+                )
+                return
+            }
             SessionManager.login(session, promptShopTrust = true)
             _loginSuccess.value = true
         }.onFailure { error ->
-            if (error is AuthPendingException) {
-                _pendingVerification.value = error.pending
-                _errorMessage.value = error.message
-            } else {
-                _errorMessage.value = error.message ?: "Unknown error occurred"
+            when (error) {
+                is AuthNeedsProfileException -> {
+                    _needsProfile.value = NeedsProfile(
+                        vendorId = error.vendorId,
+                        email = error.email,
+                        message = error.message ?: "Finish a few business details to continue."
+                    )
+                }
+                is AuthPendingException -> {
+                    _pendingVerification.value = error.pending
+                    _errorMessage.value = error.message
+                }
+                else -> _errorMessage.value = error.message ?: "Unknown error occurred"
             }
         }
     }
@@ -106,12 +149,23 @@ class AuthViewModel(private val repository: ApiAuthRepository) : ViewModel() {
         email: String,
         password: String,
         emailOtp: String,
-        mobileOtp: String
+        mobileOtp: String,
+        gstin: String = ""
     ) {
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
             _pendingVerification.value = null
+
+            val trimmedGst = gstin.trim()
+            if (trimmedGst.isNotEmpty()) {
+                val gst = repository.gstCheck(trimmedGst).getOrNull()
+                if (gst == null || !gst.ok || gst.empty) {
+                    _errorMessage.value = gst?.message ?: "Enter a valid GSTIN or leave it blank."
+                    _isLoading.value = false
+                    return@launch
+                }
+            }
 
             val result = repository.register(
                 RegisterRequest(
@@ -124,7 +178,8 @@ class AuthViewModel(private val repository: ApiAuthRepository) : ViewModel() {
                     email = email.trim(),
                     password = password,
                     email_otp = emailOtp.trim(),
-                    mobile_otp = mobileOtp.trim()
+                    mobile_otp = mobileOtp.trim(),
+                    gstin = trimmedGst
                 )
             )
             result.onSuccess { pending ->
@@ -133,6 +188,126 @@ class AuthViewModel(private val repository: ApiAuthRepository) : ViewModel() {
                 _errorMessage.value = error.message ?: "Registration failed"
             }
             _isLoading.value = false
+        }
+    }
+
+    fun completeProfile(
+        vendorId: Int,
+        shopName: String,
+        username: String,
+        city: String,
+        state: String,
+        mobile: String,
+        mobileOtp: String,
+        password: String,
+        gstin: String
+    ) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _errorMessage.value = null
+            _pendingVerification.value = null
+
+            val trimmedGst = gstin.trim()
+            if (trimmedGst.isNotEmpty()) {
+                val gst = repository.gstCheck(trimmedGst).getOrNull()
+                if (gst == null || !gst.ok || gst.empty) {
+                    _errorMessage.value = gst?.message ?: "Enter a valid GSTIN or leave it blank."
+                    _isLoading.value = false
+                    return@launch
+                }
+            }
+
+            val result = repository.completeProfile(
+                CompleteProfileRequest(
+                    vendor_id = vendorId,
+                    shop_name = shopName.trim(),
+                    username = username.trim(),
+                    city = city.trim(),
+                    state = state.trim(),
+                    mobile = mobile.trim(),
+                    mobile_otp = mobileOtp.trim(),
+                    password = password,
+                    gstin = trimmedGst
+                )
+            )
+            result.onSuccess { pending ->
+                _pendingVerification.value = pending
+            }.onFailure { error ->
+                _errorMessage.value = error.message ?: "Could not save profile"
+            }
+            _isLoading.value = false
+        }
+    }
+
+    fun suggestUsernameFromShop(shop: String) {
+        shopUsernameJob?.cancel()
+        val trimmed = shop.trim()
+        if (trimmed.length < 2) {
+            _suggestedUsername.value = null
+            return
+        }
+        shopUsernameJob = viewModelScope.launch {
+            delay(350)
+            repository.usernameAvailable(shop = trimmed)
+                .onSuccess {
+                    _suggestedUsername.value = it.suggestion.ifBlank { it.username }
+                    _usernameStatus.value = it
+                }
+                .onFailure {
+                    _suggestedUsername.value = null
+                }
+        }
+    }
+
+    fun checkUsername(username: String) {
+        usernameJob?.cancel()
+        val trimmed = username.trim()
+        if (trimmed.length < 4) {
+            _usernameStatus.value = null
+            return
+        }
+        usernameJob = viewModelScope.launch {
+            delay(350)
+            repository.usernameAvailable(username = trimmed)
+                .onSuccess { _usernameStatus.value = it }
+                .onFailure {
+                    _usernameStatus.value = UsernameAvailability(
+                        ok = false,
+                        available = false,
+                        username = trimmed,
+                        suggestion = "",
+                        message = it.message ?: "Could not check username"
+                    )
+                }
+        }
+    }
+
+    fun checkGst(gstin: String) {
+        gstJob?.cancel()
+        val trimmed = gstin.trim()
+        if (trimmed.isEmpty()) {
+            _gstStatus.value = GstCheckResult(
+                ok = true,
+                empty = true,
+                verified = false,
+                gstin = "",
+                message = ""
+            )
+            return
+        }
+        gstJob = viewModelScope.launch {
+            delay(400)
+            repository.gstCheck(trimmed)
+                .onSuccess { _gstStatus.value = it }
+                .onFailure {
+                    _gstStatus.value = GstCheckResult(
+                        ok = false,
+                        empty = false,
+                        verified = false,
+                        gstin = trimmed,
+                        message = it.message ?: "Could not check GSTIN"
+                    )
+                }
         }
     }
 
@@ -319,5 +494,9 @@ class AuthViewModel(private val repository: ApiAuthRepository) : ViewModel() {
 
     fun clearPending() {
         _pendingVerification.value = null
+    }
+
+    fun clearNeedsProfile() {
+        _needsProfile.value = null
     }
 }

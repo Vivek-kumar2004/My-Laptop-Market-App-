@@ -19,6 +19,7 @@ data class VendorSession(
     val location: String = "",
     val state: String = "",
     val isVerified: Boolean = false,
+    val profileComplete: Boolean = true,
     val subscriptionEnd: String? = null,
     val daysLeft: Int = 0,
     val logoUrl: String? = null,
