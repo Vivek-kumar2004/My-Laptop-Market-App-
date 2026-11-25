@@ -5,7 +5,15 @@ import functions_framework
 from firebase_admin import initialize_app
 from flask import Request, Response
 
-from accounts import check_gstin, delete_account, profile_update, register, shop_trust, username_available
+from accounts import (
+    check_gstin,
+    complete_google_profile,
+    delete_account,
+    profile_update,
+    register,
+    shop_trust,
+    username_available,
+)
 from admin_web import dashboard_page as admin_dashboard_page
 from admin_web import login_auth as admin_login_auth
 from admin_web import login_page as admin_login_page
@@ -530,6 +538,11 @@ def api(req: Request) -> Response:
 
     if req.method == "POST" and path == "/api/vendor/register":
         return _json(register(req.get_json(silent=True) or {}))
+
+    if req.method == "POST" and path == "/api/vendor/complete-profile":
+        body = req.get_json(silent=True) or {}
+        vendor_id = int(body.get("vendor_id") or 0)
+        return _json(complete_google_profile(vendor_id, body))
 
     if req.method in {"GET", "POST"} and path in {
         "/vendor/username-available",
