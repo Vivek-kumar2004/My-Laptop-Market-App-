@@ -286,7 +286,15 @@ def api(req: Request) -> Response:
         return vendor_register_page()
     if req.method == "GET" and path == "/vendor/complete-profile":
         return vendor_complete_profile_page(req)
-    if req.method == "POST" and path == "/vendor/complete-profile":
+    if req.method == "POST" and path in {
+        "/vendor/complete-profile",
+        "/api/vendor/complete-profile",
+    }:
+        # App sends JSON + vendor_id; website form posts multipart/form-data with cookie.
+        if (req.content_type or "").startswith("application/json"):
+            body = req.get_json(silent=True) or {}
+            vendor_id = int(body.get("vendor_id") or 0)
+            return _json(complete_google_profile(vendor_id, body))
         return vendor_complete_profile_store(req)
     if req.method == "GET" and path == "/vendor/phone-auth":
         return vendor_phone_auth_page(req.args.get("mobile") or "")
@@ -538,11 +546,6 @@ def api(req: Request) -> Response:
 
     if req.method == "POST" and path == "/api/vendor/register":
         return _json(register(req.get_json(silent=True) or {}))
-
-    if req.method == "POST" and path == "/api/vendor/complete-profile":
-        body = req.get_json(silent=True) or {}
-        vendor_id = int(body.get("vendor_id") or 0)
-        return _json(complete_google_profile(vendor_id, body))
 
     if req.method in {"GET", "POST"} and path in {
         "/vendor/username-available",

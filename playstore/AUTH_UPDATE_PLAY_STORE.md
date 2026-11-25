@@ -64,7 +64,7 @@ Same check password / status refresh pe: agar `vendor.profile_complete == false`
 ## 3) New API — Complete Google Profile (app JSON)
 
 **Endpoint:** `POST /api/vendor/complete-profile`  
-**Content-Type:** `application/json`
+**Content-Type:** `application/json` (required — form posts go to the website HTML handler)
 
 ### Request body
 
