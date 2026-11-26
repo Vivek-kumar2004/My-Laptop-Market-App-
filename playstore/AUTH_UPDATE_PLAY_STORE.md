@@ -11,7 +11,7 @@ Yeh file sirf authentication-related website updates ko Play Store app me port k
 
 ## 1) Kya website pe live hai (summary)
 
-| Feature | Website | App (1.1.4 AAB) |
+| Feature | Website | App (1.1.5 AAB) |
 |---|---|---|
 | Password login (username / email / mobile) | Yes | Yes |
 | Google Sign-In — existing dealer | Yes | Yes |
@@ -21,7 +21,7 @@ Yeh file sirf authentication-related website updates ko Play Store app me port k
 | Email OTP + Mobile OTP on register | Yes (flag) | Yes (`SHOW_VENDOR_OTP`) |
 | Incomplete Google vendor dashboard block | Yes | Yes → Complete Profile |
 
-**Play upload file:** `playstore/MyLaptopMarket-1.1.4.aab` (versionCode **14**, versionName **1.1.4**)
+**Play upload file:** `playstore/MyLaptopMarket-1.1.5.aab` (versionCode **15**, versionName **1.1.5**)
 
 ---
 
