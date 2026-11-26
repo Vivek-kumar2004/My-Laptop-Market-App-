@@ -5,7 +5,6 @@ import { cn } from "../utils/cn";
 import { useScrollProgress, useScrolled } from "../lib/motion";
 import { Icon } from "./Icon";
 import { Header } from "./Header";
-import { SideDock } from "./SideDock";
 import { Footer } from "./Footer";
 import { floatingDockConfig } from "../lib/floatingDock";
 import { AppPromoModal } from "./AppPromoModal";
@@ -82,7 +81,6 @@ export function Shell({
       </a>
 
       <Header onOpenProduct={setQuickView} />
-      <SideDock />
 
       <main>{typeof children === "function" ? children(api) : children}</main>
 
