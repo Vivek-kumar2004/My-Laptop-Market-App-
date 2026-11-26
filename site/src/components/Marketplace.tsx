@@ -4,6 +4,7 @@ import { cn } from "../utils/cn";
 import { Icon } from "./Icon";
 import { Reveal } from "../lib/motion";
 import { useCatalog } from "../lib/catalog";
+import { SITE_ORIGIN } from "../lib/api";
 
 const categoryFilters = ["All", "Laptops", "Servers", "Networking", "Monitors"] as const;
 const sortOptions = [
@@ -35,7 +36,7 @@ export function Marketplace({
   const [sort, setSort] = useState<(typeof sortOptions)[number]["value"]>("newest");
   const [showFilters, setShowFilters] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
-  const { products } = useCatalog();
+  const { products, loading, live } = useCatalog();
 
   useEffect(() => {
     setQuery(initialQuery);
@@ -89,8 +90,42 @@ export function Marketplace({
   return (
     <section id="marketplace" className="relative scroll-mt-24 border-y border-line/70 bg-mist py-14 sm:py-16 lg:py-20">
       <div className="wrap">
-        <Reveal>
-          <div className="rounded-[20px] border border-line bg-white p-3 shadow-[0_10px_40px_-30px_rgba(11,27,58,0.5)]">
+        <div className="flex flex-col justify-between gap-7 md:flex-row md:items-end">
+          <Reveal className="max-w-[560px]">
+            <span className="eyebrow">The live marketplace</span>
+            <h2 className="display mt-4 text-[clamp(2.1rem,4.2vw,3.35rem)] text-navy">
+              Fresh stock.
+              <br />
+              <span className="text-brand">Verified sellers.</span>
+            </h2>
+            <p className="mt-4 max-w-[470px] text-[14.5px] leading-relaxed text-slate-ink">
+              Real hardware listed by real IT businesses — with quantities, grades and trade prices in plain sight.
+            </p>
+          </Reveal>
+
+          <Reveal delay={100} className="flex flex-wrap items-center gap-2.5">
+            <div className="mr-2 hidden items-center gap-2 rounded-full border border-line bg-white px-3.5 py-2 text-[11px] font-semibold text-slate-ink lg:flex">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-verified opacity-70" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-verified" />
+              </span>
+              <span className="font-bold text-navy">{filtered.length}</span> of {products.length} listings shown
+              {live ? <span className="text-verified"> · live</span> : loading ? " · loading…" : null}
+            </div>
+            <button onClick={onRequirement} className="link-arrow h-11 rounded-full border border-line bg-white px-4 text-[12px] transition hover:border-brand/30">
+              Post a requirement <Icon name="plus" size={14} />
+            </button>
+            <a
+              href={`${SITE_ORIGIN}/products.html`}
+              className="btn btn-ghost h-11 min-h-0 px-4 text-[12.5px]"
+            >
+              All listings <Icon name="arrow-up-right" size={14} className="arrow" />
+            </a>
+          </Reveal>
+        </div>
+
+        <Reveal delay={60}>
+          <div className="mt-9 rounded-[20px] border border-line bg-white p-3 shadow-[0_10px_40px_-30px_rgba(11,27,58,0.5)]">
             <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
               <div className="no-scrollbar flex gap-1 overflow-x-auto">
                 {categoryFilters.map((item) => {
