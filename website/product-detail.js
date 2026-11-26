@@ -42,6 +42,17 @@
     return "₹" + num.toLocaleString("en-IN");
   }
 
+  function displayPrice(price) {
+    if (!isAuthenticated) {
+      return (
+        '<a class="price-login-link" href="' +
+        VENDOR_LOGIN_URL +
+        '"><i class="fa-solid fa-lock"></i> Login to view price</a>'
+      );
+    }
+    return formatPrice(price);
+  }
+
   function showError(message) {
     els.loading.hidden = true;
     els.loading.style.display = "none";
@@ -345,7 +356,7 @@
           escapeHtml(p.product_name) +
           "</a></h3>" +
           '<div class="product-price">' +
-          formatPrice(p.price) +
+          displayPrice(p.price) +
           "</div>" +
           '<a class="product-details-btn" href="' +
           href +
@@ -360,7 +371,11 @@
     document.title = (product.product_name || "Product") + " - My Laptop Market";
     els.breadcrumbName.textContent = product.product_name || "Product";
     els.name.textContent = product.product_name || "Product";
-    els.price.textContent = formatPrice(product.price);
+    if (!isAuthenticated) {
+      els.price.innerHTML = displayPrice(product.price);
+    } else {
+      els.price.textContent = formatPrice(product.price);
+    }
     els.description.textContent =
       product.description || "No description provided by the vendor.";
 

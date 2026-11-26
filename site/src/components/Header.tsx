@@ -5,6 +5,7 @@ import { brands, type Product } from "../data";
 import { BrandLogo, Icon } from "./Icon";
 import { useCatalog } from "../lib/catalog";
 import { useScrolled } from "../lib/motion";
+import { useVendorAuth } from "../lib/auth";
 import { navItems, routes } from "../lib/routes";
 
 const pageLinks = [
@@ -248,6 +249,7 @@ function CommandPalette({
   const [query, setQuery] = useState("");
   const [cursor, setCursor] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { authenticated, loginUrl } = useVendorAuth();
 
   useEffect(() => {
     const timer = window.setTimeout(() => inputRef.current?.focus(), 40);
@@ -358,7 +360,17 @@ function CommandPalette({
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[12px] font-bold text-navy">₹{product.price.toLocaleString("en-IN")}</p>
+                    {authenticated ? (
+                      <p className="text-[12px] font-bold text-navy">₹{product.price.toLocaleString("en-IN")}</p>
+                    ) : (
+                      <a
+                        href={loginUrl}
+                        onClick={(event) => event.stopPropagation()}
+                        className="inline-flex items-center gap-1 text-[10px] font-bold text-brand"
+                      >
+                        <Icon name="lock" size={10} /> Login for price
+                      </a>
+                    )}
                     <p className="flex items-center justify-end gap-1 text-[10px] font-medium text-slate-ink">
                       <Icon name="badge" size={10} className="text-verified" /> Verified
                     </p>

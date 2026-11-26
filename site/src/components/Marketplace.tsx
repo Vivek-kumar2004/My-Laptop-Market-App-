@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { categories, cities, inr, savings, type Product } from "../data";
+import { categories, cities, savings, type Product } from "../data";
 import { cn } from "../utils/cn";
 import { Icon } from "./Icon";
+import { LockedPrice } from "./LockedPrice";
 import { Reveal } from "../lib/motion";
+import { useVendorAuth } from "../lib/auth";
 import { useCatalog } from "../lib/catalog";
 import { SITE_ORIGIN } from "../lib/api";
 
@@ -37,6 +39,7 @@ export function Marketplace({
   const [showFilters, setShowFilters] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
   const { products, loading, live } = useCatalog();
+  const { authenticated } = useVendorAuth();
 
   useEffect(() => {
     setQuery(initialQuery);
@@ -45,6 +48,10 @@ export function Marketplace({
     setCity(cities.includes(initialCity) ? initialCity : "All cities");
     setSort("newest");
   }, [initialQuery, initialCategory, initialCity, queryKey]);
+
+  useEffect(() => {
+    if (!authenticated && sort.startsWith("price")) setSort("newest");
+  }, [authenticated, sort]);
 
   const toggleFavorite = (id: string) =>
     setFavorites((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
@@ -72,11 +79,11 @@ export function Marketplace({
       return matchesQuery && matchesCategory && matchesCity && matchesCondition;
     });
     const sorted = [...result];
-    if (sort === "price-asc") sorted.sort((a, b) => a.price - b.price);
-    if (sort === "price-desc") sorted.sort((a, b) => b.price - a.price);
+    if (authenticated && sort === "price-asc") sorted.sort((a, b) => a.price - b.price);
+    if (authenticated && sort === "price-desc") sorted.sort((a, b) => b.price - a.price);
     if (sort === "stock") sorted.sort((a, b) => b.units - a.units);
     return sorted;
-  }, [query, category, city, condition, sort, products]);
+  }, [query, category, city, condition, sort, products, authenticated]);
 
   const activeFilters = (city !== "All cities" ? 1 : 0) + (condition !== "All grades" ? 1 : 0);
   const reset = () => {
@@ -99,7 +106,7 @@ export function Marketplace({
               <span className="text-brand">Verified sellers.</span>
             </h2>
             <p className="mt-4 max-w-[470px] text-[14.5px] leading-relaxed text-slate-ink">
-              Real hardware listed by real IT businesses — with quantities, grades and trade prices in plain sight.
+              Real hardware listed by real IT businesses — with quantities and grades in plain sight. Trade prices unlock after vendor login.
             </p>
           </Reveal>
 
@@ -190,9 +197,11 @@ export function Marketplace({
                     className="cursor-pointer appearance-none bg-transparent text-[12px] font-semibold outline-none"
                     aria-label="Sort listings"
                   >
-                    {sortOptions.map((option) => (
-                      <option key={option.value} value={option.value}>{option.label}</option>
-                    ))}
+                    {sortOptions
+                      .filter((option) => authenticated || !option.value.startsWith("price"))
+                      .map((option) => (
+                        <option key={option.value} value={option.value}>{option.label}</option>
+                      ))}
                   </select>
                   <Icon name="chevron-down" size={12} className="pointer-events-none absolute right-3 text-slate-ink/70" />
                 </label>
@@ -296,6 +305,16 @@ export function Marketplace({
   );
 }
 
+function ProductSavingsBadge({ product }: { product: Product }) {
+  const { authenticated } = useVendorAuth();
+  if (!authenticated || product.mrp <= product.price) return null;
+  return (
+    <span className="absolute bottom-2.5 right-2.5 rounded-full bg-white/90 px-1.5 py-0.5 text-[8px] font-bold text-[#0f9a38] shadow-sm backdrop-blur">
+      −{savings(product.price, product.mrp)}% vs new
+    </span>
+  );
+}
+
 function ProductCard({
   product,
   index,
@@ -350,11 +369,7 @@ function ProductCard({
           >
             Quick view <Icon name="arrow-up-right" size={11} />
           </button>
-          {product.mrp > product.price ? (
-            <span className="absolute bottom-2.5 right-2.5 rounded-full bg-white/90 px-1.5 py-0.5 text-[8px] font-bold text-[#0f9a38] shadow-sm backdrop-blur">
-              −{savings(product.price, product.mrp)}% vs new
-            </span>
-          ) : null}
+          <ProductSavingsBadge product={product} />
         </div>
 
         <div className="flex flex-1 flex-col p-3">
@@ -395,9 +410,8 @@ function ProductCard({
 
           <div className="mt-auto flex items-end justify-between gap-2 pt-2.5">
             <div>
-              <p className="text-[8px] font-semibold uppercase tracking-[0.1em] text-slate-ink/70">Trade price</p>
-              <p className="text-[15px] font-bold leading-tight tracking-[-0.03em] text-navy">{product.price > 0 ? inr(product.price) : "Ask"}</p>
-              <p className="text-[8.5px] text-slate-ink/65">{product.units} in stock</p>
+              <LockedPrice price={product.price} />
+              <p className="mt-0.5 text-[8.5px] text-slate-ink/65">{product.units} in stock</p>
             </div>
             <div className="flex flex-col items-end gap-1">
               {product.detailUrl ? (

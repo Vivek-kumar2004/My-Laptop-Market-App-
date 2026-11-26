@@ -34,6 +34,17 @@
     return "₹" + num.toLocaleString("en-IN");
   }
 
+  function displayPrice(price) {
+    if (!isAuthenticated) {
+      return (
+        '<a class="price-login-link" href="' +
+        VENDOR_LOGIN_URL +
+        '"><i class="fa-solid fa-lock"></i> Login to view price</a>'
+      );
+    }
+    return formatPrice(price);
+  }
+
   function escapeHtml(str) {
     const div = document.createElement("div");
     div.textContent = str || "";
@@ -53,7 +64,7 @@
     } else {
       els.authBanner.classList.remove("logged-in");
       els.authBanner.innerHTML =
-        '<span id="authMessage"><i class="fa-solid fa-lock"></i> Vendor details are hidden. Login to view shop name, location &amp; contact.</span>' +
+        '<span id="authMessage"><i class="fa-solid fa-lock"></i> Prices and vendor details are hidden. Login to view trade price, shop name, location &amp; contact.</span>' +
         '<a class="auth-banner-btn" href="' +
         VENDOR_LOGIN_URL +
         '">Login as Vendor</a>';
@@ -259,7 +270,7 @@
           escapeHtml(p.product_name) +
           "</a></h3>" +
           '<div class="product-price">' +
-          formatPrice(p.price) +
+          displayPrice(p.price) +
           "</div>" +
           '<div class="product-stock">Stock: ' +
           escapeHtml(String(p.stock ?? "—")) +

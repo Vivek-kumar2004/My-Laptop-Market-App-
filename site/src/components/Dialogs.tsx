@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { cities, inr, type Product } from "../data";
+import { useVendorAuth } from "../lib/auth";
 import { cn } from "../utils/cn";
 import { BrandLogo, Icon } from "./Icon";
 
@@ -330,6 +331,7 @@ export function ProductModal({
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({ name: "", business: "", phone: "" });
   const firstFieldRef = useRef<HTMLInputElement>(null);
+  const { authenticated, loginUrl } = useVendorAuth();
 
   useDialogChrome(Boolean(product), onClose, firstFieldRef);
 
@@ -384,10 +386,12 @@ export function ProductModal({
                   Listed {product.listed} <span className="h-1 w-1 rounded-full bg-line" /> MOQ {product.moq} units
                 </p>
               </div>
-              <span className="shrink-0 whitespace-nowrap rounded-lg bg-verified/10 px-2 py-1.5 text-center">
-                <span className="block text-[14px] font-bold leading-none text-[#0f9a38]">{Math.round(((product.mrp - product.price) / product.mrp) * 100)}%</span>
-                <span className="mt-0.5 block text-[8px] font-bold uppercase tracking-wide text-[#0f9a38]/80">below new</span>
-              </span>
+              {authenticated && product.mrp > product.price ? (
+                <span className="shrink-0 whitespace-nowrap rounded-lg bg-verified/10 px-2 py-1.5 text-center">
+                  <span className="block text-[14px] font-bold leading-none text-[#0f9a38]">{Math.round(((product.mrp - product.price) / product.mrp) * 100)}%</span>
+                  <span className="mt-0.5 block text-[8px] font-bold uppercase tracking-wide text-[#0f9a38]/80">below new</span>
+                </span>
+              ) : null}
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -450,7 +454,9 @@ export function ProductModal({
                 </p>
                 <div className="mt-4 w-full rounded-xl border border-line bg-white p-3 text-left">
                   <div className="flex justify-between text-[10.5px] text-slate-ink"><span>Quantity</span><span className="font-bold text-navy">{quantity} units</span></div>
-                  <div className="mt-1.5 flex justify-between text-[10.5px] text-slate-ink"><span>Est. trade value</span><span className="font-bold text-navy">{inr(estimate)}</span></div>
+                  {authenticated ? (
+                    <div className="mt-1.5 flex justify-between text-[10.5px] text-slate-ink"><span>Est. trade value</span><span className="font-bold text-navy">{inr(estimate)}</span></div>
+                  ) : null}
                 </div>
                 <div className="mt-4 flex w-full flex-col gap-2">
                   <a href={`https://wa.me/919718199976?text=${encodeURIComponent(`Hi, I'm interested in ${quantity} × ${product.name} listed on My Laptop Market.`)}`} target="_blank" rel="noreferrer" className="btn btn-primary h-10 min-h-0 text-[11.5px]">
@@ -476,8 +482,20 @@ export function ProductModal({
                   <div className="flex items-end justify-between">
                     <div>
                       <p className="text-[8.5px] font-bold uppercase tracking-[0.1em] text-slate-ink/60">Trade price / unit</p>
-                      <p className="text-[22px] font-bold leading-tight tracking-[-0.03em] text-navy">{inr(product.price)}</p>
-                      <p className="text-[9.5px] text-slate-ink"><span className="line-through">{inr(product.mrp)}</span> new · you save {inr(product.mrp - product.price)}</p>
+                      {authenticated ? (
+                        <>
+                          <p className="text-[22px] font-bold leading-tight tracking-[-0.03em] text-navy">{inr(product.price)}</p>
+                          <p className="text-[9.5px] text-slate-ink"><span className="line-through">{inr(product.mrp)}</span> new · you save {inr(product.mrp - product.price)}</p>
+                        </>
+                      ) : (
+                        <a
+                          href={loginUrl}
+                          className="mt-1 inline-flex items-center gap-1.5 rounded-full border border-line bg-mist px-3 py-1.5 text-[11px] font-bold text-navy transition hover:border-brand/30 hover:text-brand"
+                        >
+                          <Icon name="lock" size={12} className="text-brand" />
+                          Login to view price
+                        </a>
+                      )}
                     </div>
                     <div className="flex items-center gap-1.5 rounded-full border border-line p-1">
                       <button
@@ -499,11 +517,15 @@ export function ProductModal({
                       </button>
                     </div>
                   </div>
-                  <div className="mt-2.5 flex items-center justify-between border-t border-line/70 pt-2 text-[10px]">
-                    <span className="font-medium text-slate-ink">Est. total <span className="text-slate-ink/60">({quantity} units)</span></span>
-                    <span className="font-bold text-navy">{inr(estimate)}</span>
-                  </div>
-                  <p className="mt-1 text-[8.5px] text-[#0f9a38]">You save {inr(saving)} vs new</p>
+                  {authenticated ? (
+                    <>
+                      <div className="mt-2.5 flex items-center justify-between border-t border-line/70 pt-2 text-[10px]">
+                        <span className="font-medium text-slate-ink">Est. total <span className="text-slate-ink/60">({quantity} units)</span></span>
+                        <span className="font-bold text-navy">{inr(estimate)}</span>
+                      </div>
+                      <p className="mt-1 text-[8.5px] text-[#0f9a38]">You save {inr(saving)} vs new</p>
+                    </>
+                  ) : null}
                 </div>
 
                 <form
