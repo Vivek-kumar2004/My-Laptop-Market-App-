@@ -199,7 +199,7 @@ const footerLinks = [
   },
   {
     title: "Company",
-    links: ["About us", "Contact", "Partner with us", "Careers", "Newsroom"],
+    links: ["About us", "Download app", "Contact", "Partner with us", "Careers"],
   },
 ];
 
@@ -310,25 +310,41 @@ export function Footer({ onRegister }: { onRegister: () => void }) {
               <ul className="mt-3.5 space-y-2.5">
                 {column.links.map((link) => (
                   <li key={link}>
-                    <Link
-                      to={
-                        link === "Why My Laptop Market"
-                          ? routes.why
-                          : link === "How it works"
-                            ? routes.how
-                            : link === "Verified vendors"
-                              ? routes.vendors
-                              : link === "Insights & guides"
-                                ? routes.insights
-                                : link === "Vendor registration"
-                                  ? routes.vendors
-                                  : routes.marketplace
-                      }
-                      className="group inline-flex items-center gap-1 text-[11.5px] font-medium text-white/65 transition hover:text-white"
-                    >
-                      {link}
-                      <Icon name="arrow-up-right" size={10} className="opacity-0 transition group-hover:opacity-100" />
-                    </Link>
+                    {link === "Contact" ? (
+                      <a
+                        href="https://mylaptopmarket.com/contact.html"
+                        className="group inline-flex items-center gap-1 text-[11.5px] font-medium text-white/65 transition hover:text-white"
+                      >
+                        {link}
+                        <Icon name="arrow-up-right" size={10} className="opacity-0 transition group-hover:opacity-100" />
+                      </a>
+                    ) : (
+                      <Link
+                        to={
+                          link === "Why My Laptop Market"
+                            ? routes.why
+                            : link === "How it works"
+                              ? routes.how
+                              : link === "Verified vendors"
+                                ? routes.vendors
+                                : link === "Insights & guides"
+                                  ? routes.insights
+                                  : link === "Vendor registration"
+                                    ? routes.vendors
+                                    : link === "About us"
+                                      ? routes.about
+                                      : link === "Download app"
+                                        ? routes.download
+                                        : link === "Partner with us"
+                                          ? routes.vendors
+                                          : routes.marketplace
+                        }
+                        className="group inline-flex items-center gap-1 text-[11.5px] font-medium text-white/65 transition hover:text-white"
+                      >
+                        {link}
+                        <Icon name="arrow-up-right" size={10} className="opacity-0 transition group-hover:opacity-100" />
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

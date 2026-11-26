@@ -6,6 +6,8 @@ import { WhyPage } from "./pages/WhyPage";
 import { HowPage } from "./pages/HowPage";
 import { VendorsPage } from "./pages/VendorsPage";
 import { InsightsPage } from "./pages/InsightsPage";
+import { AboutPage } from "./pages/AboutPage";
+import { DownloadPage } from "./pages/DownloadPage";
 
 function ScrollManager() {
   const { pathname, hash } = useLocation();
@@ -39,6 +41,10 @@ export default function App() {
           <Route path="/vendors/" element={<VendorsPage />} />
           <Route path="/insights" element={<Navigate to="/insights/" replace />} />
           <Route path="/insights/" element={<InsightsPage />} />
+          <Route path="/about" element={<Navigate to="/about/" replace />} />
+          <Route path="/about/" element={<AboutPage />} />
+          <Route path="/download" element={<Navigate to="/download/" replace />} />
+          <Route path="/download/" element={<DownloadPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </CatalogProvider>

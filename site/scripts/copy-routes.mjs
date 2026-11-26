@@ -11,7 +11,7 @@ if (!existsSync(indexHtml)) {
   process.exit(1);
 }
 
-const routes = ["why", "how", "vendors", "insights"];
+const routes = ["why", "how", "vendors", "insights", "about", "download"];
 
 for (const route of routes) {
   const dir = join(outDir, route);

@@ -13,6 +13,8 @@ const pageLinks = [
   { label: "Why My Laptop Market", href: routes.why },
   { label: "How it works", href: routes.how },
   { label: "Popular vendors", href: routes.vendors },
+  { label: "About us", href: routes.about },
+  { label: "Download app", href: routes.download },
   { label: "Insights & guides", href: routes.insights },
   { label: "FAQs", href: routes.faq },
 ];
@@ -34,6 +36,8 @@ export function Header({
     if (path.startsWith("/how")) return "how";
     if (path.startsWith("/vendors")) return "vendors";
     if (path.startsWith("/insights")) return "insights";
+    if (path.startsWith("/about")) return "about";
+    if (path.startsWith("/download")) return "download";
     if (location.hash === "#marketplace") return "marketplace";
     return path === "/" ? null : "";
   }, [location.pathname, location.hash]);
