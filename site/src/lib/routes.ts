@@ -17,6 +17,6 @@ export const navItems: { label: string; href: string; id: NavId }[] = [
   { label: "Why us", href: routes.why, id: "why" },
   { label: "How it works", href: routes.how, id: "how" },
   { label: "Vendors", href: routes.vendors, id: "vendors" },
-  { label: "About", href: routes.about, id: "about" },
+  { label: "About us", href: routes.about, id: "about" },
   { label: "Download app", href: routes.download, id: "download" },
 ];
