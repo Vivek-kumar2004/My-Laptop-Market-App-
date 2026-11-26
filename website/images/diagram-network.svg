@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 640" role="img" aria-label="Diagram of a trusted B2B IT business network">
+  <rect width="800" height="640" rx="24" fill="#F7FAFC"/>
+  <rect x="40" y="40" width="720" height="560" rx="20" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="2"/>
+  <text x="80" y="100" fill="#0F172A" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Trusted B2B network</text>
+  <text x="80" y="136" fill="#475569" font-family="Arial, Helvetica, sans-serif" font-size="16">Vendors · Dealers · Distributors · ITAD</text>
+  <g fill="none" stroke="#0767D8" stroke-width="2" stroke-opacity="0.4">
+    <path d="M400 340 L220 240"/>
+    <path d="M400 340 L580 240"/>
+    <path d="M400 340 L220 460"/>
+    <path d="M400 340 L580 460"/>
+  </g>
+  <circle cx="400" cy="340" r="54" fill="#0767D8"/>
+  <text x="400" y="346" text-anchor="middle" fill="#fff" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700">MLM Hub</text>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" fill="#0F172A">
+    <rect x="140" y="200" width="160" height="80" rx="12" fill="#E8F1FC" stroke="#0767D8"/>
+    <text x="220" y="246" text-anchor="middle">Vendor profiles</text>
+    <rect x="500" y="200" width="160" height="80" rx="12" fill="#E8F1FC" stroke="#0767D8"/>
+    <text x="580" y="246" text-anchor="middle">Lead exchange</text>
+    <rect x="140" y="420" width="160" height="80" rx="12" fill="#ECFDF5" stroke="#059669"/>
+    <text x="220" y="466" text-anchor="middle">Verification</text>
+    <rect x="500" y="420" width="160" height="80" rx="12" fill="#E8F1FC" stroke="#0767D8"/>
+    <text x="580" y="466" text-anchor="middle">Nationwide reach</text>
+  </g>
+</svg>

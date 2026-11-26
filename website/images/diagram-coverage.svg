@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 640" role="img" aria-label="Diagram of IT hardware categories covered on the platform">
+  <rect width="800" height="640" rx="24" fill="#F7FAFC"/>
+  <rect x="40" y="40" width="720" height="560" rx="20" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="2"/>
+  <text x="80" y="100" fill="#0F172A" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">Industry coverage</text>
+  <text x="80" y="136" fill="#475569" font-family="Arial, Helvetica, sans-serif" font-size="16">Hardware · Networking · Assets · Services</text>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600">
+    <rect x="80" y="180" width="300" height="70" rx="12" fill="#E8F1FC" stroke="#0767D8"/>
+    <text x="100" y="222" fill="#0F172A">Laptops &amp; notebooks</text>
+    <rect x="420" y="180" width="300" height="70" rx="12" fill="#E8F1FC" stroke="#0767D8"/>
+    <text x="440" y="222" fill="#0F172A">Desktops &amp; workstations</text>
+    <rect x="80" y="270" width="300" height="70" rx="12" fill="#E8F1FC" stroke="#0767D8"/>
+    <text x="100" y="312" fill="#0F172A">Servers &amp; storage</text>
+    <rect x="420" y="270" width="300" height="70" rx="12" fill="#E8F1FC" stroke="#0767D8"/>
+    <text x="440" y="312" fill="#0F172A">Networking gear</text>
+    <rect x="80" y="360" width="300" height="70" rx="12" fill="#ECFDF5" stroke="#059669"/>
+    <text x="100" y="402" fill="#0F172A">Refurbished assets</text>
+    <rect x="420" y="360" width="300" height="70" rx="12" fill="#E8F1FC" stroke="#0767D8"/>
+    <text x="440" y="402" fill="#0F172A">Monitors &amp; peripherals</text>
+    <rect x="80" y="450" width="640" height="90" rx="12" fill="#F7FAFC" stroke="#E2E8F0"/>
+    <text x="100" y="490" fill="#0F172A">Plus ITAD, accessories, UPS, CCTV, POS, and enterprise surplus</text>
+    <text x="100" y="520" fill="#475569" font-weight="400">Built for trade partners — not consumer retail browsing.</text>
+  </g>
+</svg>

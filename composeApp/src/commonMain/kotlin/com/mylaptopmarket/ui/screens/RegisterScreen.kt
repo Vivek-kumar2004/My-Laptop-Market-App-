@@ -1,30 +1,59 @@
 package com.mylaptopmarket.ui.screens
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Pin
 import androidx.compose.material.icons.filled.Storefront
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Verified
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.mylaptopmarket.ui.components.StateField
-import com.mylaptopmarket.util.SHOW_VENDOR_OTP
 import com.mylaptopmarket.ui.theme.PrimaryBlue
+import com.mylaptopmarket.ui.theme.PrimaryLight
+import com.mylaptopmarket.util.SHOW_VENDOR_OTP
+import com.mylaptopmarket.util.openUrl
 import com.mylaptopmarket.viewmodel.AuthViewModel
+import com.mylaptopmarket.viewmodel.SignInNotice
 import mylaptopmarket.composeapp.generated.resources.Res
 import mylaptopmarket.composeapp.generated.resources.mylaptoplogo
 import org.jetbrains.compose.resources.painterResource
@@ -42,9 +71,11 @@ fun RegisterScreen(
     var city by remember { mutableStateOf("") }
     var state by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
+    var usernameTouched by remember { mutableStateOf(false) }
     var email by remember { mutableStateOf("") }
     var emailOtp by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var gstin by remember { mutableStateOf("") }
 
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
@@ -55,13 +86,32 @@ fun RegisterScreen(
     val otpMobile by viewModel.registerOtpMobile.collectAsState()
     val verifiedMobile by viewModel.verifiedMobile.collectAsState()
     val pending by viewModel.pendingVerification.collectAsState()
+    val suggestedUsername by viewModel.suggestedUsername.collectAsState()
+    val usernameStatus by viewModel.usernameStatus.collectAsState()
+    val gstStatus by viewModel.gstStatus.collectAsState()
     val otpMatchesEmail = otpEmail != null && otpEmail.equals(email.trim(), ignoreCase = true)
     val emailVerified = verifiedEmail != null &&
         verifiedEmail.equals(email.trim(), ignoreCase = true) &&
         verifiedOtp == emailOtp
     val mobileMatches = otpMobile != null && otpMobile == mobile
     val mobileVerified = verifiedMobile != null && verifiedMobile == mobile
+    val gstOk = gstin.isBlank() || (gstStatus?.ok == true && gstStatus?.verified == true)
 
+    LaunchedEffect(shopName) {
+        viewModel.suggestUsernameFromShop(shopName)
+    }
+    LaunchedEffect(suggestedUsername, usernameTouched) {
+        val suggestion = suggestedUsername
+        if (!usernameTouched && !suggestion.isNullOrBlank()) {
+            username = suggestion
+        }
+    }
+    LaunchedEffect(username) {
+        if (username.isNotBlank()) viewModel.checkUsername(username)
+    }
+    LaunchedEffect(gstin) {
+        viewModel.checkGst(gstin)
+    }
     LaunchedEffect(pending) {
         val vendorId = pending?.vendorId
         if (vendorId != null && vendorId > 0) {
@@ -103,6 +153,21 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            OutlinedButton(
+                onClick = {
+                    SignInNotice.clear()
+                    openUrl("https://mylaptopmarket-app.firebaseapp.com/google-auth.html")
+                },
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                enabled = !isLoading,
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Continue with Google", fontWeight = FontWeight.Bold, color = PrimaryBlue)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Text("or register with email", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(modifier = Modifier.height(16.dp))
+
             OutlinedTextField(
                 value = shopName,
                 onValueChange = { shopName = it },
@@ -112,6 +177,38 @@ fun RegisterScreen(
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp)
             )
+            Spacer(modifier = Modifier.height(12.dp))
+            OutlinedTextField(
+                value = username,
+                onValueChange = {
+                    usernameTouched = true
+                    username = it.trim()
+                },
+                label = { Text("Username") },
+                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                supportingText = {
+                    val status = usernameStatus
+                    if (status != null && username.isNotBlank()) {
+                        Text(
+                            status.message,
+                            color = if (status.available) Color(0xFF15803D) else MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            )
+            if (usernameStatus?.available == false && !usernameStatus?.suggestion.isNullOrBlank() &&
+                usernameStatus?.suggestion != username
+            ) {
+                TextButton(onClick = {
+                    usernameTouched = true
+                    username = usernameStatus?.suggestion.orEmpty()
+                }) {
+                    Text("Use ${usernameStatus?.suggestion}", color = PrimaryBlue)
+                }
+            }
             Spacer(modifier = Modifier.height(12.dp))
             OutlinedTextField(
                 value = mobile,
@@ -237,16 +334,6 @@ fun RegisterScreen(
             }
             Spacer(modifier = Modifier.height(12.dp))
             OutlinedTextField(
-                value = username,
-                onValueChange = { username = it },
-                label = { Text("Username") },
-                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp)
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
                 label = { Text("Password (min 6)") },
@@ -256,6 +343,44 @@ fun RegisterScreen(
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp)
             )
+            Spacer(modifier = Modifier.height(12.dp))
+            OutlinedTextField(
+                value = gstin,
+                onValueChange = { gstin = it.uppercase().filter { ch -> ch.isLetterOrDigit() }.take(15) },
+                label = { Text("GSTIN (optional)") },
+                leadingIcon = { Icon(Icons.Default.Badge, contentDescription = null) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                supportingText = {
+                    val status = gstStatus
+                    if (status != null && !status.empty && status.message.isNotBlank()) {
+                        Text(
+                            status.message,
+                            color = if (status.ok && status.verified) PrimaryBlue else MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            )
+            if (gstStatus?.verified == true) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(PrimaryLight, RoundedCornerShape(10.dp))
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(Icons.Default.Verified, contentDescription = null, tint = PrimaryBlue)
+                    Text(
+                        "GST verified — builds dealer trust.",
+                        color = PrimaryBlue,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
 
             if (!infoMessage.isNullOrBlank()) {
                 Spacer(modifier = Modifier.height(16.dp))
@@ -277,18 +402,21 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             val canSubmit = shopName.isNotBlank() &&
-                username.isNotBlank() &&
+                username.length >= 4 &&
                 city.isNotBlank() &&
                 state.isNotBlank() &&
                 mobile.length == 10 &&
                 email.isValidEmail() &&
                 (!SHOW_VENDOR_OTP || (emailVerified && mobileVerified)) &&
                 password.length >= 6 &&
+                gstOk &&
                 !isLoading
 
             Button(
                 onClick = {
-                    viewModel.register(shopName, username, city, state, mobile, email, password, emailOtp, mobileOtp)
+                    viewModel.register(
+                        shopName, username, city, state, mobile, email, password, emailOtp, mobileOtp, gstin
+                    )
                 },
                 modifier = Modifier
                     .fillMaxWidth()

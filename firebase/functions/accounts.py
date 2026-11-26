@@ -281,6 +281,214 @@ def release_vendor_keys(vendor: dict) -> None:
         _release_unique(kind, key, vendor_id)
 
 
+def slug_username(shop: str) -> str:
+    raw = re.sub(r"[^a-zA-Z0-9]+", "_", _text(shop).lower())
+    raw = re.sub(r"_+", "_", raw).strip("._")
+    if len(raw) < 4:
+        raw = (raw + "_shop").strip("._")
+    if not raw:
+        raw = "vendor"
+    return raw[:20].strip("._") or "vendor"
+
+
+def username_available(username: str = "", shop: str = "") -> dict:
+    requested = _text(username)
+    base = requested or slug_username(shop)
+    if not re.fullmatch(r"[a-zA-Z0-9._]{4,20}", base):
+        return {
+            "ok": False,
+            "available": False,
+            "username": base,
+            "message": "Use 4–20 letters, numbers, dots or underscores.",
+        }
+    if not _taken("username", base):
+        return {"ok": True, "available": True, "username": base, "suggestion": base, "message": "Username is available."}
+    for index in range(2, 100):
+        suffix = str(index)
+        stem = base[: max(1, 20 - len(suffix))].rstrip("._")
+        candidate = (stem + suffix)[:20]
+        if re.fullmatch(r"[a-zA-Z0-9._]{4,20}", candidate) and not _taken("username", candidate):
+            return {
+                "ok": True,
+                "available": False,
+                "username": base,
+                "suggestion": candidate,
+                "message": "That username is taken. Try " + candidate + ".",
+            }
+    return {
+        "ok": False,
+        "available": False,
+        "username": base,
+        "message": "That username is taken. Pick another.",
+    }
+
+
+def check_gstin(gstin_raw: str) -> dict:
+    raw = _text(gstin_raw)
+    if raw == "":
+        return {"ok": True, "empty": True, "verified": False, "message": ""}
+    gstin = _normalize_gstin(raw)
+    if not _valid_gstin(gstin):
+        return {"ok": False, "empty": False, "verified": False, "gstin": gstin, "message": "Enter a valid 15-character GSTIN."}
+    lookup = _lookup_gstin(gstin)
+    if not lookup["ok"]:
+        return {"ok": False, "empty": False, "verified": False, "gstin": gstin, "message": lookup["message"]}
+    if not lookup["found"]:
+        return {"ok": False, "empty": False, "verified": False, "gstin": gstin, "message": lookup["message"]}
+    details = lookup["details"]
+    active = _text(details.get("status")).lower() == "active"
+    return {
+        "ok": True,
+        "empty": False,
+        "verified": active,
+        "gstin": gstin,
+        "details": details,
+        "message": "GST verified — builds dealer trust." if active else f"This GSTIN is {_text(details.get('status')) or 'inactive'}.",
+    }
+
+
+def create_google_vendor(email: str, firebase_uid: str, display_name: str = "") -> dict:
+    email = _text(email).lower()
+    if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email):
+        return {"success": False, "message": "This Google account has no email address."}
+    if _taken("email", email):
+        return {"success": False, "message": "The email has already been taken."}
+    seed = _text(display_name) or email.split("@")[0] or "vendor"
+    check = username_available("", seed)
+    username = _text(check.get("suggestion") or check.get("username") or slug_username(seed))
+    if not re.fullmatch(r"[a-zA-Z0-9._]{4,20}", username):
+        username = (slug_username(seed) + "shop")[:20]
+    vendor_id = _next_vendor_id()
+    held = hold_vendor_keys(vendor_id, username, "", email, "")
+    if held:
+        return {"success": False, "message": held}
+    vendor = {
+        "id": vendor_id,
+        "username": username,
+        "password": "",
+        "password_plain": "",
+        "shop_name": "",
+        "logo": None,
+        "logo_url": None,
+        "mobile": "",
+        "mobile_verified": False,
+        "email": email,
+        "email_verified": True,
+        "status": 0,
+        "location": "",
+        "subscription_start": None,
+        "subscription_end": None,
+        "state": "",
+        "gstin": "",
+        "gst_verified": 0,
+        "gst_details": None,
+        "shop_photo": None,
+        "admin_warning": "",
+        "firebase_uid": _text(firebase_uid),
+        "auth_provider": "google",
+        "profile_complete": False,
+    }
+    firestore.client().collection("vendors").document(str(vendor_id)).set(vendor)
+    return {"success": True, "vendor_id": vendor_id, "vendor_row": vendor, "vendor": vendor_payload(vendor)}
+
+
+def complete_google_profile(vendor_id: int, body: dict) -> dict:
+    vendor = _load(int(vendor_id))
+    if vendor is None:
+        return {"success": False, "message": "Sign in with Google again."}
+    if vendor.get("profile_complete") is True and _text(vendor.get("shop_name")) and _mobile_key(vendor.get("mobile")):
+        return {"success": True, "message": "Profile already complete.", "vendor_id": vendor_id, "vendor": vendor_payload(vendor)}
+
+    shop = _text(body.get("shop_name"))
+    username = _text(body.get("username")) or _text(vendor.get("username"))
+    city = _text(body.get("city"))
+    state = _normalize_state(body.get("state"))
+    mobile = _mobile_key(body.get("mobile"))
+    password = body.get("password") or ""
+    gstin_raw = _text(body.get("gstin"))
+    if shop == "" or username == "" or city == "" or mobile == "":
+        return {"success": False, "message": "Fill shop name, username, city, state and mobile."}
+    if state == "":
+        return {"success": False, "message": "Select a valid state."}
+    if not re.fullmatch(r"[0-9]{10}", mobile):
+        return {"success": False, "message": "Enter a 10-digit mobile number."}
+    if not re.fullmatch(r"[a-zA-Z0-9._]{4,20}", username):
+        return {"success": False, "message": "Username must be 4–20 letters, numbers, dots or underscores."}
+    if password and len(password) < 6:
+        return {"success": False, "message": "Password must be at least 6 characters."}
+    if _taken("username", username, int(vendor_id)):
+        return {"success": False, "message": "The username has already been taken."}
+    if _taken("mobile", mobile, int(vendor_id)):
+        return {"success": False, "message": "The mobile has already been taken."}
+    if _taken("shop_name", shop, int(vendor_id)):
+        return {"success": False, "message": "This shop name is already registered."}
+
+    from feature_flags import SHOW_VENDOR_OTP
+
+    if SHOW_VENDOR_OTP:
+        from phone_verify import consume as consume_mobile
+        from phone_verify import ready as mobile_ready
+
+        mobile_ok = mobile_ready(mobile, _text(body.get("mobile_otp")))
+        if not mobile_ok.get("ok"):
+            return {"success": False, "message": mobile_ok.get("message") or "Enter the OTP sent to your mobile."}
+        mobile_done = consume_mobile(mobile, _text(body.get("mobile_otp")))
+        if not mobile_done.get("ok"):
+            return {"success": False, "message": mobile_done.get("message") or "Enter the OTP sent to your mobile."}
+
+    gst_probe: dict = {
+        "gstin": vendor.get("gstin") or "",
+        "gst_verified": int(vendor.get("gst_verified") or 0),
+        "gst_details": vendor.get("gst_details"),
+    }
+    if gstin_raw:
+        gst_error = _apply_gst(gst_probe, gstin_raw)
+        if gst_error:
+            return {"success": False, "message": gst_error}
+
+    previous = {
+        "username": vendor.get("username"),
+        "mobile": vendor.get("mobile"),
+        "email": vendor.get("email"),
+        "shop_name": vendor.get("shop_name"),
+    }
+    replaced = replace_vendor_keys(int(vendor_id), previous, username, mobile, vendor.get("email"), shop)
+    if replaced:
+        return {"success": False, "message": replaced}
+
+    vendor["username"] = username
+    vendor["shop_name"] = shop
+    vendor["mobile"] = mobile
+    vendor["mobile_verified"] = bool(SHOW_VENDOR_OTP)
+    vendor["location"] = city
+    vendor["state"] = state
+    vendor["gstin"] = gst_probe.get("gstin") or ""
+    vendor["gst_verified"] = int(gst_probe.get("gst_verified") or 0)
+    vendor["gst_details"] = gst_probe.get("gst_details")
+    vendor["profile_complete"] = True
+    vendor["email_verified"] = True
+    if password:
+        vendor["password"] = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+        vendor["password_plain"] = password
+    _save_vendor(vendor)
+    try:
+        from push_apns import notify_admins
+
+        notify_admins(
+            "New vendor registered",
+            f"{shop} just signed up with Google and is waiting for approval.",
+            "vendor_register",
+        )
+    except Exception:
+        pass
+    return {
+        "success": True,
+        "message": "Profile saved. Activate subscription to go live.",
+        "vendor_id": int(vendor_id),
+        "vendor": vendor_payload(vendor),
+    }
+
+
 def register(body: dict) -> dict:
     shop = _text(body.get("shop_name"))
     username = _text(body.get("username"))
@@ -289,6 +497,7 @@ def register(body: dict) -> dict:
     mobile = _mobile_key(body.get("mobile"))
     email = _text(body.get("email")).lower()
     password = body.get("password") or ""
+    gstin_raw = _text(body.get("gstin"))
     if shop == "" or username == "" or city == "" or mobile == "" or email == "" or password == "":
         return {"success": False, "message": "Fill shop name, username, city, state, mobile, email and password."}
     if state == "":
@@ -297,6 +506,8 @@ def register(body: dict) -> dict:
         return {"success": False, "message": "Enter a 10-digit mobile number."}
     if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email):
         return {"success": False, "message": "Enter a valid email address."}
+    if not re.fullmatch(r"[a-zA-Z0-9._]{4,20}", username):
+        return {"success": False, "message": "Username must be 4–20 letters, numbers, dots or underscores."}
     if len(password) < 6:
         return {"success": False, "message": "Password must be at least 6 characters."}
     if _taken("username", username):
@@ -307,6 +518,12 @@ def register(body: dict) -> dict:
         return {"success": False, "message": "The email has already been taken."}
     if _taken("shop_name", shop):
         return {"success": False, "message": "This shop name is already registered."}
+
+    gst_probe: dict = {"gstin": "", "gst_verified": 0, "gst_details": None}
+    if gstin_raw:
+        gst_error = _apply_gst(gst_probe, gstin_raw)
+        if gst_error:
+            return {"success": False, "message": gst_error}
 
     from feature_flags import SHOW_VENDOR_OTP
 
@@ -351,11 +568,13 @@ def register(body: dict) -> dict:
         "subscription_start": None,
         "subscription_end": None,
         "state": state,
-        "gstin": "",
-        "gst_verified": 0,
-        "gst_details": None,
+        "gstin": gst_probe.get("gstin") or "",
+        "gst_verified": int(gst_probe.get("gst_verified") or 0),
+        "gst_details": gst_probe.get("gst_details"),
         "shop_photo": None,
         "admin_warning": "",
+        "profile_complete": True,
+        "auth_provider": "password",
     }
     firestore.client().collection("vendors").document(str(vendor_id)).set(vendor)
     try:

@@ -36,6 +36,9 @@ firebase/.venv/
 firebase/node_modules/
 firebase/.firebase/
 node_modules/
+site/.next/
+site/out/
+.website-publish/
 __pycache__/
 *.pyc
 

@@ -2,9 +2,12 @@
   const API_BASE = "https://asia-south1-mylaptopmarket-app.cloudfunctions.net/api/api";
   const FALLBACK_IMG = window.location.origin + "/mylaptop/assets/images/no-product.svg";
   const productsGrid = document.getElementById("homeProductsGrid");
+  const productsGridB = document.getElementById("homeProductsGridB");
   const vendorsGrid = document.getElementById("homeVendorsGrid");
+  const carousel = document.getElementById("homeCarousel");
+  const listingMeta = document.getElementById("listingMeta");
 
-  if (!productsGrid && !vendorsGrid) return;
+  if (!productsGrid && !productsGridB && !vendorsGrid && !carousel) return;
 
   function escapeHtml(str) {
     const div = document.createElement("div");
@@ -22,78 +25,124 @@
     return (name || "V").trim().charAt(0).toUpperCase() || "V";
   }
 
-  function bindTilt(root) {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    if (window.matchMedia("(pointer: coarse)").matches) return;
+  function productCard(p, opts) {
+    opts = opts || {};
+    const img = p.main_image || (p.image_urls && p.image_urls[0]) || FALLBACK_IMG;
+    const letter = escapeHtml(initial(p.vendor_name));
+    const href = p.id ? "product.html?id=" + encodeURIComponent(p.id) : "products.html";
+    const logo = p.vendor_logo_url
+      ? '<img src="' +
+        escapeHtml(p.vendor_logo_url) +
+        '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'grid\'">' +
+        '<span class="vendor-fallback" style="display:none">' +
+        letter +
+        "</span>"
+      : '<span class="vendor-fallback">' + letter + "</span>";
 
-    root.querySelectorAll("[data-tilt]").forEach(function (card) {
-      card.addEventListener("mousemove", function (e) {
-        const box = card.getBoundingClientRect();
-        const x = (e.clientX - box.left) / box.width - 0.5;
-        const y = (e.clientY - box.top) / box.height - 0.5;
-        card.style.transform =
-          "rotateY(" + x * 12 + "deg) rotateX(" + -y * 9 + "deg) translateZ(18px)";
-      });
-      card.addEventListener("mouseleave", function () {
-        card.style.transform = "";
-      });
-    });
+    if (opts.carousel) {
+      return (
+        '<a class="pdf-carousel-card" href="' +
+        href +
+        '">' +
+        '<div class="img">' +
+        '<span class="pdf-verified" aria-hidden="true"><i class="fa-solid fa-check"></i></span>' +
+        '<img src="' +
+        escapeHtml(img) +
+        '" alt="' +
+        escapeHtml(p.product_name || "Product") +
+        '" loading="lazy" onerror="this.onerror=null;this.src=\'' +
+        escapeHtml(FALLBACK_IMG) +
+        "'\">" +
+        "</div>" +
+        '<div class="body">' +
+        "<h3>" +
+        escapeHtml(p.product_name || "Product") +
+        "</h3>" +
+        '<div class="pdf-price">' +
+        formatPrice(p.price) +
+        "</div>" +
+        (p.category ? '<span class="pdf-chip">' + escapeHtml(p.category) + "</span>" : "") +
+        "</div></a>"
+      );
+    }
+
+    return (
+      '<a class="home-product-card" href="' +
+      href +
+      '">' +
+      '<div class="home-product-visual">' +
+      (p.category
+        ? '<span class="home-product-badge">' + escapeHtml(p.category) + "</span>"
+        : "") +
+      '<span class="pdf-verified" aria-hidden="true"><i class="fa-solid fa-check"></i></span>' +
+      '<img src="' +
+      escapeHtml(img) +
+      '" alt="' +
+      escapeHtml(p.product_name || "Product") +
+      '" loading="lazy" onerror="this.onerror=null;this.src=\'' +
+      escapeHtml(FALLBACK_IMG) +
+      "'\">" +
+      "</div>" +
+      '<div class="home-product-body">' +
+      "<h3>" +
+      escapeHtml(p.product_name || "Product") +
+      "</h3>" +
+      '<div class="home-product-price">' +
+      formatPrice(p.price) +
+      "</div>" +
+      '<div class="pdf-card-foot">' +
+      '<div class="home-product-vendor">' +
+      logo +
+      "<span>" +
+      escapeHtml(p.vendor_name || "Verified vendor") +
+      "</span></div>" +
+      '<span class="pdf-view">View Details <i class="fa-solid fa-arrow-right"></i></span>' +
+      "</div></div></a>"
+    );
   }
 
   function renderProducts(products) {
-    if (!productsGrid) return;
-    if (!products || !products.length) {
-      productsGrid.innerHTML =
-        '<p class="home-empty">New listings will appear here as vendors go live.</p>';
-      return;
+    const list = products || [];
+    const empty =
+      '<p class="home-empty">New listings will appear here as vendors go live.</p>';
+
+    if (carousel) {
+      carousel.innerHTML = list.length
+        ? list
+            .slice(0, 12)
+            .map(function (p) {
+              return productCard(p, { carousel: true });
+            })
+            .join("")
+        : empty;
     }
 
-    productsGrid.innerHTML = products
-      .map(function (p) {
-        const img = p.main_image || (p.image_urls && p.image_urls[0]) || FALLBACK_IMG;
-        const letter = escapeHtml(initial(p.vendor_name));
-        const logo = p.vendor_logo_url
-          ? '<img src="' +
-            escapeHtml(p.vendor_logo_url) +
-            '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'grid\'">' +
-            '<span class="vendor-fallback" style="display:none">' +
-            letter +
-            "</span>"
-          : '<span class="vendor-fallback">' + letter + "</span>";
+    if (productsGrid) {
+      productsGrid.innerHTML = list.length
+        ? list
+            .slice(0, 4)
+            .map(function (p) {
+              return productCard(p);
+            })
+            .join("")
+        : empty;
+    }
 
-        return (
-          '<a class="home-product-card" data-tilt href="' +
-          (p.id ? "product.html?id=" + encodeURIComponent(p.id) : "products.html") +
-          '">' +
-          '<div class="home-product-visual">' +
-          (p.category
-            ? '<span class="home-product-badge">' + escapeHtml(p.category) + "</span>"
-            : "") +
-          '<img src="' +
-          escapeHtml(img) +
-          '" alt="' +
-          escapeHtml(p.product_name || "Product") +
-          '" loading="lazy" onerror="this.onerror=null;this.src=\'' +
-          escapeHtml(FALLBACK_IMG) +
-          "'\">" +
-          "</div>" +
-          '<div class="home-product-body">' +
-          "<h3>" +
-          escapeHtml(p.product_name || "Product") +
-          "</h3>" +
-          '<div class="home-product-price">' +
-          formatPrice(p.price) +
-          "</div>" +
-          '<div class="home-product-vendor">' +
-          logo +
-          "<span>" +
-          escapeHtml(p.vendor_name || "Verified vendor") +
-          "</span></div></div></a>"
-        );
-      })
-      .join("");
+    if (productsGridB) {
+      productsGridB.innerHTML = list.length
+        ? list
+            .slice(0, 8)
+            .map(function (p) {
+              return productCard(p);
+            })
+            .join("")
+        : empty;
+    }
 
-    bindTilt(productsGrid);
+    if (listingMeta && list.length) {
+      listingMeta.textContent =
+        "Showing " + list.length + " live listing" + (list.length === 1 ? "" : "s");
+    }
   }
 
   function renderVendors(vendors) {
@@ -132,15 +181,18 @@
           href +
           '">' +
           logo +
-          "<h3>" +
+          "<div><h3>" +
           escapeHtml(v.vendor_name || "Vendor") +
-          "</h3>" +
-          "<p>" +
-          (v.vendor_location ? escapeHtml(v.vendor_location) + " · " : "") +
+          "</h3><p>" +
+          (v.vendor_location
+            ? '<i class="fa-solid fa-location-dot"></i> ' + escapeHtml(v.vendor_location) + " · "
+            : "") +
+          '<span style="color:#20ca47;font-weight:700"><i class="fa-solid fa-check"></i> ' +
           count +
           " listing" +
           (count !== 1 ? "s" : "") +
-          "</p></a>"
+          "</span></p></div>" +
+          '<span class="pdf-vendor-go" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></span></a>'
         );
       })
       .join("");

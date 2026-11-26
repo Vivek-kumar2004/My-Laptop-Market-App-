@@ -9,14 +9,26 @@ from flask import Response
 
 from datetime import date
 
-from accounts import STATES, register
-from auth import _days_left, acknowledge_warning, login
+from accounts import complete_google_profile, register
+from auth import _days_left, acknowledge_warning, login, profile_incomplete
 from email_verify import confirm as confirm_email_otp
 from email_verify import send as send_email_otp
 from phone_verify import confirm as confirm_mobile_otp
 from password_reset import forgot_password, reset_password
 from subscription import SHOW_VENDOR_PAYMENT
 from feature_flags import SHOW_VENDOR_OTP
+from vendor_auth_ui import (
+    auth_document,
+    complete_profile_main,
+    complete_profile_scripts,
+    forgot_main,
+    login_main,
+    login_scripts,
+    mobile_firebase_scripts,
+    register_footer,
+    register_main,
+    register_scripts,
+)
 
 COOKIE = "mlm_vendor"
 MAX_AGE = 120 * 60
@@ -266,28 +278,22 @@ def _scripts() -> str:
 <script src="{ASSET}/dist/js/adminlte.min.js"></script>"""
 
 
-def _guest_page(title: str, body: str, status: int, width: str = "420px") -> Response:
+def _guest_page(
+    title: str,
+    body: str,
+    status: int,
+    width: str = "420px",
+    *,
+    document_html: str | None = None,
+) -> Response:
+    if document_html is not None:
+        return Response(document_html, status=status, mimetype="text/html")
+    # Legacy AdminLTE guest shell (unused by redesigned auth pages).
     document = f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{html.escape(title)}</title>
 <link rel="stylesheet" href="{FA}" crossorigin="anonymous">
 <link rel="stylesheet" href="{ASSET}/dist/css/adminlte.min.css">
-<style>
-form.vendor-register .form-group {{ margin-bottom: 12px; }}
-form.vendor-register label {{ display:block; margin-bottom: 4px; font-size: 13px; font-weight: 600; }}
-form.vendor-register .form-control {{ height: 44px; border-radius: 8px; }}
-form.vendor-register select.form-control {{ padding-top: 0; padding-bottom: 0; }}
-form.vendor-register .btn-block {{ height: 44px; border-radius: 8px; font-weight: 700; }}
-form.forgot-form input,
-form.forgot-form button {{ display:block; width:100%; box-sizing:border-box; margin:0 0 12px; }}
-form.forgot-form input {{ height:44px; border:1px solid #d0d7e2; border-radius:8px; padding:0 12px; }}
-form.forgot-form button {{ height:44px; border:0; border-radius:8px; background:#0767d8; color:#fff; font-weight:700; cursor:pointer; }}
-form.forgot-form + form.forgot-form {{ margin-top:8px; padding-top:8px; border-top:1px solid #e6eaf0; }}
-.or-line {{ display:flex; align-items:center; gap:10px; margin:16px 0 12px; color:#64748b; font-size:13px; }}
-.or-line:before, .or-line:after {{ content:""; flex:1; height:1px; background:#e2e8f0; }}
-button.google-btn {{ display:block; width:100%; height:44px; border-radius:8px; font-weight:700; cursor:pointer; background:#fff; color:#0767d8; border:1px solid #0767d8; }}
-#sign-note {{ margin-top:12px; }}
-</style>
 </head>
 <body class="hold-transition login-page"><div class="login-box" style="width:{html.escape(width)}; max-width:calc(100% - 24px);">
 <div class="login-logo"><a href="https://mylaptopmarket.com"><img src="{LOGO}" alt="My Laptop Market" style="max-height:100px; width:auto;"></a>
@@ -300,6 +306,8 @@ button.google-btn {{ display:block; width:100%; height:44px; border-radius:8px; 
 def _vendor_panel(title: str, body: str, status: int, bare: bool, extra_scripts: str = "") -> Response:
     session, vendor = _session_vendor()
     current = _request_path()
+    if session is not None and profile_incomplete(vendor) and not current.endswith("/complete-profile"):
+        return _redirect("/api/vendor/complete-profile" if current.startswith("/api/") else "complete-profile")
     vendor_id = int((session or {}).get("vendor_id") or 0)
     unread = _unread_count(vendor_id) if vendor_id else 0
     shop = html.escape(_text(vendor.get("shop_name")) or _text((session or {}).get("shop_name")) or "Vendor Panel")
@@ -334,14 +342,21 @@ def _page(
     wide: bool = False,
     width: str | None = None,
     extra_scripts: str = "",
+    document_html: str | None = None,
 ) -> Response:
     path = _request_path()
-    if title in {"Vendor Login", "Vendor Register", "Forgot Password"} or path in {
+    if document_html is not None or title in {
+        "Vendor Login",
+        "Vendor Register",
+        "Forgot Password",
+        "Complete Profile",
+    } or path in {
         "/vendor/login",
         "/vendor/register",
         "/vendor/forgot-password",
+        "/vendor/complete-profile",
     }:
-        return _guest_page(title, body, status, width or "420px")
+        return _guest_page(title, body, status, width or "420px", document_html=document_html)
     if path.startswith("/vendor/"):
         return _vendor_panel(
             title,
@@ -435,26 +450,13 @@ def acknowledge(req) -> Response:
 
 
 def _login_body(error: str = "", vendor_id: int = 0, success: str = "") -> str:
-    alert = f'<div class="error">{html.escape(error)}</div>' if error else ""
-    if success:
-        alert = f'<div class="ok">{html.escape(success)}</div>' + alert
     pay = ""
     if SHOW_VENDOR_PAYMENT and vendor_id:
-        pay = f'<a class="btn pay" href="/api/subscription/checkout?vendor_id={vendor_id}&source=web">Pay / Renew Subscription</a>'
-    return f"""
-<form action="loginAuth" method="post">
-<div class="input-group mb-3"><input name="username" class="form-control" placeholder="Username" autocomplete="username"><div class="input-group-append"><div class="input-group-text"><span class="fas fa-user"></span></div></div></div>
-<div class="input-group mb-3"><input name="password" type="password" class="form-control" placeholder="Password" autocomplete="current-password"><div class="input-group-append"><div class="input-group-text"><span class="fas fa-lock"></span></div></div></div>
-<button type="submit" class="btn btn-primary btn-block">Login</button>
-</form>
-<div class="or-line">or</div>
-<button type="button" class="google-btn" id="google-sign-in">Continue with Google</button>
-<div id="sign-note">{alert}</div>
-{pay}
-<p class="mb-1 mt-3"><a href="forgot-password">Forgot password?</a></p>
-<p class="mb-0"><a href="register">Don't have an account? Register here</a></p>
-{_firebase_login_script()}
-"""
+        pay = (
+            f'<a class="pay-link" href="/api/subscription/checkout?vendor_id={vendor_id}&source=web">'
+            "Pay / Renew Subscription</a>"
+        )
+    return login_main(error=error, vendor_id=vendor_id, success=success, pay_html=pay)
 
 
 _FIREBASE_LOGIN_JS = """
@@ -545,7 +547,15 @@ def google_auth_page() -> Response:
 
 
 def login_page(error: str = "", vendor_id: int = 0, success: str = "") -> Response:
-    return _page("Vendor Login", _login_body(error, vendor_id, success))
+    main = _login_body(error, vendor_id, success)
+    document = auth_document(
+        "Vendor Login",
+        main,
+        back_href="https://mylaptopmarket.com",
+        back_label="Back to home",
+        scripts=login_scripts(_firebase_login_script()),
+    )
+    return _page("Vendor Login", main, document_html=document)
 
 
 def _field(req, name: str) -> str:
@@ -594,16 +604,38 @@ def _count(value) -> int:
         return 0
 
 
-def dashboard(req) -> Response:
+def _redirect(location: str) -> Response:
+    response = Response("", status=302)
+    response.headers["Location"] = location
+    return response
+
+
+def _load_session_vendor(req) -> tuple[dict | None, dict]:
     session = vendor_session(req)
     if session is None:
-        response = Response("", status=302)
-        response.headers["Location"] = "login"
-        return response
+        return None, {}
     vendor_id = int(session.get("vendor_id") or 0)
+    doc = firestore.client().collection("vendors").document(str(vendor_id)).get()
+    vendor = doc.to_dict() or {} if doc.exists else {}
+    return session, vendor
+
+
+def _guard_incomplete(req) -> Response | None:
+    session, vendor = _load_session_vendor(req)
+    if session is None:
+        return _redirect("login")
+    if profile_incomplete(vendor):
+        return _redirect("complete-profile")
+    return None
+
+
+def dashboard(req) -> Response:
+    blocked = _guard_incomplete(req)
+    if blocked is not None:
+        return blocked
+    session, vendor = _load_session_vendor(req)
+    vendor_id = int((session or {}).get("vendor_id") or 0)
     client = firestore.client()
-    vendor_doc = client.collection("vendors").document(str(vendor_id)).get()
-    vendor = vendor_doc.to_dict() or {} if vendor_doc.exists else {}
     products = []
     active = inactive = 0
     for doc in client.collection("products").where("vendor_id", "==", vendor_id).stream():
@@ -866,79 +898,115 @@ window.confirmCode = function(code) {
 
 def register_page(error: str = "", values: dict | None = None, success: str = "") -> Response:
     values = values or {}
-    options = ['<option value="">Select state</option>']
-    for name in STATES:
-        selected = " selected" if values.get("state") == name else ""
-        options.append(f'<option value="{html.escape(name)}"{selected}>{html.escape(name)}</option>')
-    alert = f'<div class="alert alert-danger">{html.escape(error)}</div>' if error else ""
-    if success:
-        alert += f'<div class="alert alert-success">{html.escape(success)}</div>'
-
-    def field(name: str, label: str, kind: str = "text", autocomplete: str = "") -> str:
-        value = "" if name == "password" else html.escape(_text(values.get(name)))
-        extra = ' maxlength="6"' if name in {"email_otp", "mobile_otp"} else ""
-        auto = f' autocomplete="{autocomplete}"' if autocomplete else ""
-        return (
-            f'<div class="form-group"><label for="{name}">{label}</label>'
-            f'<input id="{name}" name="{name}" type="{kind}" class="form-control" '
-            f'placeholder="{label}" value="{value}"{extra}{auto}></div>'
-        )
-
+    main = register_main(error=error, values=values, success=success, otp_enabled=SHOW_VENDOR_OTP)
+    scripts = ""
+    # Google signup uses the same firebase-login endpoint as the login page.
+    scripts += _firebase_login_script()
     if SHOW_VENDOR_OTP:
-        otp_note = '<p class="text-muted">We send a 6-digit OTP to your email and mobile so both have to be real.</p>'
-        mobile_otp = f"""
-{field("mobile_otp", "Mobile OTP", autocomplete="one-time-code")}
-<div class="row mb-3">
-<div class="col-6"><button type="button" class="btn btn-outline-primary btn-block" id="sendMobileOtp">Send SMS</button></div>
-<div class="col-6"><button type="button" class="btn btn-outline-primary btn-block" id="verifyMobileOtp">Verify</button></div>
-</div>
-<div id="recaptcha"></div>
-<p id="mobileNote"></p>
-"""
-        email_otp = f"""
-{field("email_otp", "Email OTP", autocomplete="one-time-code")}
-<div class="row mb-3">
-<div class="col-6"><button type="submit" class="btn btn-outline-primary btn-block" formaction="email-otp">Send OTP</button></div>
-<div class="col-6"><button type="submit" class="btn btn-outline-primary btn-block" formaction="email-verify">Verify</button></div>
-</div>
-"""
-        mobile_script = _mobile_auth_script()
-    else:
-        otp_note = ""
-        mobile_otp = ""
-        email_otp = ""
-        mobile_script = ""
+        # Avoid double-loading Firebase scripts if Google already injected them.
+        if "firebase-app-compat.js" not in scripts:
+            scripts += mobile_firebase_scripts(_firebase_config())
+        else:
+            scripts += f"<script>window.__MLM_FIREBASE__ = {__import__('json').dumps(_firebase_config())};</script>"
+    scripts += register_scripts(_firebase_config(), otp_enabled=SHOW_VENDOR_OTP)
+    document = auth_document(
+        "Vendor Register",
+        main,
+        back_href="login",
+        back_label="Back to login",
+        step=(1, 3),
+        footer=register_footer(),
+        scripts=scripts,
+    )
+    return _page("Vendor Register", main, width="460px", document_html=document)
 
-    body = f"""
-{alert}
-{otp_note}
-<form class="vendor-register" action="registerStore" method="post">
-{field("shop_name", "Shop Name", autocomplete="organization")}
-{field("mobile", "Mobile Number", "tel", "tel")}
-{mobile_otp}
-{field("city", "City", autocomplete="address-level2")}
-<div class="form-group"><label for="state">State</label>
-<select id="state" name="state" class="form-control" autocomplete="address-level1">{"".join(options)}</select></div>
-{field("email", "Email", "email", "email")}
-{email_otp}
-{field("username", "Username", autocomplete="username")}
-{field("password", "Password (min 6)", "password", "new-password")}
-<button type="submit" class="btn btn-primary btn-block">Register</button>
-</form>
-<p class="mb-0 mt-3 text-center"><a href="login">Already have an account? Login</a></p>
-{mobile_script}
-"""
-    return _page("Vendor Register", body, width="460px")
+
+def complete_profile_page(req, error: str = "", values: dict | None = None, success: str = "") -> Response:
+    session, vendor = _load_session_vendor(req)
+    if session is None:
+        return _redirect("login")
+    if not profile_incomplete(vendor):
+        return _redirect("dashboard")
+    values = values or {
+        "shop_name": _text(vendor.get("shop_name")),
+        "city": _text(vendor.get("location")),
+        "state": _text(vendor.get("state")),
+        "username": _text(vendor.get("username")),
+        "mobile": _text(vendor.get("mobile")),
+        "gstin": _text(vendor.get("gstin")),
+    }
+    main = complete_profile_main(
+        error=error,
+        values=values,
+        success=success,
+        email=_text(vendor.get("email")),
+        otp_enabled=SHOW_VENDOR_OTP,
+    )
+    scripts = ""
+    if SHOW_VENDOR_OTP:
+        scripts += mobile_firebase_scripts(_firebase_config())
+    scripts += complete_profile_scripts(_firebase_config(), otp_enabled=SHOW_VENDOR_OTP)
+    document = auth_document(
+        "Complete Profile",
+        main,
+        back_href="logout",
+        back_label="Sign out",
+        scripts=scripts,
+    )
+    return _page("Complete Profile", main, width="460px", document_html=document)
+
+
+def complete_profile_store(req) -> Response:
+    session, vendor = _load_session_vendor(req)
+    if session is None:
+        return _redirect("login")
+    body = {
+        name: _field(req, name)
+        for name in ("shop_name", "username", "city", "state", "mobile", "password", "mobile_otp", "gstin")
+    }
+    result = complete_google_profile(int(session.get("vendor_id") or 0), body)
+    if not result.get("success"):
+        return complete_profile_page(req, error=result.get("message") or "Could not save profile.", values=body)
+    response = Response("", status=302)
+    if SHOW_VENDOR_PAYMENT:
+        response.headers["Location"] = (
+            f"/api/subscription/checkout?vendor_id={int(result.get('vendor_id') or 0)}&source=web"
+        )
+    else:
+        response.headers["Location"] = "dashboard"
+    return response
 
 
 def _register_values(req) -> dict:
     return {
         name: _field(req, name)
-        for name in ("shop_name", "username", "city", "state", "mobile", "email", "password", "email_otp", "mobile_otp")
+        for name in (
+            "shop_name",
+            "username",
+            "city",
+            "state",
+            "mobile",
+            "email",
+            "password",
+            "email_otp",
+            "mobile_otp",
+            "gstin",
+        )
     }
 
 
+def _json_message(ok: bool, message: str, status: int = 200) -> Response:
+    import json as _json_mod
+
+    body = _json_mod.dumps({"success": ok, "ok": ok, "message": message})
+    return Response(body, status=status if ok else 422, mimetype="application/json")
+
+
 def register_send_otp(req) -> Response:
+    if req.is_json:
+        data = req.get_json(silent=True) or {}
+        result = send_email_otp(_text(data.get("email")))
+        return _json_message(bool(result.get("ok")), result.get("message") or ("OTP sent." if result.get("ok") else "Could not send the OTP."))
     values = _register_values(req)
     result = send_email_otp(values.get("email") or "")
     if result.get("ok"):
@@ -947,6 +1015,13 @@ def register_send_otp(req) -> Response:
 
 
 def register_verify_otp(req) -> Response:
+    if req.is_json:
+        data = req.get_json(silent=True) or {}
+        result = confirm_email_otp(_text(data.get("email")), _text(data.get("email_otp") or data.get("otp")))
+        return _json_message(
+            bool(result.get("ok")),
+            result.get("message") or ("Email verified." if result.get("ok") else "Could not verify this email."),
+        )
     values = _register_values(req)
     result = confirm_email_otp(values.get("email") or "", values.get("email_otp") or "")
     if result.get("ok"):
@@ -991,29 +1066,14 @@ def register_store(req) -> Response:
 
 
 def forgot_page(email: str = "", error: str = "", success: str = "") -> Response:
-    alert = ""
-    if error:
-        alert += f'<div class="alert alert-danger">{html.escape(error)}</div>'
-    if success:
-        alert += f'<div class="alert alert-success">{html.escape(success)}</div>'
-    safe_email = html.escape(email)
-    body = f"""
-<p class="text-muted">We will email a 6-digit OTP.</p>
-{alert}
-<form class="forgot-form" action="forgot-password" method="post">
-<input type="email" name="email" placeholder="Email" value="{safe_email}" autocomplete="email" required>
-<button type="submit">Send OTP</button>
-</form>
-<form class="forgot-form" action="reset-password" method="post">
-<input type="hidden" name="email" value="{safe_email}">
-<input name="otp" placeholder="6-digit OTP" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
-<input type="password" name="password" placeholder="New password" autocomplete="new-password">
-<input type="password" name="password_confirmation" placeholder="Confirm password" autocomplete="new-password">
-<button type="submit">Update password</button>
-</form>
-<p class="mb-0 mt-2"><a href="login">Back to login</a></p>
-"""
-    return _page("Forgot Password", body)
+    main = forgot_main(email=email, error=error, success=success)
+    document = auth_document(
+        "Forgot Password",
+        main,
+        back_href="login",
+        back_label="Back to login",
+    )
+    return _page("Forgot Password", main, document_html=document)
 
 
 def forgot_send(req) -> Response:

@@ -1,4 +1,5 @@
 import json
+import re
 import secrets
 from datetime import date, datetime, timedelta, timezone
 
@@ -77,10 +78,24 @@ def _gst_details(vendor: dict):
     return details
 
 
+def profile_incomplete(vendor: dict) -> bool:
+    flag = vendor.get("profile_complete")
+    if flag is False:
+        return True
+    if flag is True:
+        return False
+    shop = _text(vendor.get("shop_name")).strip()
+    mobile = re.sub(r"\D", "", _text(vendor.get("mobile")))
+    if len(mobile) >= 12 and mobile.startswith("91"):
+        mobile = mobile[-10:]
+    return shop == "" or not re.fullmatch(r"[6-9]\d{9}", mobile)
+
+
 def vendor_payload(vendor: dict) -> dict:
     logo = vendor.get("logo")
     photo = _text(vendor.get("shop_photo")).strip()
     trusted = int(vendor.get("gst_verified") or 0) == 1 and photo != ""
+    incomplete = profile_incomplete(vendor)
     return {
         "id": int(vendor.get("id") or 0),
         "username": _text(vendor.get("username")),
@@ -91,6 +106,7 @@ def vendor_payload(vendor: dict) -> dict:
         "state": _text(vendor.get("state")),
         "status": int(vendor.get("status") or 0),
         "verified": int(vendor.get("status") or 0) == 1,
+        "profile_complete": not incomplete,
         "subscription_start": vendor.get("subscription_start"),
         "subscription_end": vendor.get("subscription_end"),
         "logo": logo,
@@ -115,12 +131,33 @@ def _password_matches(password: str, stored: str) -> bool:
 
 
 def _find_vendor(username: str):
+    needle = _text(username).strip()
+    if needle == "":
+        return None
     client = firestore.client()
-    matches = client.collection("vendors").where("username", "==", username).limit(1).stream()
+    matches = client.collection("vendors").where("username", "==", needle).limit(1).stream()
     for doc in matches:
         data = doc.to_dict() or {}
         data["_ref"] = doc.reference
         return data
+    if "@" in needle:
+        return _find_vendor_by_email(needle)
+    digits = re.sub(r"\D", "", needle)
+    if len(digits) >= 12 and digits.startswith("91"):
+        digits = digits[-10:]
+    if re.fullmatch(r"[6-9]\d{9}", digits):
+        for doc in client.collection("vendors").where("mobile", "==", digits).limit(1).stream():
+            data = doc.to_dict() or {}
+            data["_ref"] = doc.reference
+            return data
+        for doc in client.collection("vendors").stream():
+            data = doc.to_dict() or {}
+            mobile = re.sub(r"\D", "", _text(data.get("mobile")))
+            if len(mobile) >= 12 and mobile.startswith("91"):
+                mobile = mobile[-10:]
+            if mobile == digits:
+                data["_ref"] = doc.reference
+                return data
     return None
 
 
@@ -229,14 +266,38 @@ def login_with_firebase(id_token: str) -> dict:
             "code": "invalid_credentials",
             "message": "This Google account has no email address.",
         }
+    uid = _text(decoded.get("uid"))
+    display_name = _text(decoded.get("name"))
     vendor = _find_vendor_by_email(email)
     if vendor is None:
+        from accounts import create_google_vendor
+
+        created = create_google_vendor(email, uid, display_name)
+        if not created.get("success"):
+            return {
+                "success": False,
+                "code": "register_failed",
+                "message": created.get("message") or "Could not create your account with Google.",
+            }
+        vendor = created.get("vendor_row") or {}
         return {
-            "success": False,
-            "code": "no_vendor",
-            "message": "No vendor account uses this email. Register first, then sign in with the same email.",
+            "success": True,
+            "code": "needs_profile",
+            "redirect": "complete-profile",
+            "message": "Finish a few business details to continue.",
+            "vendor_id": int(vendor.get("id") or 0),
+            "vendor": vendor_payload(vendor),
         }
-    _link_firebase_uid(vendor, _text(decoded.get("uid")))
+    _link_firebase_uid(vendor, uid)
+    if profile_incomplete(vendor):
+        return {
+            "success": True,
+            "code": "needs_profile",
+            "redirect": "complete-profile",
+            "message": "Finish a few business details to continue.",
+            "vendor_id": int(vendor.get("id") or 0),
+            "vendor": vendor_payload(vendor),
+        }
     return _finish_login(vendor)
 
 
@@ -271,6 +332,15 @@ def consume_app_handoff(code: str) -> dict:
     vendor = _vendor_by_id(int(data.get("vendor_id") or 0))
     if vendor is None:
         return {"success": False, "message": "Sign in with Google again."}
+    if profile_incomplete(vendor):
+        return {
+            "success": True,
+            "code": "needs_profile",
+            "redirect": "complete-profile",
+            "message": "Finish a few business details to continue.",
+            "vendor_id": int(vendor.get("id") or 0),
+            "vendor": vendor_payload(vendor),
+        }
     return _finish_login(vendor)
 
 

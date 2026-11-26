@@ -1,0 +1,97 @@
+/* Asset cleanup: SVG service icons + monogram avatars (Trustworthy marketplace) */
+
+.service-icon-card,
+.core-icon-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  min-height: 220px;
+  padding: 28px 20px;
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  color: #0f172a;
+}
+
+.service-icon-wrap,
+.core-icon-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: #e8f1fc;
+  color: #0767d8;
+}
+
+.service-icon-wrap svg,
+.core-icon-wrap svg {
+  width: 34px;
+  height: 34px;
+  display: block;
+}
+
+.service-icon-card h3,
+.core-icon-card h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.35;
+}
+
+.core-card.core-icon-card {
+  position: relative;
+  overflow: visible;
+  min-height: 200px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: none;
+}
+
+.core-card.core-icon-card .core-overlay {
+  display: none;
+}
+
+.page-home .service-grid .service-icon-card,
+.theme-dark .service-grid .service-icon-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.page-home .service-grid .service-icon-card:hover,
+.theme-dark .service-grid .service-icon-card:hover {
+  border-color: rgba(7, 103, 216, 0.35);
+  transform: translateY(-2px);
+}
+
+.diagram-frame {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  background: #f7fafc;
+}
+
+.hero .slide-bg.is-svg {
+  background-size: cover;
+  background-position: center;
+  background-color: #e8f1fc;
+}
+
+.hero .slide-bg.is-svg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.orbit-laptop img {
+  object-fit: contain;
+}

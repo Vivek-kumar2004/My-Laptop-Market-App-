@@ -132,8 +132,6 @@
 .page-home .faq-btn,
 .theme-dark .faq-content,
 .page-home .faq-content,
-.theme-dark .testimonial-card,
-.page-home .testimonial-card,
 .page-home .home-product-card,
 .page-home .home-vendor-card,
 .theme-dark .info-box,
@@ -418,86 +416,6 @@
 .whatsapp-float:hover {
   transform: translateY(-2px);
   color: #fff;
-}
-
-.app-download-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1400;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  background: rgba(15, 40, 48, 0.55);
-  backdrop-filter: blur(2px);
-}
-
-.app-download-pop {
-  position: relative;
-  width: min(420px, 100%);
-  padding: 48px 28px 28px;
-  border-radius: 24px;
-  background: #fff;
-  border: 1px solid rgba(13, 148, 136, 0.16);
-  box-shadow: 0 24px 60px rgba(15, 40, 48, 0.28);
-  color: #0767d8;
-  text-align: center;
-}
-
-.app-download-close {
-  position: absolute;
-  top: 10px;
-  right: 12px;
-  width: 36px;
-  height: 36px;
-  border: 0;
-  border-radius: 50%;
-  background: rgba(13, 148, 136, 0.1);
-  color: #0767d8;
-  font-size: 24px;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.app-download-pop p {
-  margin: 0 0 14px;
-  font-size: 18px;
-  line-height: 1.45;
-  color: #0767d8;
-}
-
-.app-download-link {
-  display: inline-flex;
-  align-items: center;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: #0767d8;
-  font-size: 17px;
-  font-weight: 700;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-.app-download-options {
-  display: none;
-  margin-top: 16px;
-  gap: 10px;
-}
-
-.app-download-options.is-open {
-  display: grid;
-}
-
-.app-download-options a {
-  display: block;
-  padding: 12px 14px;
-  border-radius: 14px;
-  text-decoration: none;
-  text-align: center;
-  font-weight: 700;
-  color: #fff;
-  background: #0767d8;
 }
 
 .theme-dark .section-title,

@@ -128,6 +128,18 @@
   margin-bottom: 22px;
 }
 
+.detail-price .price-login-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: inherit;
+  text-decoration: none;
+  font-size: 1rem;
+}
+.detail-price .price-login-link:hover {
+  text-decoration: underline;
+}
+
 .detail-facts {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
