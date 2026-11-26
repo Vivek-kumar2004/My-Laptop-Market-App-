@@ -46,6 +46,11 @@ private var watchingVendorId: Int? = null
 
 private val json = Json { ignoreUnknownKeys = true }
 
+fun ensureAlertChannel() {
+    val context = applicationContextOrNull() ?: return
+    ensureChannel(context)
+}
+
 actual fun ensureVendorNotifications(vendorId: Int?) {
     val context = applicationContextOrNull() ?: return
     if (vendorId == null) {

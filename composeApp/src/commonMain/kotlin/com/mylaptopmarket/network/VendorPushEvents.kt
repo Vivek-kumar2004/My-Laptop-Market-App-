@@ -6,7 +6,8 @@ import kotlinx.coroutines.flow.asStateFlow
 
 data class VendorPushToken(
     val token: String,
-    val environment: String
+    val environment: String,
+    val platform: String = "ios"
 )
 
 data class VendorPushOpen(
@@ -22,9 +23,9 @@ object VendorPushEvents {
     private val _open = MutableStateFlow<VendorPushOpen?>(null)
     val open: StateFlow<VendorPushOpen?> = _open.asStateFlow()
 
-    fun onToken(token: String, environment: String) {
+    fun onToken(token: String, environment: String, platform: String = "ios") {
         if (token.isBlank()) return
-        _token.value = VendorPushToken(token = token, environment = environment)
+        _token.value = VendorPushToken(token = token, environment = environment, platform = platform)
     }
 
     fun onOpen(type: String, targetId: String, targetName: String) {

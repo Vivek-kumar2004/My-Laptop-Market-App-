@@ -543,7 +543,7 @@ class ApiAuthRepository {
         }
     }
 
-    suspend fun savePushToken(vendorId: Int, token: String, environment: String) {
+    suspend fun savePushToken(vendorId: Int, token: String, environment: String, platform: String = "ios") {
         runCatching {
             client.post("$baseUrl/vendor/push-token") {
                 contentType(ContentType.Application.Json)
@@ -551,6 +551,7 @@ class ApiAuthRepository {
                     VendorPushTokenRequest(
                         vendor_id = vendorId,
                         token = token,
+                        platform = platform,
                         environment = environment
                     )
                 )

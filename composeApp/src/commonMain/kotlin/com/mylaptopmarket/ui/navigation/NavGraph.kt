@@ -103,13 +103,13 @@ fun NavGraph(navController: NavHostController) {
         }
     }
 
-    LaunchedEffect(session?.id, pushToken?.token, pushToken?.environment) {
+    LaunchedEffect(session?.id, pushToken?.token, pushToken?.environment, pushToken?.platform) {
         val token = pushToken ?: return@LaunchedEffect
         val current = session
         if (current == null) {
             authRepository.clearPushToken(token.token)
         } else {
-            authRepository.savePushToken(current.id, token.token, token.environment)
+            authRepository.savePushToken(current.id, token.token, token.environment, token.platform)
         }
     }
 

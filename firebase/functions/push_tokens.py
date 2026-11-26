@@ -57,7 +57,7 @@ def save_vendor(req) -> tuple[dict, int]:
         vendor_id = int(raw_vendor)
     except (TypeError, ValueError):
         return {"success": False, "message": "The vendor id must be an integer."}, 422
-    if token == "" or len(token) > 255 or len(platform) > 20:
+    if token == "" or len(token) > 4096 or len(platform) > 20:
         return {"success": False, "message": "The token field is required."}, 422
     if not firestore.client().collection("vendors").document(str(vendor_id)).get().exists:
         return {"success": False, "message": "Vendor not found."}, 422
@@ -74,7 +74,7 @@ def save_admin(req, admin: dict) -> tuple[dict, int]:
     body = _body(req)
     token = _text(body.get("token"))
     platform = _text(body.get("platform")) or "ios"
-    if token == "" or len(token) > 255 or len(platform) > 20:
+    if token == "" or len(token) > 4096 or len(platform) > 20:
         return {"success": False, "message": "The token field is required."}, 422
     _save(
         "admin_push_tokens",

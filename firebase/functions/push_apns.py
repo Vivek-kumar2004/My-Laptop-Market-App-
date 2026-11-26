@@ -85,7 +85,42 @@ def _payload(title: str, body: str, push_type: str, extra: dict | None = None) -
     )
 
 
-def _dispatch(collection: str, owner_field: str, wanted: set | None, bundle: str, payload: str) -> dict:
+def _send_fcm(token: str, title: str, body: str, push_type: str, extra: dict | None) -> str:
+    from firebase_admin import messaging
+
+    data = {"type": push_type, "title": title, "body": body}
+    for key, value in (extra or {}).items():
+        data[str(key)] = "" if value is None else str(value)
+    try:
+        messaging.send(
+            messaging.Message(
+                notification=messaging.Notification(title=title, body=body),
+                data=data,
+                token=token,
+                android=messaging.AndroidConfig(
+                    priority="high",
+                    notification=messaging.AndroidNotification(channel_id="mlm_alerts", sound="default"),
+                ),
+            )
+        )
+        return "sent"
+    except messaging.UnregisteredError:
+        return "remove"
+    except Exception:
+        return "failed"
+
+
+def _dispatch(
+    collection: str,
+    owner_field: str,
+    wanted: set | None,
+    bundle: str,
+    payload: str,
+    title: str = "",
+    body: str = "",
+    push_type: str = "",
+    extra: dict | None = None,
+) -> dict:
     sent = failed = removed = 0
     client = firestore.client()
     with httpx.Client(http2=True, timeout=15) as http:
@@ -97,6 +132,19 @@ def _dispatch(collection: str, owner_field: str, wanted: set | None, bundle: str
                 continue
             token = _text(row.get("token"))
             if token == "" or (wanted is not None and owner_id not in wanted):
+                continue
+            if _text(row.get("platform")) == "android":
+                outcome = _send_fcm(token, title, body, push_type, extra)
+                if outcome == "sent":
+                    sent += 1
+                elif outcome == "remove":
+                    doc.reference.delete()
+                    removed += 1
+                else:
+                    failed += 1
+                continue
+            if _ready():
+                failed += 1
                 continue
             preferred = "production" if _text(row.get("environment")) == "production" else "sandbox"
             hosts = (
@@ -136,9 +184,6 @@ def _dispatch(collection: str, owner_field: str, wanted: set | None, bundle: str
 
 
 def notify(vendor_ids, title: str, body: str, push_type: str, extra: dict | None = None) -> dict:
-    missing = _ready()
-    if missing:
-        return {"sent": 0, "failed": 0, "removed": 0, "error": missing}
     bundle = _text(os.environ.get("APNS_VENDOR_BUNDLE_ID")) or VENDOR_BUNDLE
     return _dispatch(
         "vendor_push_tokens",
@@ -146,6 +191,10 @@ def notify(vendor_ids, title: str, body: str, push_type: str, extra: dict | None
         {int(item) for item in vendor_ids},
         bundle,
         _payload(title, body, push_type, extra),
+        title,
+        body,
+        push_type,
+        extra,
     )
 
 

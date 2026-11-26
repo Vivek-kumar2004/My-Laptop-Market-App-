@@ -15,7 +15,10 @@ import androidx.core.content.ContextCompat
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.google.firebase.messaging.FirebaseMessaging
+import com.mylaptopmarket.network.VendorPushEvents
 import com.mylaptopmarket.service.globalSpeechService
+import com.mylaptopmarket.util.ensureAlertChannel
 import com.mylaptopmarket.util.initPlatformContext
 import com.mylaptopmarket.util.initializePlatformContext
 
@@ -44,7 +47,10 @@ class MainActivity : ComponentActivity() {
         initializePlatformContext(this)
         PhoneAuthInstaller.install(this)
         com.mylaptopmarket.network.SessionManager.restore()
+        ensureAlertChannel()
         requestNotificationPermission()
+        registerPushToken()
+        openFromPush(intent)
 
         try {
             globalSpeechService.initialize(this)
@@ -76,6 +82,23 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         deepLinkUri = intent.data
+        openFromPush(intent)
+    }
+
+    private fun registerPushToken() {
+        FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+            VendorPushEvents.onToken(token, "production", "android")
+        }
+    }
+
+    private fun openFromPush(intent: Intent?) {
+        val type = intent?.getStringExtra("type").orEmpty()
+        if (type.isBlank()) return
+        VendorPushEvents.onOpen(
+            type,
+            intent?.getStringExtra("target_id").orEmpty(),
+            intent?.getStringExtra("target_name").orEmpty()
+        )
     }
 
     override fun onResume() {

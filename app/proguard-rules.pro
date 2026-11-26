@@ -36,6 +36,7 @@
 
 # App models used in JSON
 -keep class com.mylaptopmarket.** { *; }
+-keep class com.google.firebase.messaging.** { *; }
 
 -keep class com.mylaptopmarket.util.VendorNotificationWorker { *; }
 
