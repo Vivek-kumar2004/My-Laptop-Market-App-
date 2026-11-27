@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Shell } from "../components/Shell";
 import { NetworkSection } from "../components/NetworkSection";
+import { HowItWorks } from "../components/HowItWorks";
 import { CtaSection } from "../components/Footer";
 
 export function WhyPage() {
@@ -16,6 +17,7 @@ export function WhyPage() {
       {(api) => (
         <>
           <NetworkSection onRegister={api.onRegister} />
+          <HowItWorks onRegister={api.onRegister} />
           <CtaSection onRegister={api.onRegister} onRequirement={api.onRequirement} />
         </>
       )}

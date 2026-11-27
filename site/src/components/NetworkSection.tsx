@@ -45,10 +45,10 @@ export function NetworkSection({ onRegister }: { onRegister: () => void }) {
               Join the network <Icon name="arrow-up-right" size={15} className="arrow" />
             </button>
             <Link
-              to={routes.marketplace}
+              to={routes.how}
               className="btn h-11 min-h-0 border border-white/20 bg-white/5 px-5 text-[12.5px] text-white backdrop-blur hover:bg-white/10"
             >
-              See inside the platform
+              How it works
             </Link>
           </Reveal>
         </div>
