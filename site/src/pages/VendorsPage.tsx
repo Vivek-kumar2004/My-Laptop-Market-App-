@@ -5,7 +5,7 @@ import { CtaSection } from "../components/Footer";
 
 export function VendorsPage() {
   useEffect(() => {
-    document.title = "Vendors — My Laptop Market";
+    document.title = "Our Partners — My Laptop Market";
     return () => {
       document.title = "My Laptop Market — India's Live B2B IT Marketplace";
     };

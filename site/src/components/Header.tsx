@@ -10,12 +10,11 @@ import { navItems, routes } from "../lib/routes";
 
 const pageLinks = [
   { label: "Home", href: routes.home },
-  { label: "Live marketplace", href: routes.marketplace },
+  { label: "Download app", href: routes.download },
   { label: "Why My Laptop Market", href: routes.why },
   { label: "How it works", href: routes.how },
-  { label: "Popular vendors", href: routes.vendors },
+  { label: "Our Partners", href: routes.vendors },
   { label: "About us", href: routes.about },
-  { label: "Download app", href: routes.download },
   { label: "Insights & guides", href: routes.insights },
   { label: "FAQs", href: routes.faq },
 ];
@@ -29,7 +28,7 @@ export function Header({
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
-  const [scrollActive, setScrollActive] = useState<string>("marketplace");
+  const [scrollActive, setScrollActive] = useState<string>("download");
 
   const pathActive = useMemo(() => {
     const path = location.pathname.replace(/\/index\.html$/, "").replace(/\/?$/, "/") || "/";
@@ -140,13 +139,13 @@ export function Header({
                 href="https://mylaptopmarket.com/api/vendor/login"
                 className="hidden rounded-full px-4 py-2.5 text-[13px] font-semibold text-navy/75 transition hover:bg-mist hover:text-navy md:inline-flex"
               >
-                Vendor Login
+                Login
               </a>
               <a
                 href="https://mylaptopmarket.com/api/vendor/register"
                 className="btn btn-primary hidden h-10 min-h-0 px-4 text-[12.5px] sm:inline-flex"
               >
-                Register as Dealer
+                Register
                 <Icon name="arrow-up-right" size={14} className="arrow" />
               </a>
               <button
@@ -208,7 +207,7 @@ export function Header({
                 className="btn btn-primary flex-1"
                 onClick={() => setMenuOpen(false)}
               >
-                Register as Dealer <Icon name="arrow-up-right" size={15} className="arrow" />
+                Register <Icon name="arrow-up-right" size={15} className="arrow" />
               </a>
               <a
                 href="https://mylaptopmarket.com/api/vendor/login"

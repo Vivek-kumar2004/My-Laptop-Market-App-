@@ -50,7 +50,7 @@ export function VendorsSection({ onRegister }: { onRegister: () => void }) {
       <div className="wrap">
         <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <Reveal className="max-w-[600px]">
-            <span className="eyebrow">Popular vendors</span>
+            <span className="eyebrow">Our Partners</span>
             <h2 className="display mt-4 text-[clamp(2.1rem,4.2vw,3.35rem)] text-navy">
               Businesses that do this
               <br />
