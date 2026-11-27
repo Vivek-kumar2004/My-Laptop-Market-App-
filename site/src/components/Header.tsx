@@ -99,10 +99,10 @@ export function Header({
         <div className="relative z-10 px-3 pt-3 sm:px-5 sm:pt-4 xl:pl-20">
           <div
             className={cn(
-              "mx-auto flex items-center justify-between gap-3 rounded-full border py-2 pl-3 pr-2 transition-[max-width,background-color,border-color,box-shadow] duration-700 sm:pl-5",
+              "mx-auto flex items-center justify-between gap-3 rounded-full border py-2 pl-3 pr-2 shadow-[0_12px_40px_-14px_rgba(5,7,11,0.2)] transition-[max-width,background-color,border-color,box-shadow] duration-700 sm:pl-5",
               solid
-                ? "max-w-[1120px] border-line/80 bg-white/88 shadow-[0_12px_40px_-14px_rgba(5,7,11,0.28)] backdrop-blur-xl"
-                : "max-w-[1320px] border-transparent bg-white/0",
+                ? "max-w-[1120px] border-line/80 bg-white/88 backdrop-blur-xl"
+                : "max-w-[1320px] border-transparent bg-white/80 backdrop-blur-xl",
             )}
           >
             <Link to={routes.home} className="group flex shrink-0 items-center" aria-label="My Laptop Market home">
