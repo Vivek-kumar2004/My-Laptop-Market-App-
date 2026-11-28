@@ -222,6 +222,7 @@ class ApiProductRepository : ProductRepository {
         youtubeVideo: String?,
         status: Int,
         images: List<ByteArray>,
+        frontImage: ByteArray?,
         stockSheetName: String?,
         stockSheetBytes: ByteArray?
     ): Result<Boolean> {
@@ -247,6 +248,16 @@ class ApiProductRepository : ProductRepository {
                                     Headers.build {
                                         append(HttpHeaders.ContentType, "image/jpeg")
                                         append(HttpHeaders.ContentDisposition, "filename=\"image_$index.jpg\"")
+                                    }
+                                )
+                            }
+                            if (frontImage != null && frontImage.isNotEmpty()) {
+                                append(
+                                    "front_image",
+                                    frontImage,
+                                    Headers.build {
+                                        append(HttpHeaders.ContentType, "image/jpeg")
+                                        append(HttpHeaders.ContentDisposition, "filename=\"front.jpg\"")
                                     }
                                 )
                             }
@@ -283,6 +294,8 @@ class ApiProductRepository : ProductRepository {
         status: Int,
         images: List<ByteArray>,
         keepImageNames: List<String>?,
+        frontImage: ByteArray?,
+        removeFrontImage: Boolean,
         stockSheetName: String?,
         stockSheetBytes: ByteArray?,
         removeStockSheet: Boolean
@@ -319,6 +332,19 @@ class ApiProductRepository : ProductRepository {
                                         )
                                     }
                                 )
+                            }
+                            if (frontImage != null && frontImage.isNotEmpty()) {
+                                append(
+                                    "front_image",
+                                    frontImage,
+                                    Headers.build {
+                                        append(HttpHeaders.ContentType, "image/jpeg")
+                                        append(HttpHeaders.ContentDisposition, "filename=\"front.jpg\"")
+                                    }
+                                )
+                            }
+                            if (removeFrontImage) {
+                                append("remove_front_image", "1")
                             }
                         }
                     )
@@ -457,11 +483,22 @@ class ApiProductRepository : ProductRepository {
             else -> emptyList()
         }
 
+        val front = frontImage?.takeIf {
+            it.isNotBlank() &&
+                !it.contains("no-product", ignoreCase = true) &&
+                !it.contains("no-image", ignoreCase = true)
+        }?.let { img ->
+            if (img.startsWith("http://") || img.startsWith("https://")) img
+            else "${baseImageUrl}${img.trimStart('/')}"
+        }
         val mediaList = imageList.mapNotNull { img ->
             val url = when {
                 img.startsWith("http://") || img.startsWith("https://") -> img
                 img.isBlank() -> return@mapNotNull null
                 else -> "${baseImageUrl}${img.trimStart('/')}"
+            }
+            if (front != null && (url == front || url.substringAfterLast('/') == front.substringAfterLast('/'))) {
+                return@mapNotNull null
             }
             Media(url, MediaType.IMAGE)
         }
@@ -479,6 +516,7 @@ class ApiProductRepository : ProductRepository {
             providerName = vendorName ?: "Unknown Vendor",
             providerNumber = vendorNumber ?: "Number Not Available",
             media = mediaList,
+            frontImageUrl = front,
             videoUrl = if (youtubeVideo.isNullOrBlank()) null else youtubeVideo,
             isActive = (status ?: 1) == 1,
             providerLogoUrl = resolveLogoFromResponse(vendorLogoUrl, vendorLogo),

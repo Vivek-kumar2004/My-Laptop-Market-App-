@@ -15,6 +15,7 @@ data class Product(
     val providerName: String,
     val providerNumber: String,
     val media: List<Media>,
+    val frontImageUrl: String? = null,
     val videoUrl: String? = null,
     val isActive: Boolean = true,
     val providerLogoUrl: String? = null,
@@ -48,4 +49,16 @@ data class Media(
 @Serializable
 enum class MediaType {
     IMAGE, VIDEO
+}
+
+fun Product.coverImageUrl(): String? {
+    val front = frontImageUrl?.takeIf { it.isNotBlank() }
+    if (front != null) return front
+    return media.firstOrNull { it.type == MediaType.IMAGE && it.url.isNotBlank() }?.url
+}
+
+fun Product.galleryMedia(): List<Media> {
+    val photos = media.filter { it.type == MediaType.IMAGE && it.url.isNotBlank() }
+    val front = frontImageUrl?.takeIf { it.isNotBlank() } ?: return photos
+    return listOf(Media(front, MediaType.IMAGE)) + photos.filter { it.url != front }
 }

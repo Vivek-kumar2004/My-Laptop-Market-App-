@@ -806,6 +806,7 @@ def delete_account(body: dict) -> tuple[dict, int]:
         product = doc.to_dict() or {}
         for image in _images_of(product):
             _delete_stored_image(image)
+        _delete_stored_image(_text(product.get("front_image")))
         _delete_sheet_blob(int(product.get("id") or doc.id))
         doc.reference.delete()
     for field in ("sender_id", "receiver_id"):

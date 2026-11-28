@@ -360,6 +360,7 @@ def delete_vendor(vendor_id: int) -> tuple[dict, int]:
         product = doc.to_dict() or {}
         for image in _images_of(product):
             _delete_stored_image(image)
+        _delete_stored_image(_text(product.get("front_image")))
         _delete_sheet_blob(int(product.get("id") or 0))
         doc.reference.delete()
     for field in ("sender_id", "receiver_id"):
@@ -813,10 +814,10 @@ def admin_products() -> dict:
         product = doc.to_dict() or {}
         vendor = vendors.get(str(product.get("vendor_id"))) or {}
         images = product.get("images")
-        main = None
-        if isinstance(images, list) and images:
+        main = _text(product.get("front_image")) or None
+        if not main and isinstance(images, list) and images:
             main = images[0]
-        elif isinstance(images, str) and images:
+        elif not main and isinstance(images, str) and images:
             main = images
         try:
             price = float(product.get("price") or 0)
@@ -848,6 +849,7 @@ def admin_delete_product(product_id: int) -> tuple[dict, int]:
     name = _text(product.get("product_name")) or f"Product #{product_id}"
     for image in _images_of(product):
         _delete_stored_image(image)
+    _delete_stored_image(_text(product.get("front_image")))
     _delete_sheet_blob(product_id)
     product["_ref"].delete()
     return {"success": True, "message": f'Product "{name}" was deleted.'}, 200

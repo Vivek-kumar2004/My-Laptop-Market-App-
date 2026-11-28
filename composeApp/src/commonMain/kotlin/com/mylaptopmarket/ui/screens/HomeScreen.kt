@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.mylaptopmarket.model.Product
+import com.mylaptopmarket.model.coverImageUrl
 import com.mylaptopmarket.model.StockStatus
 import com.mylaptopmarket.ui.components.PlaceFilterBar
 import com.mylaptopmarket.ui.components.productMatchesPlace
@@ -924,7 +925,7 @@ fun ProductCard(
                     .height(140.dp)
                     .background(SurfaceHover)
             ) {
-                val imageUrl = product.media.firstOrNull()?.url
+                val imageUrl = product.coverImageUrl()
                 if (imageUrl != null) {
                     AsyncImage(
                         model = imageUrl,

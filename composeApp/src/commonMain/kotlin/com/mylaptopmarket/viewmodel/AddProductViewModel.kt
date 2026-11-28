@@ -64,6 +64,7 @@ class AddProductViewModel(private val repository: ProductRepository) : ViewModel
         youtubeVideo: String? = null,
         status: Int = 1,
         images: List<ByteArray>,
+        frontImage: ByteArray? = null,
         stockSheetName: String? = null,
         stockSheetBytes: ByteArray? = null
     ) {
@@ -88,6 +89,7 @@ class AddProductViewModel(private val repository: ProductRepository) : ViewModel
                 youtubeVideo = youtubeVideo,
                 status = status,
                 images = images,
+                frontImage = frontImage,
                 stockSheetName = stockSheetName,
                 stockSheetBytes = stockSheetBytes
             )
@@ -112,6 +114,8 @@ class AddProductViewModel(private val repository: ProductRepository) : ViewModel
         status: Int = 1,
         images: List<ByteArray>,
         keepImageNames: List<String>? = null,
+        frontImage: ByteArray? = null,
+        removeFrontImage: Boolean = false,
         stockSheetName: String? = null,
         stockSheetBytes: ByteArray? = null,
         removeStockSheet: Boolean = false
@@ -139,6 +143,8 @@ class AddProductViewModel(private val repository: ProductRepository) : ViewModel
                 status = status,
                 images = images,
                 keepImageNames = keepImageNames,
+                frontImage = frontImage,
+                removeFrontImage = removeFrontImage,
                 stockSheetName = stockSheetName,
                 stockSheetBytes = stockSheetBytes,
                 removeStockSheet = removeStockSheet

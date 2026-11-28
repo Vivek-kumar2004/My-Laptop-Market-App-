@@ -22,6 +22,7 @@ data class ProductResponse(
     @SerialName("images") val images: String? = null,
     @SerialName("image_urls") val imageUrls: List<String>? = null,
     @SerialName("main_image") val mainImage: String? = null,
+    @SerialName("front_image") val frontImage: String? = null,
     @SerialName("stock") val stock: Int? = null,
     @SerialName("youtube_video") val youtubeVideo: String? = null,
     @SerialName("status") val status: Int? = null,

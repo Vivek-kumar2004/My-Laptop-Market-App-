@@ -70,8 +70,22 @@ def _logo_url(vendor: dict) -> str:
     return _file_url(vendor.get("logo_url") or vendor.get("logo")) or DEFAULT_LOGO
 
 
-def format_product(product: dict, vendor: dict, include_vendor: bool, for_web: bool = False) -> dict:
+def _display_images(product: dict) -> tuple[str, list[str], list[str]]:
+    front_raw = _text(product.get("front_image"))
+    _, front_urls = _image_parts(front_raw) if front_raw else ([], [])
+    front = front_urls[0] if front_urls else ""
     names, urls = _image_parts(product.get("images"))
+    ordered = [front] if front else []
+    front_name = _file_name(front) if front else ""
+    for url in urls:
+        if front_name and _file_name(url) == front_name:
+            continue
+        ordered.append(url)
+    return front, names, ordered
+
+
+def format_product(product: dict, vendor: dict, include_vendor: bool, for_web: bool = False) -> dict:
+    front, names, urls = _display_images(product)
     fallback = f"{SITE}/assets/images/no-product.svg"
     if for_web:
         item = {
@@ -85,6 +99,7 @@ def format_product(product: dict, vendor: dict, include_vendor: bool, for_web: b
             "images": urls,
             "image_urls": urls,
             "main_image": urls[0] if urls else fallback,
+            "front_image": front,
             "has_stock_sheet": bool(product.get("has_stock_sheet")),
             "vendor_shop_trusted": _trusted(vendor),
         }
@@ -102,6 +117,7 @@ def format_product(product: dict, vendor: dict, include_vendor: bool, for_web: b
             "images": json.dumps(names),
             "image_urls": urls,
             "main_image": urls[0] if urls else fallback,
+            "front_image": front,
             "created_at": product.get("created_at"),
             "updated_at": product.get("updated_at"),
             "has_stock_sheet": bool(product.get("has_stock_sheet")),

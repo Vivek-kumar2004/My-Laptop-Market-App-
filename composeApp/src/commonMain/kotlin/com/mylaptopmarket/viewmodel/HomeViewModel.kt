@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mylaptopmarket.model.MarketListing
 import com.mylaptopmarket.model.Product
+import com.mylaptopmarket.model.coverImageUrl
 import com.mylaptopmarket.model.Provider
 import com.mylaptopmarket.network.SessionManager
 import com.mylaptopmarket.repository.ProductRepository
@@ -133,7 +134,7 @@ class HomeViewModel(private val repository: ProductRepository) : ViewModel() {
     }
 
     private fun imageUrls(products: List<Product>, listings: List<MarketListing>): List<String> {
-        val productPhotos = products.mapNotNull { it.media.firstOrNull()?.url }
+        val productPhotos = products.mapNotNull { it.coverImageUrl() }
         val listingPhotos = listings.mapNotNull { it.images.firstOrNull() }
         return productPhotos + listingPhotos
     }

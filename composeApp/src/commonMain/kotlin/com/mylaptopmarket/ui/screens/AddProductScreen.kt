@@ -62,6 +62,9 @@ fun AddProductScreen(
     var statusExpanded by remember { mutableStateOf(false) }
     var categoryExpanded by remember { mutableStateOf(false) }
     var selectedImages by remember { mutableStateOf<List<ByteArray>>(emptyList()) }
+    var frontBytes by remember { mutableStateOf<ByteArray?>(null) }
+    var existingFront by remember { mutableStateOf<String?>(null) }
+    var removeFront by remember { mutableStateOf(false) }
     var sheetName by remember { mutableStateOf<String?>(null) }
     var sheetBytes by remember { mutableStateOf<ByteArray?>(null) }
     var removeSheet by remember { mutableStateOf(false) }
@@ -113,6 +116,13 @@ fun AddProductScreen(
                 !media.url.contains("no-image", ignoreCase = true) &&
                 !media.url.contains("no-product", ignoreCase = true)
         }
+        existingFront = product.frontImageUrl?.takeIf {
+            it.isNotBlank() &&
+                !it.contains("no-image", ignoreCase = true) &&
+                !it.contains("no-product", ignoreCase = true)
+        }
+        frontBytes = null
+        removeFront = false
         selectedImages = emptyList()
         // Keep existing category even if not in list
         if (!product.category.isNullOrBlank() && product.category !in categories) {
@@ -325,6 +335,82 @@ fun AddProductScreen(
                         maxLines = 4
                     )
 
+                    Text("Front photo", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary)
+                    Text(
+                        "This photo is the thumbnail on stock listings.",
+                        fontSize = 12.sp,
+                        color = TextSecondary
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        val preview = frontBytes
+                        val savedFront = existingFront
+                        if (preview != null) {
+                            Box {
+                                AsyncImage(
+                                    model = preview,
+                                    contentDescription = "Front photo",
+                                    modifier = Modifier.size(88.dp).clip(RoundedCornerShape(8.dp)),
+                                    contentScale = ContentScale.Crop
+                                )
+                                IconButton(
+                                    onClick = { frontBytes = null },
+                                    modifier = Modifier.align(Alignment.TopEnd).size(22.dp).clip(CircleShape).background(ErrorRed)
+                                ) {
+                                    Icon(Icons.Default.Close, contentDescription = "Remove front photo", tint = SurfaceWhite, modifier = Modifier.size(12.dp))
+                                }
+                            }
+                        } else if (!savedFront.isNullOrBlank() && !removeFront) {
+                            Box {
+                                AsyncImage(
+                                    model = savedFront,
+                                    contentDescription = "Front photo",
+                                    modifier = Modifier.size(88.dp).clip(RoundedCornerShape(8.dp)),
+                                    contentScale = ContentScale.Crop
+                                )
+                                IconButton(
+                                    onClick = { removeFront = true },
+                                    modifier = Modifier.align(Alignment.TopEnd).size(22.dp).clip(CircleShape).background(ErrorRed)
+                                ) {
+                                    Icon(Icons.Default.Close, contentDescription = "Remove front photo", tint = SurfaceWhite, modifier = Modifier.size(12.dp))
+                                }
+                            }
+                        }
+                    }
+                    ImagePicker(
+                        selectionLimit = 1,
+                        onImagesSelected = { bytes ->
+                            frontBytes = bytes.firstOrNull()
+                            removeFront = false
+                        }
+                    ) { onClick ->
+                        Surface(
+                            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)),
+                            color = SurfaceHover,
+                            border = BorderStroke(1.dp, CardBorder)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp).fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Button(
+                                    onClick = onClick,
+                                    shape = RoundedCornerShape(8.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryLight, contentColor = PrimaryBlue)
+                                ) {
+                                    Icon(Icons.Default.AddPhotoAlternate, contentDescription = null, modifier = Modifier.size(18.dp))
+                                    Spacer(Modifier.width(6.dp))
+                                    Text("Front photo", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                }
+                                Text(
+                                    if (frontBytes != null) "1 file selected" else "Optional",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = if (frontBytes == null) TextMuted else PrimaryBlue
+                                )
+                            }
+                        }
+                    }
+
                     Text("Product Images", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary)
 
                     if (isEdit) {
@@ -457,7 +543,7 @@ fun AddProductScreen(
                         }
                     }
                     Text(
-                        "You can select multiple images",
+                        "Other photos stay in the product gallery",
                         fontSize = 11.sp,
                         color = ErrorRed,
                         modifier = Modifier.padding(start = 2.dp)
@@ -589,6 +675,8 @@ fun AddProductScreen(
                                     status = statusVal,
                                     images = selectedImages,
                                     keepImageNames = existingImages.map { imageFileName(it.url) }.filter { it.isNotBlank() },
+                                    frontImage = frontBytes,
+                                    removeFrontImage = removeFront && frontBytes == null,
                                     stockSheetName = sheetName,
                                     stockSheetBytes = sheetBytes,
                                     removeStockSheet = removeSheet && sheetBytes == null
@@ -603,6 +691,7 @@ fun AddProductScreen(
                                     youtubeVideo = if (youtubeVideo.isNotBlank()) youtubeVideo else null,
                                     status = statusVal,
                                     images = selectedImages,
+                                    frontImage = frontBytes,
                                     stockSheetName = sheetName,
                                     stockSheetBytes = sheetBytes
                                 )

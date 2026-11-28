@@ -143,6 +143,22 @@ def _uploads(req) -> list:
     return [item for item in files if item and item.filename]
 
 
+def _store_front(req, current: str = "") -> tuple[str, str | None]:
+    upload = req.files.get("front_image") if req.files else None
+    if upload is not None and getattr(upload, "filename", ""):
+        url, error = _save_image(upload)
+        if error:
+            return current, error
+        if current and current != url:
+            _delete_stored_image(current)
+        return url, None
+    if _field(req, "remove_front_image") in {"1", "true", "on"}:
+        if current:
+            _delete_stored_image(current)
+        return "", None
+    return current, None
+
+
 def _delete_stored_image(value: str) -> None:
     folder = ""
     if "/api/media/products/" in value:
@@ -203,6 +219,9 @@ def add_product(req, vendor_id: int | None = None) -> tuple[dict, int]:
         if error:
             return {"status": False, "message": error}, 422
         images.append(url)
+    front, error = _store_front(req)
+    if error:
+        return {"status": False, "message": error}, 422
 
     status = _field(req, "status") or "1"
     product_id = _next_product_id()
@@ -216,6 +235,7 @@ def add_product(req, vendor_id: int | None = None) -> tuple[dict, int]:
         "stock": stock_value,
         "youtube_video": _field(req, "youtube_video") or None,
         "images": images,
+        "front_image": front,
         "status": int(status) if status.lstrip("-").isdigit() else 1,
         "has_stock_sheet": False,
     }
@@ -282,6 +302,9 @@ def update_product(req, product_id: int, vendor_id: int | None = None) -> tuple[
         if error:
             return {"status": False, "message": error}, 422
         images.append(url)
+    front, error = _store_front(req, _text(product.get("front_image")))
+    if error:
+        return {"status": False, "message": error}, 422
 
     status = _field(req, "status")
     product["_ref"].update(
@@ -293,6 +316,7 @@ def update_product(req, product_id: int, vendor_id: int | None = None) -> tuple[
             "stock": stock_value,
             "youtube_video": _field(req, "youtube_video") or None,
             "images": images,
+            "front_image": front,
             "status": int(status) if status.lstrip("-").isdigit() else int(product.get("status") or 1),
         }
     )
@@ -308,6 +332,7 @@ def delete_product(req, product_id: int) -> tuple[dict, int]:
         return {"status": False, "message": "Product not found"}, 404
     for item in _images_of(product):
         _delete_stored_image(item)
+    _delete_stored_image(_text(product.get("front_image")))
     _delete_sheet_blob(product_id)
     product["_ref"].delete()
     return {"status": True, "message": "Product deleted successfully"}, 200

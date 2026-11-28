@@ -34,6 +34,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil3.compose.AsyncImage
 import com.mylaptopmarket.model.Product
+import com.mylaptopmarket.model.galleryMedia
 import com.mylaptopmarket.model.StockStatus
 import com.mylaptopmarket.network.SessionManager
 import com.mylaptopmarket.ui.theme.PrimaryBlue
@@ -144,7 +145,8 @@ fun ProductDetailScreen(
                     .background(MaterialTheme.colorScheme.background)
                     .verticalScroll(rememberScrollState())
             ) {
-                val pagerState = rememberPagerState(pageCount = { prod.media.size })
+                val photos = prod.galleryMedia()
+                val pagerState = rememberPagerState(pageCount = { photos.size })
                 Box(modifier = Modifier
                     .fillMaxWidth()
                     .height(320.dp)) {
@@ -153,7 +155,7 @@ fun ProductDetailScreen(
                         modifier = Modifier.fillMaxSize()
                     ) { page ->
                         AsyncImage(
-                            model = prod.media[page].url,
+                            model = photos[page].url,
                             contentDescription = null,
                             modifier = Modifier
                                 .fillMaxSize()
@@ -187,7 +189,7 @@ fun ProductDetailScreen(
                             .align(Alignment.BottomCenter),
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        repeat(prod.media.size) { iteration ->
+                        repeat(photos.size) { iteration ->
                             val color =
                                 if (pagerState.currentPage == iteration) MaterialTheme.colorScheme.primary else Color.White.copy(
                                     alpha = 0.6f
@@ -285,7 +287,7 @@ fun ProductDetailScreen(
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             contentPadding = PaddingValues(end = 24.dp)
                         ) {
-                            itemsIndexed(prod.media) { index, item ->
+                            itemsIndexed(photos) { index, item ->
                                 Card(
                                     modifier = Modifier
                                         .size(80.dp)
@@ -583,7 +585,7 @@ fun ProductDetailScreen(
 
                 if (showFullScreenViewer) {
                     FullScreenImageViewer(
-                        media = prod.media.map { it.url },
+                        media = photos.map { it.url },
                         initialIndex = selectedImageIndex,
                         onDismiss = { showFullScreenViewer = false }
                     )

@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.mylaptopmarket.model.Product
+import com.mylaptopmarket.model.coverImageUrl
 import com.mylaptopmarket.model.Provider
 import com.mylaptopmarket.model.StockStatus
 import com.mylaptopmarket.ui.components.PlaceFilterBar
@@ -338,7 +339,7 @@ fun SearchProductResultItem(
                     .background(SurfaceHover),
                 contentAlignment = Alignment.Center
             ) {
-                val imageUrl = product.media.firstOrNull()?.url
+                val imageUrl = product.coverImageUrl()
                 if (imageUrl.isNullOrBlank()) {
                     Icon(
                         Icons.Default.Storefront,

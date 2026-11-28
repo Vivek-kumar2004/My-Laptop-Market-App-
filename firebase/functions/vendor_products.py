@@ -58,7 +58,7 @@ def product_list(req) -> Response:
     body_rows = []
     for index, row in enumerate(rows, start=1):
         images = _images_of(row)
-        image = images[0] if images else ""
+        image = _text(row.get("front_image")) or (images[0] if images else "")
         if image and not image.startswith("http"):
             image = f"{SITE}/assets/uploads/products/{image}"
         picture = (
@@ -203,6 +203,18 @@ def _product_form(req, product: dict | None, notice: str = "", error: str = "") 
     action = f"/api/vendor/product_update/{product_id}" if editing else "/api/vendor/product_store"
     heading = "Edit Product" if editing else "Add Product"
     images = _images_of(product) if editing else []
+    front = _text(product.get("front_image")) if editing else ""
+    front_block = ""
+    if front:
+        front_src = front if front.startswith("http") else f"{SITE}/assets/uploads/products/{_file_name(front)}"
+        front_block = (
+            f'<div class="mb-2"><img src="{html.escape(front_src)}" class="img-fluid img-thumbnail" '
+            'style="max-height:120px" alt="Front photo"></div>'
+            '<div class="custom-control custom-checkbox mb-2">'
+            '<input type="checkbox" class="custom-control-input" id="removeFront" name="remove_front_image" value="1">'
+            '<label class="custom-control-label" for="removeFront">Remove front photo</label>'
+            "</div>"
+        )
     cards = []
     for image in images:
         filename = _file_name(image)
@@ -278,6 +290,12 @@ def _product_form(req, product: dict | None, notice: str = "", error: str = "") 
 <div class="col-md-12"><div class="form-group">
 <label>Description</label>
 <textarea name="description" class="form-control" rows="5" placeholder="Enter Product Description" required>{html.escape(description)}</textarea>
+</div></div>
+<div class="col-md-12"><div class="form-group">
+<label>Front photo (thumbnail)</label>
+{front_block}
+<input type="file" name="front_image" class="form-control" accept="image/*">
+<small class="text-muted">Shown as the main photo on stock listings. One photo, JPG, PNG, WEBP, or HEIC, up to 5 MB.</small>
 </div></div>
 <div class="col-md-12"><div class="form-group">
 <label>Product Images</label>
@@ -506,6 +524,7 @@ def remove(req, product_id: int) -> Response:
     if product is not None:
         for item in _images_of(product):
             _delete_stored_image(item)
+        _delete_stored_image(_text(product.get("front_image")))
         _delete_sheet_blob(product_id)
         product["_ref"].delete()
     return _redirect("../product_list?notice=" + quote("Product deleted."))

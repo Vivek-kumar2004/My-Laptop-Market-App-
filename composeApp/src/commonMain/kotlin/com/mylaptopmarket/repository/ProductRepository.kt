@@ -27,6 +27,7 @@ interface ProductRepository {
         youtubeVideo: String? = null,
         status: Int = 1,
         images: List<ByteArray>,
+        frontImage: ByteArray? = null,
         stockSheetName: String? = null,
         stockSheetBytes: ByteArray? = null
     ): Result<Boolean>
@@ -43,6 +44,8 @@ interface ProductRepository {
         status: Int = 1,
         images: List<ByteArray> = emptyList(),
         keepImageNames: List<String>? = null,
+        frontImage: ByteArray? = null,
+        removeFrontImage: Boolean = false,
         stockSheetName: String? = null,
         stockSheetBytes: ByteArray? = null,
         removeStockSheet: Boolean = false
