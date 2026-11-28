@@ -7,7 +7,9 @@ import com.mylaptopmarket.model.Product
 import com.mylaptopmarket.model.Provider
 import com.mylaptopmarket.network.SessionManager
 import com.mylaptopmarket.repository.ProductRepository
+import com.mylaptopmarket.util.HomeCatalog
 import com.mylaptopmarket.util.HomeCatalogStore
+import com.mylaptopmarket.util.OfflineSync
 import com.mylaptopmarket.util.prefetchImages
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -46,16 +48,29 @@ class HomeViewModel(private val repository: ProductRepository) : ViewModel() {
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
+    private val _showingSaved = MutableStateFlow(false)
+    val showingSaved: StateFlow<Boolean> = _showingSaved.asStateFlow()
+
     init {
-        HomeCatalogStore.read()?.let { saved ->
-            if (saved.products.isNotEmpty() || saved.listings.isNotEmpty()) {
-                _topProducts.value = saved.products
-                _featuredProducts.value = saved.products.take(5)
-                _topProviders.value = providersFrom(saved.products)
-                _marketListings.value = saved.listings
-                _isLoading.value = false
+        applySaved(HomeCatalogStore.read())
+        viewModelScope.launch {
+            OfflineSync.revision.collect { revision ->
+                if (revision == 0) return@collect
+                applySaved(HomeCatalogStore.read())
+                _showingSaved.value = false
+                _errorMessage.value = null
             }
         }
+    }
+
+    private fun applySaved(saved: HomeCatalog?) {
+        if (saved == null) return
+        if (saved.products.isEmpty() && saved.listings.isEmpty()) return
+        _topProducts.value = saved.products
+        _featuredProducts.value = saved.products.take(5)
+        _topProviders.value = providersFrom(saved.products)
+        _marketListings.value = saved.listings
+        _isLoading.value = false
     }
 
     fun refreshData(fromPull: Boolean = false) {
@@ -79,6 +94,7 @@ class HomeViewModel(private val repository: ProductRepository) : ViewModel() {
                 if (products.isEmpty() && !showingSaved) {
                     _errorMessage.value = "Abhi koi live product listing nahi hai."
                 }
+                _showingSaved.value = false
                 finishRefresh(generation)
                 withContext(Dispatchers.Default) {
                     HomeCatalogStore.write(products, listings)
@@ -86,7 +102,9 @@ class HomeViewModel(private val repository: ProductRepository) : ViewModel() {
                 prefetchImages(imageUrls(products, listings))
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                if (!showingSaved) {
+                if (showingSaved) {
+                    _showingSaved.value = true
+                } else {
                     _errorMessage.value = com.mylaptopmarket.network.friendlyNetworkError(e)
                 }
             } finally {

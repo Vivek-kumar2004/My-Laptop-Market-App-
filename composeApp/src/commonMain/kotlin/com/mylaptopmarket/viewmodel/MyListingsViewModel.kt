@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.mylaptopmarket.model.Product
 import com.mylaptopmarket.network.SessionManager
 import com.mylaptopmarket.repository.ProductRepository
+import com.mylaptopmarket.util.OfflineSync
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,6 +21,11 @@ class MyListingsViewModel(private val repository: ProductRepository) : ViewModel
 
     init {
         loadMyListings()
+        viewModelScope.launch {
+            OfflineSync.revision.collect { revision ->
+                if (revision > 0) loadMyListings()
+            }
+        }
     }
 
     fun loadMyListings() {

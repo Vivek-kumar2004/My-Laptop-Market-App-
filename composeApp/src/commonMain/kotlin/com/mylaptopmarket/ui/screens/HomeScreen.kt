@@ -103,6 +103,7 @@ fun HomeScreen(
     var marketChip by remember { mutableStateOf("All") }
     val marketShown = marketListings.filter { marketChip == "All" || it.category == marketChip }
     val errorMessage by viewModel.errorMessage.collectAsState()
+    val showingSaved by viewModel.showingSaved.collectAsState()
     var selectedState by remember { mutableStateOf("") }
     val shownProducts = topProducts.filter { productMatchesPlace(it, selectedState) }
     var homeNotice by remember { mutableStateOf("") }
@@ -530,6 +531,7 @@ fun HomeScreen(
         ) {
             val gridState = rememberLazyGridState()
             val errorShown = errorMessage != null && topProducts.isEmpty()
+            val offlineNote = showingSaved && (topProducts.isNotEmpty() || marketListings.isNotEmpty())
             val emptyPlace = topProducts.isNotEmpty() && shownProducts.isEmpty()
             SideEffect {
                 AppTour.scrollHome = { target ->
@@ -768,6 +770,19 @@ fun HomeScreen(
                         Spacer(Modifier.height(16.dp))
                     }
                 }
+            }
+            if (offlineNote) {
+                Text(
+                    "No internet. Showing saved stock.",
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 16.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(Color(0xFF0F172A))
+                        .padding(horizontal = 14.dp, vertical = 8.dp),
+                    color = Color.White,
+                    fontSize = 12.sp
+                )
             }
         }
         }

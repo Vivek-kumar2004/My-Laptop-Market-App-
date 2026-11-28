@@ -35,6 +35,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -51,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.mylaptopmarket.model.MarketListing
+import com.mylaptopmarket.util.OfflineSync
 import com.mylaptopmarket.ui.tour.tourTarget
 import com.mylaptopmarket.repository.ProductRepository
 import com.mylaptopmarket.util.makeCall
@@ -227,8 +229,9 @@ fun MarketListingScreen(
     var listing by remember { mutableStateOf<MarketListing?>(null) }
     var failed by remember { mutableStateOf(false) }
     var photoIndex by remember { mutableIntStateOf(0) }
+    val catalogRevision by OfflineSync.revision.collectAsState()
 
-    LaunchedEffect(listingId) {
+    LaunchedEffect(listingId, catalogRevision) {
         val found = repository.getMarketListing(listingId)
         listing = found
         failed = found == null

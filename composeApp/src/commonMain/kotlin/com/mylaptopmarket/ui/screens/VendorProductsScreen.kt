@@ -43,6 +43,8 @@ import com.mylaptopmarket.network.SessionManager
 import com.mylaptopmarket.network.VendorSession
 import com.mylaptopmarket.repository.ApiAuthRepository
 import com.mylaptopmarket.ui.theme.*
+import com.mylaptopmarket.util.NetworkStatus
+import com.mylaptopmarket.util.OfflineSync
 import com.mylaptopmarket.util.openUrl
 import com.mylaptopmarket.viewmodel.VendorProductsViewModel
 import kotlinx.coroutines.launch
@@ -57,6 +59,8 @@ fun VendorProductsScreen(
     onProductClick: (String) -> Unit
 ) {
     val products by viewModel.products.collectAsState()
+    val online by NetworkStatus.online.collectAsState()
+    val catalogRevision by OfflineSync.revision.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val logoUrl by viewModel.logoUrl.collectAsState()
     val resolvedVendorName by viewModel.resolvedVendorName.collectAsState()
@@ -87,7 +91,7 @@ fun VendorProductsScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(catalogRevision) {
         viewModel.load()
     }
 
@@ -139,7 +143,7 @@ fun VendorProductsScreen(
                                     overflow = TextOverflow.Ellipsis
                                 )
                                 Text(
-                                    "${products.size} products",
+                                    if (online) "${products.size} products" else "Saved stock · ${products.size}",
                                     fontSize = 12.sp,
                                     color = TextSecondary
                                 )

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mylaptopmarket.model.Product
 import com.mylaptopmarket.repository.ProductRepository
+import com.mylaptopmarket.util.HomeCatalogStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -38,7 +39,12 @@ class VendorProductsViewModel(
                 _logoUrl.value = list.firstOrNull()?.providerLogoUrl
                 _resolvedVendorName.value = list.firstOrNull()?.providerName
             } catch (_: Exception) {
-                _products.value = emptyList()
+                val cached = HomeCatalogStore.productsForVendor(vendorId)
+                if (cached.isNotEmpty()) {
+                    _products.value = cached
+                    _logoUrl.value = cached.firstOrNull()?.providerLogoUrl
+                    _resolvedVendorName.value = cached.firstOrNull()?.providerName
+                }
             }
             _isLoading.value = false
         }

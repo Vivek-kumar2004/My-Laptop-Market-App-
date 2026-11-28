@@ -5,6 +5,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.first
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import coil3.ImageLoader
@@ -15,6 +17,10 @@ import com.mylaptopmarket.util.appCacheDir
 import okio.Path.Companion.toPath
 import com.mylaptopmarket.network.SessionManager
 import com.mylaptopmarket.repository.ApiAuthRepository
+import com.mylaptopmarket.repository.ApiProductRepository
+import com.mylaptopmarket.util.HomeCatalogStore
+import com.mylaptopmarket.util.NetworkStatus
+import com.mylaptopmarket.util.OfflineSync
 import com.mylaptopmarket.repository.AuthNeedsProfileException
 import com.mylaptopmarket.repository.AuthPendingException
 import com.mylaptopmarket.ui.navigation.NavGraph
@@ -45,6 +51,28 @@ fun App(
     }
     MyLaptopMarketTheme {
         remember { SessionManager.restore() }
+        LaunchedEffect(Unit) {
+            NetworkStatus.start()
+            val repository = ApiProductRepository()
+            NetworkStatus.backOnline.collect {
+                try {
+                    val products = repository.getAllProducts()
+                    val listings = try {
+                        repository.getMarketListings().first()
+                    } catch (cancelled: CancellationException) {
+                        throw cancelled
+                    } catch (_: Exception) {
+                        emptyList()
+                    }
+                    val kept = listings.ifEmpty { HomeCatalogStore.read()?.listings.orEmpty() }
+                    HomeCatalogStore.write(products, kept)
+                    OfflineSync.noteRefresh()
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                }
+            }
+        }
         Surface(
             modifier = Modifier.fillMaxSize()
         ) {

@@ -2,6 +2,7 @@ package com.mylaptopmarket.repository
 
 import com.mylaptopmarket.model.*
 import com.mylaptopmarket.network.*
+import com.mylaptopmarket.util.HomeCatalogStore
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
@@ -87,7 +88,7 @@ class ApiProductRepository : ProductRepository {
         } catch (e: CancellationException) {
             throw e
         } catch (_: Exception) {
-            null
+            HomeCatalogStore.read()?.listings?.find { it.id.toString() == id }
         }
     }
 
@@ -124,13 +125,23 @@ class ApiProductRepository : ProductRepository {
     }
 
     override fun getProductById(id: String): Flow<Product?> = flow {
-        val all = getAllProducts()
-        emit(all.find { it.id == id })
+        try {
+            emit(getAllProducts().find { it.id == id })
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            emit(HomeCatalogStore.product(id))
+        }
     }
 
     override fun getProviderById(id: String): Flow<Provider?> = flow {
-        val all = getAllProducts()
-        val products = all.filter { it.providerId == id }
+        val products = try {
+            getAllProducts().filter { it.providerId == id }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            HomeCatalogStore.productsForVendor(id)
+        }
         val product = products.firstOrNull()
         if (product != null) {
             val logo = product.providerLogoUrl
@@ -162,8 +173,11 @@ class ApiProductRepository : ProductRepository {
         } catch (e: Exception) {
             if (e is CancellationException) throw e
             e.printStackTrace()
-            val all = getAllProducts()
-            emit(all.filter { it.name.contains(query, ignoreCase = true) })
+            val saved = HomeCatalogStore.read()?.products.orEmpty()
+            emit(saved.filter {
+                it.name.contains(query, ignoreCase = true) ||
+                    it.providerName.contains(query, ignoreCase = true)
+            })
         }
     }
 
@@ -178,7 +192,7 @@ class ApiProductRepository : ProductRepository {
         } catch (e: Exception) {
             if (e is CancellationException) throw e
             e.printStackTrace()
-            emit(emptyList())
+            emit(HomeCatalogStore.productsForVendor(vendorId))
         }
     }
 
@@ -352,20 +366,21 @@ class ApiProductRepository : ProductRepository {
             if (!response.status) {
                 Result.failure(Exception(response.message ?: "Could not open stock sheet"))
             } else {
-                Result.success(
-                    StockSheet(
-                        originalName = response.originalName.orEmpty(),
-                        viewerName = response.viewerName.orEmpty(),
-                        viewedAt = response.viewedAt.orEmpty(),
-                        headers = response.headers,
-                        rows = response.rows,
-                        truncated = response.truncated
-                    )
+                val sheet = StockSheet(
+                    originalName = response.originalName.orEmpty(),
+                    viewerName = response.viewerName.orEmpty(),
+                    viewedAt = response.viewedAt.orEmpty(),
+                    headers = response.headers,
+                    rows = response.rows,
+                    truncated = response.truncated
                 )
+                HomeCatalogStore.saveStockSheet(productId, sheet)
+                Result.success(sheet)
             }
         } catch (e: Exception) {
             if (e is CancellationException) throw e
-            Result.failure(e)
+            HomeCatalogStore.stockSheet(productId)?.let { Result.success(it) }
+                ?: Result.failure(e)
         }
     }
 

@@ -44,6 +44,8 @@ import com.mylaptopmarket.viewmodel.ProductDetailViewModel
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import com.mylaptopmarket.util.YoutubeVideoPlayer
+import com.mylaptopmarket.util.NetworkStatus
+import com.mylaptopmarket.util.OfflineSync
 import com.mylaptopmarket.util.makeCall
 import com.mylaptopmarket.util.openUrl
 import io.ktor.http.encodeURLParameter
@@ -73,13 +75,15 @@ fun ProductDetailScreen(
 ) {
     val product by viewModel.product.collectAsState()
     val provider by viewModel.provider.collectAsState()
+    val online by NetworkStatus.online.collectAsState()
+    val catalogRevision by OfflineSync.revision.collectAsState()
     val session by SessionManager.currentSession.collectAsState()
     val isVendorLoggedIn = session != null
 
     var showFullScreenViewer by remember { mutableStateOf(false) }
     var selectedImageIndex by remember { mutableIntStateOf(0) }
 
-    LaunchedEffect(productId) {
+    LaunchedEffect(productId, catalogRevision) {
         viewModel.loadProductDetail(productId)
     }
 
@@ -87,12 +91,17 @@ fun ProductDetailScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = product?.name ?: "Product Details",
-                        style = MaterialTheme.typography.titleLarge,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Column {
+                        Text(
+                            text = product?.name ?: "Product Details",
+                            style = MaterialTheme.typography.titleLarge,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        if (product != null && !online) {
+                            Text("Saved copy", color = TextMuted, fontSize = 12.sp)
+                        }
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {

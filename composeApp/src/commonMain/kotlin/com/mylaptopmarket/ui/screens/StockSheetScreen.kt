@@ -29,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +45,8 @@ import androidx.compose.ui.unit.sp
 import com.mylaptopmarket.model.StockSheet
 import com.mylaptopmarket.network.SessionManager
 import com.mylaptopmarket.repository.ProductRepository
+import com.mylaptopmarket.util.NetworkStatus
+import com.mylaptopmarket.util.OfflineSync
 import com.mylaptopmarket.ui.theme.PrimaryBlue
 import com.mylaptopmarket.ui.theme.TextMuted
 
@@ -56,11 +59,13 @@ fun StockSheetScreen(
     onLoginClick: () -> Unit
 ) {
     val session = SessionManager.currentSession.value
+    val online by NetworkStatus.online.collectAsState()
+    val catalogRevision by OfflineSync.revision.collectAsState()
     var sheet by remember { mutableStateOf<StockSheet?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(session != null) }
 
-    LaunchedEffect(productId, session?.id) {
+    LaunchedEffect(productId, session?.id, catalogRevision) {
         val vendorId = session?.id
         if (vendorId == null) {
             loading = false
@@ -134,6 +139,14 @@ fun StockSheetScreen(
                             color = PrimaryBlue
                         )
                         Spacer(Modifier.height(6.dp))
+                        if (!online) {
+                            Text(
+                                "Saved stock sheet. It updates when the internet is back.",
+                                color = TextMuted,
+                                fontSize = 12.sp
+                            )
+                            Spacer(Modifier.height(8.dp))
+                        }
                         if (data.originalName.isNotBlank()) {
                             Text(data.originalName, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                             Spacer(Modifier.height(8.dp))
