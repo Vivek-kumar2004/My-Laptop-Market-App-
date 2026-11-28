@@ -43,6 +43,7 @@ data class RegisterRequest(
 @Serializable
 data class CompleteProfileRequest(
     val vendor_id: Int,
+    @SerialName("signup_token") val signupToken: String = "",
     val shop_name: String,
     val username: String,
     val city: String,
@@ -169,6 +170,7 @@ data class LoginResponse(
     val message: String? = null,
     val code: String? = null,
     val vendor_id: Int? = null,
+    @SerialName("signup_token") val signupToken: String? = null,
     val vendor: VendorData? = null
 )
 
@@ -242,11 +244,16 @@ class ApiAuthRepository {
             (success && vendor != null && vendor.profileComplete == false)
         if (needsProfile) {
             val id = vendor_id ?: vendor?.id ?: 0
+            val signup = signupToken.orEmpty()
+            if (id <= 0 && signup.isBlank()) {
+                return Result.failure(Exception(message ?: fallback))
+            }
             return Result.failure(
                 AuthNeedsProfileException(
                     message = message ?: "Finish a few business details to continue.",
                     vendorId = id,
-                    email = vendor?.email.orEmpty()
+                    email = vendor?.email.orEmpty(),
+                    signupToken = signup
                 )
             )
         }
@@ -645,5 +652,6 @@ class AuthPendingException(
 class AuthNeedsProfileException(
     message: String,
     val vendorId: Int,
-    val email: String = ""
+    val email: String = "",
+    val signupToken: String = ""
 ) : Exception(message)

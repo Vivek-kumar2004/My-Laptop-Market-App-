@@ -162,8 +162,9 @@ def _cors(response: Response, req: Request) -> Response:
 def _firebase_sign_in_result(result: dict, handoff: str) -> Response:
     vendor = result.get("vendor") or {}
     vendor_id = int(vendor.get("id") or result.get("vendor_id") or 0)
-    if handoff == "app" and vendor_id > 0:
-        code = issue_app_handoff(vendor_id)
+    signup_token = str(result.get("signup_token") or "")
+    if handoff == "app" and (vendor_id > 0 or signup_token):
+        code = issue_app_handoff(vendor_id, signup_token)
         return _json({"redirect": "mylaptopmarket://auth?code=" + code})
     if result.get("success"):
         redirect = result.get("redirect") or "dashboard"
@@ -191,7 +192,10 @@ def _firebase_sign_in_result(result: dict, handoff: str) -> Response:
 def _firebase_sign_in(req: Request) -> Response:
     body = req.get_json(silent=True) or {}
     handoff = body.get("handoff") if body.get("handoff") == "app" else ""
-    return _firebase_sign_in_result(login_with_firebase(body.get("id_token")), handoff)
+    return _firebase_sign_in_result(
+        login_with_firebase(body.get("id_token"), defer_create=(handoff == "app")),
+        handoff,
+    )
 
 
 def _json(body: dict, status: int = 200) -> Response:

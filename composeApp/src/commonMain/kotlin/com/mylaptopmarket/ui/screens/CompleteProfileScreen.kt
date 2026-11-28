@@ -59,6 +59,7 @@ import org.jetbrains.compose.resources.painterResource
 fun CompleteProfileScreen(
     vendorId: Int,
     email: String,
+    signupToken: String = "",
     viewModel: AuthViewModel,
     onCompleted: (Int) -> Unit,
     onBackClick: () -> Unit
@@ -131,7 +132,11 @@ fun CompleteProfileScreen(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                if (email.isNotBlank()) "Signed in as $email" else "Add shop details to continue.",
+                if (email.isNotBlank()) {
+                    "Signed in as $email. Shop name, username, city, state and mobile are required."
+                } else {
+                    "Shop name, username, city, state and mobile are required."
+                },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -301,7 +306,7 @@ fun CompleteProfileScreen(
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-            val canSubmit = vendorId > 0 &&
+            val canSubmit = (vendorId > 0 || signupToken.isNotBlank()) &&
                 shopName.isNotBlank() &&
                 username.length >= 4 &&
                 city.isNotBlank() &&
@@ -316,6 +321,7 @@ fun CompleteProfileScreen(
                 onClick = {
                     viewModel.completeProfile(
                         vendorId = vendorId,
+                        signupToken = signupToken,
                         shopName = shopName,
                         username = username,
                         city = city,

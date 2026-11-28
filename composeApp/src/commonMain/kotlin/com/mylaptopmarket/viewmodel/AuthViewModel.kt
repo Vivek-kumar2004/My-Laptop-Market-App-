@@ -37,7 +37,8 @@ object SignInNotice {
 data class NeedsProfile(
     val vendorId: Int,
     val email: String = "",
-    val message: String = ""
+    val message: String = "",
+    val signupToken: String = ""
 )
 
 class AuthViewModel(private val repository: ApiAuthRepository) : ViewModel() {
@@ -128,7 +129,8 @@ class AuthViewModel(private val repository: ApiAuthRepository) : ViewModel() {
                     _needsProfile.value = NeedsProfile(
                         vendorId = error.vendorId,
                         email = error.email,
-                        message = error.message ?: "Finish a few business details to continue."
+                        message = error.message ?: "Finish a few business details to continue.",
+                        signupToken = error.signupToken
                     )
                 }
                 is AuthPendingException -> {
@@ -193,6 +195,7 @@ class AuthViewModel(private val repository: ApiAuthRepository) : ViewModel() {
 
     fun completeProfile(
         vendorId: Int,
+        signupToken: String = "",
         shopName: String,
         username: String,
         city: String,
@@ -220,6 +223,7 @@ class AuthViewModel(private val repository: ApiAuthRepository) : ViewModel() {
             val result = repository.completeProfile(
                 CompleteProfileRequest(
                     vendor_id = vendorId,
+                    signupToken = signupToken,
                     shop_name = shopName.trim(),
                     username = username.trim(),
                     city = city.trim(),

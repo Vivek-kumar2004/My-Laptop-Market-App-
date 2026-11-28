@@ -1,7 +1,9 @@
 import json
 import re
+import secrets
 import urllib.parse
 import urllib.request
+from datetime import datetime, timedelta, timezone
 
 import bcrypt
 from firebase_admin import firestore
@@ -347,6 +349,142 @@ def check_gstin(gstin_raw: str) -> dict:
     }
 
 
+def hold_google_signup(email: str, firebase_uid: str, display_name: str = "") -> str:
+    token = secrets.token_urlsafe(24)
+    firestore.client().collection("google_signups").document(token).set(
+        {
+            "email": email,
+            "firebase_uid": _text(firebase_uid),
+            "display_name": _text(display_name),
+            "expires_at": datetime.now(timezone.utc) + timedelta(minutes=30),
+        }
+    )
+    return token
+
+
+def load_google_signup(token: str) -> dict | None:
+    token = _text(token)
+    if token == "" or len(token) > 200:
+        return None
+    ref = firestore.client().collection("google_signups").document(token)
+    snap = ref.get()
+    if not snap.exists:
+        return None
+    data = snap.to_dict() or {}
+    expires = data.get("expires_at")
+    if hasattr(expires, "timestamp"):
+        if getattr(expires, "tzinfo", None) is None:
+            expires = expires.replace(tzinfo=timezone.utc)
+        if expires <= datetime.now(timezone.utc):
+            ref.delete()
+            return None
+    data["_ref"] = ref
+    return data
+
+
+def _create_vendor_after_google(body: dict) -> dict:
+    signup = load_google_signup(_text(body.get("signup_token")))
+    if signup is None:
+        return {"success": False, "message": "Sign in with Google again."}
+    email = _text(signup.get("email")).lower()
+    shop = _text(body.get("shop_name"))
+    username = _text(body.get("username"))
+    city = _text(body.get("city"))
+    state = _normalize_state(body.get("state"))
+    mobile = _mobile_key(body.get("mobile"))
+    password = body.get("password") or ""
+    gstin_raw = _text(body.get("gstin"))
+    if shop == "" or username == "" or city == "" or mobile == "":
+        return {"success": False, "message": "Fill shop name, username, city, state and mobile."}
+    if state == "":
+        return {"success": False, "message": "Select a valid state."}
+    if not re.fullmatch(r"[0-9]{10}", mobile):
+        return {"success": False, "message": "Enter a 10-digit mobile number."}
+    if not re.fullmatch(r"[a-zA-Z0-9._]{4,20}", username):
+        return {"success": False, "message": "Username must be 4–20 letters, numbers, dots or underscores."}
+    if password and len(password) < 6:
+        return {"success": False, "message": "Password must be at least 6 characters."}
+    if _taken("email", email):
+        return {"success": False, "message": "The email has already been taken."}
+    if _taken("username", username):
+        return {"success": False, "message": "The username has already been taken."}
+    if _taken("mobile", mobile):
+        return {"success": False, "message": "The mobile has already been taken."}
+    if _taken("shop_name", shop):
+        return {"success": False, "message": "This shop name is already registered."}
+
+    from feature_flags import SHOW_VENDOR_OTP
+
+    if SHOW_VENDOR_OTP:
+        from phone_verify import consume as consume_mobile
+        from phone_verify import ready as mobile_ready
+
+        mobile_ok = mobile_ready(mobile, _text(body.get("mobile_otp")))
+        if not mobile_ok.get("ok"):
+            return {"success": False, "message": mobile_ok.get("message") or "Enter the OTP sent to your mobile."}
+        mobile_done = consume_mobile(mobile, _text(body.get("mobile_otp")))
+        if not mobile_done.get("ok"):
+            return {"success": False, "message": mobile_done.get("message") or "Enter the OTP sent to your mobile."}
+
+    gst_probe: dict = {"gstin": "", "gst_verified": 0, "gst_details": None}
+    if gstin_raw:
+        gst_error = _apply_gst(gst_probe, gstin_raw)
+        if gst_error:
+            return {"success": False, "message": gst_error}
+
+    vendor_id = _next_vendor_id()
+    held = hold_vendor_keys(vendor_id, username, mobile, email, shop)
+    if held:
+        return {"success": False, "message": held}
+    vendor = {
+        "id": vendor_id,
+        "username": username,
+        "password": "",
+        "password_plain": "",
+        "shop_name": shop,
+        "logo": None,
+        "logo_url": None,
+        "mobile": mobile,
+        "mobile_verified": bool(SHOW_VENDOR_OTP),
+        "email": email,
+        "email_verified": True,
+        "status": 0,
+        "location": city,
+        "subscription_start": None,
+        "subscription_end": None,
+        "state": state,
+        "gstin": gst_probe.get("gstin") or "",
+        "gst_verified": int(gst_probe.get("gst_verified") or 0),
+        "gst_details": gst_probe.get("gst_details"),
+        "shop_photo": None,
+        "admin_warning": "",
+        "firebase_uid": _text(signup.get("firebase_uid")),
+        "auth_provider": "google",
+        "profile_complete": True,
+    }
+    if password:
+        vendor["password"] = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+        vendor["password_plain"] = password
+    firestore.client().collection("vendors").document(str(vendor_id)).set(vendor)
+    signup["_ref"].delete()
+    try:
+        from push_apns import notify_admins
+
+        notify_admins(
+            "New vendor registered",
+            f"{shop} just signed up with Google and is waiting for approval.",
+            "vendor_register",
+        )
+    except Exception:
+        pass
+    return {
+        "success": True,
+        "message": "Profile saved. Activate subscription to go live.",
+        "vendor_id": vendor_id,
+        "vendor": vendor_payload(vendor),
+    }
+
+
 def create_google_vendor(email: str, firebase_uid: str, display_name: str = "") -> dict:
     email = _text(email).lower()
     if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email):
@@ -393,6 +531,8 @@ def create_google_vendor(email: str, firebase_uid: str, display_name: str = "") 
 
 
 def complete_google_profile(vendor_id: int, body: dict) -> dict:
+    if int(vendor_id or 0) <= 0:
+        return _create_vendor_after_google(body)
     vendor = _load(int(vendor_id))
     if vendor is None:
         return {"success": False, "message": "Sign in with Google again."}

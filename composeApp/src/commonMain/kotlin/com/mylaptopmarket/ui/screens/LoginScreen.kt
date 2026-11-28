@@ -34,7 +34,7 @@ fun LoginScreen(
     onRegisterClick: () -> Unit,
     onForgotPasswordClick: () -> Unit,
     onPendingVerification: (Int) -> Unit,
-    onNeedsProfile: (vendorId: Int, email: String) -> Unit,
+    onNeedsProfile: (vendorId: Int, email: String, signupToken: String) -> Unit,
     onBackClick: () -> Unit
 ) {
     var username by remember { mutableStateOf("") }
@@ -62,8 +62,8 @@ fun LoginScreen(
 
     LaunchedEffect(needsProfile) {
         val pendingProfile = needsProfile
-        if (pendingProfile != null && pendingProfile.vendorId > 0) {
-            onNeedsProfile(pendingProfile.vendorId, pendingProfile.email)
+        if (pendingProfile != null && (pendingProfile.vendorId > 0 || pendingProfile.signupToken.isNotBlank())) {
+            onNeedsProfile(pendingProfile.vendorId, pendingProfile.email, pendingProfile.signupToken)
             viewModel.clearNeedsProfile()
         }
     }

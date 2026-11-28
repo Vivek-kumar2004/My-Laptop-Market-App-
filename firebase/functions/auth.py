@@ -236,7 +236,7 @@ def _link_firebase_uid(vendor: dict, uid: str) -> None:
     vendor["firebase_uid"] = uid
 
 
-def login_with_firebase(id_token: str) -> dict:
+def login_with_firebase(id_token: str, defer_create: bool = False) -> dict:
     id_token = _text(id_token).strip()
     if id_token == "":
         return {
@@ -269,6 +269,25 @@ def login_with_firebase(id_token: str) -> dict:
     uid = _text(decoded.get("uid"))
     display_name = _text(decoded.get("name"))
     vendor = _find_vendor_by_email(email)
+    if vendor is None and defer_create:
+        from accounts import hold_google_signup
+
+        token = hold_google_signup(email, uid, display_name)
+        return {
+            "success": True,
+            "code": "needs_profile",
+            "redirect": "complete-profile",
+            "message": "Finish a few business details to continue.",
+            "vendor_id": 0,
+            "signup_token": token,
+            "vendor": {
+                "id": 0,
+                "email": email,
+                "shop_name": "",
+                "username": "",
+                "profile_complete": False,
+            },
+        }
     if vendor is None:
         from accounts import create_google_vendor
 
@@ -301,14 +320,14 @@ def login_with_firebase(id_token: str) -> dict:
     return _finish_login(vendor)
 
 
-def issue_app_handoff(vendor_id: int) -> str:
+def issue_app_handoff(vendor_id: int = 0, signup_token: str = "") -> str:
     code = secrets.token_urlsafe(24)
-    firestore.client().collection("vendor_auth_codes").document(code).set(
-        {
-            "vendor_id": int(vendor_id),
-            "expires_at": datetime.now(timezone.utc) + timedelta(minutes=2),
-        }
-    )
+    payload = {"expires_at": datetime.now(timezone.utc) + timedelta(minutes=2)}
+    if int(vendor_id or 0) > 0:
+        payload["vendor_id"] = int(vendor_id)
+    if signup_token:
+        payload["signup_token"] = signup_token
+    firestore.client().collection("vendor_auth_codes").document(code).set(payload)
     return code
 
 
@@ -329,6 +348,28 @@ def consume_app_handoff(code: str) -> dict:
             expires = expires.replace(tzinfo=timezone.utc)
         if expires <= datetime.now(timezone.utc):
             return {"success": False, "message": "This Google sign-in expired. Try again."}
+    signup_token = _text(data.get("signup_token"))
+    if signup_token:
+        from accounts import load_google_signup
+
+        signup = load_google_signup(signup_token)
+        if signup is None:
+            return {"success": False, "message": "This Google sign-in expired. Try again."}
+        return {
+            "success": True,
+            "code": "needs_profile",
+            "signup_token": signup_token,
+            "redirect": "complete-profile",
+            "message": "Finish a few business details to continue.",
+            "vendor_id": 0,
+            "vendor": {
+                "id": 0,
+                "email": _text(signup.get("email")),
+                "shop_name": "",
+                "username": "",
+                "profile_complete": False,
+            },
+        }
     vendor = _vendor_by_id(int(data.get("vendor_id") or 0))
     if vendor is None:
         return {"success": False, "message": "Sign in with Google again."}

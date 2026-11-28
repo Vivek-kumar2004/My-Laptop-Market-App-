@@ -112,10 +112,15 @@ fun App(
                             }
                         }.onFailure { error ->
                             when {
-                                error is AuthNeedsProfileException && error.vendorId > 0 -> {
+                                error is AuthNeedsProfileException &&
+                                    (error.vendorId > 0 || error.signupToken.isNotBlank()) -> {
                                     SignInNotice.clear()
                                     navController.navigate(
-                                        Screen.CompleteProfile.createRoute(error.vendorId, error.email)
+                                        Screen.CompleteProfile.createRoute(
+                                            error.vendorId,
+                                            error.email,
+                                            error.signupToken
+                                        )
                                     ) {
                                         launchSingleTop = true
                                     }

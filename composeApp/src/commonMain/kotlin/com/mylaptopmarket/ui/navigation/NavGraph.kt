@@ -37,9 +37,9 @@ sealed class Screen(val route: String) {
     data object Login : Screen("login")
     data object Register : Screen("register")
     data object ForgotPassword : Screen("forgot_password")
-    data object CompleteProfile : Screen("complete_profile/{vendorId}?email={email}") {
-        fun createRoute(vendorId: Int, email: String = "") =
-            "complete_profile/$vendorId?email=${email.replace("&", "").replace("?", "")}"
+    data object CompleteProfile : Screen("complete_profile/{vendorId}?email={email}&signup={signup}") {
+        fun createRoute(vendorId: Int, email: String = "", signupToken: String = "") =
+            "complete_profile/$vendorId?email=${email.replace("&", "").replace("?", "")}&signup=${signupToken.replace("&", "").replace("?", "")}"
     }
     data object SellerVerification : Screen("seller_verification?vendorId={vendorId}") {
         fun createRoute(vendorId: Int? = null) =
@@ -305,8 +305,8 @@ fun NavGraph(navController: NavHostController) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 },
-                onNeedsProfile = { vendorId, email ->
-                    navController.navigate(Screen.CompleteProfile.createRoute(vendorId, email)) {
+                onNeedsProfile = { vendorId, email, signupToken ->
+                    navController.navigate(Screen.CompleteProfile.createRoute(vendorId, email, signupToken)) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 },
@@ -318,15 +318,18 @@ fun NavGraph(navController: NavHostController) {
             route = Screen.CompleteProfile.route,
             arguments = listOf(
                 navArgument("vendorId") { type = NavType.IntType },
-                navArgument("email") { type = NavType.StringType; nullable = true; defaultValue = "" }
+                navArgument("email") { type = NavType.StringType; nullable = true; defaultValue = "" },
+                navArgument("signup") { type = NavType.StringType; nullable = true; defaultValue = "" }
             )
         ) { backStackEntry ->
             val vendorId = backStackEntry.arguments?.getInt("vendorId") ?: 0
             val email = backStackEntry.arguments?.getString("email").orEmpty()
+            val signupToken = backStackEntry.arguments?.getString("signup").orEmpty()
             val viewModel = remember { AuthViewModel(authRepository) }
             CompleteProfileScreen(
                 vendorId = vendorId,
                 email = email,
+                signupToken = signupToken,
                 viewModel = viewModel,
                 onCompleted = { id ->
                     navController.navigate(Screen.SellerVerification.createRoute(id)) {
